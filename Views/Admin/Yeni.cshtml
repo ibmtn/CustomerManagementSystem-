@@ -1,0 +1,55 @@
+@{
+    ViewData["Title"] = "Yeni Personel Ekle";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="mb-3">
+            <a href="/Admin" class="btn btn-sm btn-outline-secondary">&larr; Listeye Geri Dön</a>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-danger text-white py-3">
+                <h5 class="card-title mb-0 fw-bold">Yeni Personel Kayıt Formu</h5>
+            </div>
+            <div class="card-body p-4">
+                <form action="/Admin/Yeni" method="post">
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-bold">Ad Soyad <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="AdSoyad" placeholder="Personelin tam adı" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Kullanıcı Adı <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="KullaniciAdi" placeholder="Sisteme giriş adı" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">E-Posta <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" name="EPosta" placeholder="ornek@kcetas.com" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Şifre <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" name="Sifre" required />
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-bold">Sistem Rolü <span class="text-danger">*</span></label>
+                            <select class="form-select" name="RolId" required>
+                                <option value="">-- Rol Seçiniz --</option>
+                                <option value="1">Yönetici</option>
+                                <option value="2">Kullanıcı (Gişe/Saha)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted mb-4">
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="/Admin" class="btn btn-light border">İptal</a>
+                        <button type="submit" class="btn btn-danger px-4 fw-bold">Personeli Kaydet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

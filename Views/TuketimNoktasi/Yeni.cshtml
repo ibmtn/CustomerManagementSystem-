@@ -17,14 +17,16 @@
                     
                     <div class="mb-3">
                         <label class="form-label fw-bold text-muted">Tekil Kod (Sistem Üretecek)</label>
-                        <input type="text" class="form-control bg-light" value="TK-@DateTime.Now.ToString("yyyyMMdd")-XXXX" readonly />
+                        <!-- name="TekilKod" eklendi -->
+                        <input type="text" class="form-control bg-light" name="TekilKod" value="TK-@DateTime.Now.ToString("yyyyMMdd")-XXXX" readonly />
                         <div class="form-text">Her tüketim noktası için benzersiz bir kod atanır.</div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Tüketici Grubu <span class="text-danger">*</span></label>
-                            <select class="form-select" required>
+                            <!-- name="TuketiciGrubu" eklendi -->
+                            <select class="form-select" name="TuketiciGrubu" required>
                                 <option value="">-- Seçiniz --</option>
                                 <option value="Mesken">Mesken (Ev)</option>
                                 <option value="Ticarethane">Ticarethane (İş Yeri)</option>
@@ -35,13 +37,15 @@
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Bağlantı Gücü (kW) <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" min="0.01" class="form-control" placeholder="Örn: 5.00" required />
+                            <!-- name="BaglantiGucu" eklendi -->
+                            <input type="number" step="0.01" min="0.01" class="form-control" name="BaglantiGucu" placeholder="Örn: 5.00" required />
                         </div>
                     </div>
 
                     <div class="mb-4">
                         <label class="form-label fw-bold">Açık Adres <span class="text-danger">*</span></label>
-                        <textarea class="form-control" rows="3" placeholder="Açık adresi detaylı yazınız..." required></textarea>
+                        <!-- name="AcikAdres" eklendi -->
+                        <textarea class="form-control" rows="3" name="AcikAdres" placeholder="Açık adresi detaylı yazınız..." required></textarea>
                     </div>
 
                     <hr class="text-muted my-4">

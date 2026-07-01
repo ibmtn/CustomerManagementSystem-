@@ -7,6 +7,15 @@
     <a href="/TuketimNoktasi/Yeni" class="btn btn-success fw-bold">+ Yeni Kayıt Ekle</a>
 </div>
 
+<!-- BAŞARI MESAJI BURAYA (EN ÜSTE) GELDİ -->
+@if (TempData["BasariMesaji"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+        <strong>İşlem Başarılı!</strong> @TempData["BasariMesaji"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <div class="card shadow-sm border-0">
     <div class="card-body">
         <div class="table-responsive">

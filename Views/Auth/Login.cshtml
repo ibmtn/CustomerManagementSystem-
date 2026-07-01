@@ -1,0 +1,372 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>KCETAŞ | Giriş</title>
+
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    height:100vh;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-family:'Segoe UI',sans-serif;
+
+    background:
+    linear-gradient(rgba(0,20,45,.65),rgba(0,20,45,.65)),
+    url("https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop");
+
+    background-size:cover;
+    background-position:center;
+    overflow:hidden;
+
+}
+
+/* Hafif blur */
+
+body::before{
+
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    backdrop-filter:blur(6px);
+
+}
+
+/* Kart */
+
+.login-card{
+
+    position:relative;
+
+    width:430px;
+
+    max-width:95%;
+
+    padding:45px;
+
+    border-radius:24px;
+
+    background:rgba(255,255,255,.15);
+
+    backdrop-filter:blur(22px);
+
+    border:1px solid rgba(255,255,255,.2);
+
+    box-shadow:
+    0 25px 45px rgba(0,0,0,.35);
+
+    animation:fade .7s ease;
+
+    z-index:2;
+
+}
+
+@@keyframes fade{
+
+from{
+
+opacity:0;
+
+transform:translateY(40px);
+
+}
+
+to{
+
+opacity:1;
+
+transform:translateY(0);
+
+}
+
+}
+
+.logo{
+
+width:85px;
+
+height:85px;
+
+margin:auto;
+
+border-radius:50%;
+
+background:linear-gradient(135deg,#2563eb,#0ea5e9);
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+font-size:38px;
+
+color:white;
+
+font-weight:bold;
+
+box-shadow:0 10px 25px rgba(37,99,235,.5);
+
+margin-bottom:20px;
+
+}
+
+h3{
+
+color:white;
+
+font-weight:700;
+
+text-align:center;
+
+}
+
+.subtitle{
+
+text-align:center;
+
+color:#d7d7d7;
+
+margin-bottom:35px;
+
+font-size:15px;
+
+}
+
+.input-group{
+
+margin-bottom:22px;
+
+}
+
+.input-group-text{
+
+background:rgba(255,255,255,.15);
+
+border:none;
+
+color:white;
+
+}
+
+.form-control{
+
+background:rgba(255,255,255,.12);
+
+border:none;
+
+color:white;
+
+height:55px;
+
+}
+
+.form-control::placeholder{
+
+color:#ddd;
+
+}
+
+.form-control:focus{
+
+background:rgba(255,255,255,.18);
+
+color:white;
+
+box-shadow:0 0 0 .2rem rgba(13,110,253,.2);
+
+}
+
+.btn-login{
+
+height:55px;
+
+font-size:18px;
+
+font-weight:600;
+
+border-radius:12px;
+
+transition:.3s;
+
+background:linear-gradient(135deg,#2563eb,#0ea5e9);
+
+border:none;
+
+}
+
+.btn-login:hover{
+
+transform:translateY(-3px);
+
+box-shadow:0 12px 20px rgba(37,99,235,.45);
+
+}
+
+.footer{
+
+margin-top:25px;
+
+text-align:center;
+
+color:#ddd;
+
+font-size:13px;
+
+}
+
+.alert{
+
+border-radius:12px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="login-card">
+
+@if (TempData["HataMesaji"] != null)
+{
+<div class="alert alert-danger text-center">
+@TempData["HataMesaji"]
+</div>
+}
+
+<div class="logo">
+K
+</div>
+
+<h3>KCETAŞ Portal</h3>
+
+<div class="subtitle">
+Kurumsal Yönetim Sistemi
+</div>
+
+<form action="/Auth/Login" method="post">
+
+<div class="input-group">
+
+<span class="input-group-text">
+
+<i class="fa-solid fa-user"></i>
+
+</span>
+
+<input
+type="text"
+class="form-control"
+placeholder="Kullanıcı Adı"
+name="kullaniciAdi"
+required>
+
+</div>
+
+<div class="input-group">
+
+<span class="input-group-text">
+
+<i class="fa-solid fa-lock"></i>
+
+</span>
+
+<input
+type="password"
+class="form-control"
+placeholder="Şifre"
+id="password"
+name="sifre"
+required>
+
+<button
+class="btn btn-light"
+type="button"
+onclick="togglePassword()">
+
+<i class="fa-solid fa-eye" id="eye"></i>
+
+</button>
+
+</div>
+
+<div class="d-grid">
+
+<button class="btn btn-login">
+
+Sisteme Giriş Yap
+
+</button>
+
+</div>
+
+</form>
+
+<div class="footer">
+
+© @DateTime.Now.Year KCETAŞ
+
+</div>
+
+</div>
+
+<script>
+
+function togglePassword(){
+
+const pass=document.getElementById("password");
+
+const eye=document.getElementById("eye");
+
+if(pass.type==="password"){
+
+pass.type="text";
+
+eye.classList.remove("fa-eye");
+
+eye.classList.add("fa-eye-slash");
+
+}else{
+
+pass.type="password";
+
+eye.classList.remove("fa-eye-slash");
+
+eye.classList.add("fa-eye");
+
+}
+
+}
+
+</script>
+
+</body>
+</html>

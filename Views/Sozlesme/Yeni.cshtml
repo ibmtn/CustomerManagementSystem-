@@ -1,0 +1,64 @@
+@{
+    ViewData["Title"] = "Yeni Sözleşme";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="mb-3">
+            <a href="/Sozlesme" class="btn btn-sm btn-outline-secondary">&larr; Listeye Geri Dön</a>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-success text-white py-3">
+                <h5 class="card-title mb-0 fw-bold">Yeni Perakende Satış Sözleşmesi</h5>
+            </div>
+            <div class="card-body p-4">
+                <form action="/Sozlesme/Yeni" method="post">
+                    
+                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">1. Tesisat ve Tarife Bilgileri</h6>
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tüketim Noktası <span class="text-danger">*</span></label>
+                            <select class="form-select" name="TuketimNoktasiKod" required>
+                                <option value="">-- Bağlantıya Uygun Nokta Seçin --</option>
+                                <option value="TK-2026-001">TK-2026-001 (Mesken)</option>
+                                <option value="TK-2026-002">TK-2026-002 (Ticarethane)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tarife Grubu <span class="text-danger">*</span></label>
+                            <select class="form-select" name="TarifeGrubu" required>
+                                <option value="">-- Seçiniz --</option>
+                                <option value="Tek Zamanlı Mesken">Tek Zamanlı Mesken</option>
+                                <option value="Çok Zamanlı Mesken">Çok Zamanlı Mesken</option>
+                                <option value="Ticarethane">Ticarethane</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">2. Abone Bilgileri</h6>
+                    <div class="row mb-4">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-bold">Ad Soyad / Unvan <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="AboneAdSoyad" placeholder="Abonenin tam adı veya şirket unvanı" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">TCKN / VKN</label>
+                            <input type="text" class="form-control" name="TCKN" placeholder="11 haneli TCKN veya 10 haneli VKN" maxlength="11" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">İletişim (Telefon) <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control" name="Telefon" placeholder="05XX XXX XX XX" required />
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="/Sozlesme" class="btn btn-light border">İptal</a>
+                        <button type="submit" class="btn btn-success px-4">Sözleşmeyi Başlat</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
