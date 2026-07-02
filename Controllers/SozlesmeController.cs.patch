@@ -1,0 +1,18 @@
+--- /Users/arzusahinaral/Desktop/ProjeStaj/Controllers/SozlesmeController.cs
++++ /Users/arzusahinaral/Desktop/ProjeStaj/Controllers/SozlesmeController.cs
+@@ -42,5 +42,15 @@
+             TempData["SozlesmeMesaji"] = AboneAdSoyad + " isimli abone için " + TuketimNoktasiKod + " numaralı noktada sözleşme başarıyla başlatıldı.";
+             return RedirectToAction("Index");
+         }
++
++        public IActionResult Detay(string id)
++        {
++            var item = _sozlesmeler.FirstOrDefault(x => x.SozlesmeNo == id);
++            if (item == null)
++            {
++                return NotFound();
++            }
++            return View(item);
++        }
+     }
+ }

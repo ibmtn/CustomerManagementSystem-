@@ -1,0 +1,59 @@
+@model KcetasWeb.Models.TuketimNoktasi
+
+@{
+    ViewData["Title"] = "Tüketim Noktası Düzenle";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="mb-3">
+            <a href="/TuketimNoktasi/Detay/@Model.TekilKod" class="btn btn-sm btn-outline-secondary">&larr; Detaya Geri Dön</a>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-warning text-dark py-3">
+                <h5 class="card-title mb-0 fw-bold">Tüketim Noktası Bilgilerini Düzenle</h5>
+            </div>
+            <div class="card-body p-4">
+                <form action="/TuketimNoktasi/Duzenle" method="post">
+                    <input type="hidden" name="TekilKod" value="@Model.TekilKod" />
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tüketici Grubu <span class="text-danger">*</span></label>
+                            <select class="form-select" name="TuketiciGrubu" required>
+                                <option value="Mesken" selected="@(Model.TuketiciGrubu == "Mesken")">Mesken</option>
+                                <option value="Ticarethane" selected="@(Model.TuketiciGrubu == "Ticarethane")">Ticarethane</option>
+                                <option value="Sanayi" selected="@(Model.TuketiciGrubu == "Sanayi")">Sanayi</option>
+                                <option value="Tarımsal Sulama" selected="@(Model.TuketiciGrubu == "Tarımsal Sulama")">Tarımsal Sulama</option>
+                                <option value="Aydınlatma" selected="@(Model.TuketiciGrubu == "Aydınlatma")">Aydınlatma</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Bağlantı Gücü (kW) <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="BaglantiGucu" value="@Model.BaglantiGucuKw.ToString("0.00")" required />
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-bold">Bağlantı Durumu <span class="text-danger">*</span></label>
+                            <select class="form-select" name="BaglantiDurumu" required>
+                                <option value="Aktif" selected="@(Model.BaglantiDurumu == "Aktif")">Aktif</option>
+                                <option value="Bağlantı Bekliyor" selected="@(Model.BaglantiDurumu == "Bağlantı Bekliyor")">Bağlantı Bekliyor</option>
+                                <option value="İptal Edildi" selected="@(Model.BaglantiDurumu == "İptal Edildi")">İptal Edildi</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-bold">Açık Adres <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="AcikAdres" rows="3" required>@Model.AcikAdres</textarea>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted mb-4">
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="/TuketimNoktasi/Detay/@Model.TekilKod" class="btn btn-light border">İptal</a>
+                        <button type="submit" class="btn btn-warning px-4 fw-bold shadow-sm">Değişiklikleri Kaydet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

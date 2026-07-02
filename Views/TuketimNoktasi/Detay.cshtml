@@ -1,0 +1,69 @@
+@model KcetasWeb.Models.TuketimNoktasi
+
+@{
+    ViewData["Title"] = "Tüketim Noktası Detayı";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 text-success fw-bold">
+            <i class="bi bi-geo-alt-fill me-2"></i> Tüketim Noktası Detayı
+        </h2>
+        <a href="/TuketimNoktasi/Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Listeye Dön
+        </a>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-gradient bg-success text-white p-4">
+            <div class="d-flex align-items-center">
+                <div class="bg-white text-success rounded-circle d-flex justify-content-center align-items-center shadow-sm" style="width: 60px; height: 60px; font-size: 24px;">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </div>
+                <div class="ms-3">
+                    <h3 class="mb-0 fw-bold">@Model.TekilKod</h3>
+                    <p class="mb-0 opacity-75">Tüketici Grubu: @Model.TuketiciGrubu</p>
+                </div>
+                <div class="ms-auto">
+                    @if (Model.BaglantiDurumu == "Aktif")
+                    {
+                        <span class="badge bg-light text-success rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Aktif</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-exclamation-triangle-fill me-1"></i> @Model.BaglantiDurumu</span>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-4 bg-light">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
+                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-plug-fill me-1"></i> Bağlantı Gücü</label>
+                        <p class="fs-4 fw-bold text-dark mb-0">@Model.BaglantiGucuKw.ToString("0.00") <span class="fs-6 text-muted fw-normal">kW</span></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
+                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-calendar-plus me-1"></i> Kayıt Tarihi</label>
+                        <p class="fs-5 fw-medium text-dark mb-0">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</p>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light">
+                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-map-fill me-1"></i> Açık Adres</label>
+                        <p class="fs-5 fw-medium text-dark mb-0">
+                            @(string.IsNullOrEmpty(Model.AcikAdres) ? "Adres bilgisi bulunamadı." : Model.AcikAdres)
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 text-end">
+                <a href="/TuketimNoktasi/Duzenle/@Model.TekilKod" class="btn btn-warning shadow-sm"><i class="bi bi-pencil-square"></i> Düzenle</a>
+                <a href="/Sozlesme/Yeni?tk=@Model.TekilKod" class="btn btn-primary ms-2 shadow-sm"><i class="bi bi-file-earmark-text"></i> Sözleşme Başlat</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,59 @@
+@model KcetasWeb.Models.Sozlesme
+
+@{
+    ViewData["Title"] = "Sözleşme Düzenle";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="mb-3">
+            <a href="/Sozlesme/Detay/@Model.SozlesmeNo" class="btn btn-sm btn-outline-secondary">&larr; Detaya Geri Dön</a>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-warning text-dark py-3">
+                <h5 class="card-title mb-0 fw-bold">Sözleşme Bilgilerini Düzenle</h5>
+            </div>
+            <div class="card-body p-4">
+                <form action="/Sozlesme/Duzenle" method="post">
+                    <input type="hidden" name="SozlesmeNo" value="@Model.SozlesmeNo" />
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-bold">Sözleşme No</label>
+                            <input type="text" class="form-control" value="@Model.SozlesmeNo" disabled />
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-bold">Abone Adı / Ünvanı <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="AboneAdSoyad" value="@Model.AboneAdSoyad" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tarife Grubu <span class="text-danger">*</span></label>
+                            <select class="form-select" name="TarifeGrubu" required>
+                                <option value="Tek Zamanlı Mesken" selected="@(Model.TarifeGrubu == "Tek Zamanlı Mesken")">Tek Zamanlı Mesken</option>
+                                <option value="Çok Zamanlı Mesken" selected="@(Model.TarifeGrubu == "Çok Zamanlı Mesken")">Çok Zamanlı Mesken</option>
+                                <option value="Ticarethane" selected="@(Model.TarifeGrubu == "Ticarethane")">Ticarethane</option>
+                                <option value="Sanayi" selected="@(Model.TarifeGrubu == "Sanayi")">Sanayi</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-bold">Statü <span class="text-danger">*</span></label>
+                            <select class="form-select" name="Statu" required>
+                                <option value="Aktif" selected="@(Model.Statu == "Aktif")">Aktif</option>
+                                <option value="Güvence Bekliyor" selected="@(Model.Statu == "Güvence Bekliyor")">Güvence Bekliyor</option>
+                                <option value="Feshedildi" selected="@(Model.Statu == "Feshedildi")">Feshedildi</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted mb-4">
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="/Sozlesme/Detay/@Model.SozlesmeNo" class="btn btn-light border">İptal</a>
+                        <button type="submit" class="btn btn-warning px-4 fw-bold shadow-sm">Değişiklikleri Kaydet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

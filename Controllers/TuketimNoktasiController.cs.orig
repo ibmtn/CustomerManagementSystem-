@@ -53,46 +53,5 @@ namespace KcetasWeb.Controllers
             // Kayıt bitince kullanıcıyı tekrar listeye (Index'e) geri yolla:
             return RedirectToAction("Index");
         }
-
-        public IActionResult Detay(string id)
-        {
-            var item = _tuketimNoktalari.FirstOrDefault(x => x.TekilKod == id);
-            if (item == null)
-            {
-                return NotFound();
-            }
-            return View(item);
-        }
-
-        public IActionResult Duzenle(string id)
-        {
-            var item = _tuketimNoktalari.FirstOrDefault(x => x.TekilKod == id);
-            if (item == null)
-            {
-                return NotFound();
-            }
-            return View(item);
-        }
-
-        [HttpPost]
-        public IActionResult Duzenle(string TekilKod, string TuketiciGrubu, string BaglantiGucu, string AcikAdres, string BaglantiDurumu)
-        {
-            var item = _tuketimNoktalari.FirstOrDefault(x => x.TekilKod == TekilKod);
-            if (item != null)
-            {
-                decimal gucu = 0;
-                if(!string.IsNullOrEmpty(BaglantiGucu))
-                {
-                    decimal.TryParse(BaglantiGucu.Replace('.', ','), out gucu);
-                }
-                item.TuketiciGrubu = TuketiciGrubu;
-                item.BaglantiGucuKw = gucu;
-                item.AcikAdres = AcikAdres;
-                item.BaglantiDurumu = BaglantiDurumu;
-            }
-            TempData["BasariMesaji"] = TekilKod + " kodlu nokta başarıyla güncellendi.";
-            return RedirectToAction("Detay", new { id = TekilKod });
-        }
     }
 }
-

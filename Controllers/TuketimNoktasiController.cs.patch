@@ -1,0 +1,18 @@
+--- /Users/arzusahinaral/Desktop/ProjeStaj/Controllers/TuketimNoktasiController.cs
++++ /Users/arzusahinaral/Desktop/ProjeStaj/Controllers/TuketimNoktasiController.cs
+@@ -47,5 +47,15 @@
+             // Kayıt bitince kullanıcıyı tekrar listeye (Index'e) geri yolla:
+             return RedirectToAction("Index");
+         }
++
++        public IActionResult Detay(string id)
++        {
++            var item = _tuketimNoktalari.FirstOrDefault(x => x.TekilKod == id);
++            if (item == null)
++            {
++                return NotFound();
++            }
++            return View(item);
++        }
+     }
+ }

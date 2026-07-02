@@ -1,3 +1,5 @@
+@model IEnumerable<KcetasWeb.Models.TuketimNoktasi>
+
 @{
     ViewData["Title"] = "Tüketim Noktaları";
 }
@@ -30,20 +32,25 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td><strong>TK-2026-001</strong></td>
-                        <td>Mesken</td>
-                        <td>5.00</td>
-                        <td><span class="badge bg-success">Aktif</span></td>
-                        <td><button class="btn btn-sm btn-outline-primary">Detay</button></td>
-                    </tr>
-                    <tr>
-                        <td><strong>TK-2026-002</strong></td>
-                        <td>Ticarethane</td>
-                        <td>15.50</td>
-                        <td><span class="badge bg-warning text-dark">Bağlantı Bekliyor</span></td>
-                        <td><button class="btn btn-sm btn-outline-primary">Detay</button></td>
-                    </tr>
+                    @foreach (var tn in Model)
+                    {
+                        <tr>
+                            <td><strong>@tn.TekilKod</strong></td>
+                            <td>@tn.TuketiciGrubu</td>
+                            <td>@tn.BaglantiGucuKw.ToString("0.00")</td>
+                            <td>
+                                @if (tn.BaglantiDurumu == "Aktif")
+                                {
+                                    <span class="badge bg-success">Aktif</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">@tn.BaglantiDurumu</span>
+                                }
+                            </td>
+                            <td><a href="/TuketimNoktasi/Detay/@tn.TekilKod" class="btn btn-sm btn-outline-primary shadow-sm">Detay</a></td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>

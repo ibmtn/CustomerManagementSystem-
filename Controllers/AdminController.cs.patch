@@ -1,0 +1,57 @@
+--- /Users/arzusahinaral/Desktop/ProjeStaj/Controllers/AdminController.cs
++++ /Users/arzusahinaral/Desktop/ProjeStaj/Controllers/AdminController.cs
+@@ -52,5 +52,15 @@
+             TempData["PersonelMesaji"] = AdSoyad + " isimli personel sisteme başarıyla eklendi.";
+             return RedirectToAction("Index");
+         }
++
++        public IActionResult Detay(int id)
++        {
++            var kullanici = _kullanicilar.FirstOrDefault(x => x.KullaniciId == id);
++            if (kullanici == null)
++            {
++                return NotFound();
++            }
++            return View(kullanici);
++        }
+     }
+ }
+--- /Users/arzusahinaral/Desktop/ProjeStaj/Controllers/AdminController.cs
++++ /Users/arzusahinaral/Desktop/ProjeStaj/Controllers/AdminController.cs
+@@ -62,5 +62,35 @@
+             }
+             return View(kullanici);
+         }
++
++        public IActionResult Duzenle(int id)
++        {
++            var kullanici = _kullanicilar.FirstOrDefault(x => x.KullaniciId == id);
++            if (kullanici == null)
++            {
++                return NotFound();
++            }
++            return View(kullanici);
++        }
++
++        [HttpPost]
++        public IActionResult Duzenle(int KullaniciId, string AdSoyad, string KullaniciAdi, string EPosta, string Durum, short RolId)
++        {
++            var kullanici = _kullanicilar.FirstOrDefault(x => x.KullaniciId == KullaniciId);
++            if (kullanici != null)
++            {
++                string rolAdi = RolId switch {
++                    1 => "Yonetici",
++                    2 => "Gişe Memuru",
++                    _ => "Kullanici"
++                };
++                kullanici.AdSoyad = AdSoyad;
++                kullanici.KullaniciAdi = KullaniciAdi;
++                kullanici.EPosta = EPosta;
++                kullanici.Durum = Durum;
++                kullanici.Rol.RolAdi = rolAdi;
++            }
++            TempData["PersonelMesaji"] = AdSoyad + " isimli personel başarıyla güncellendi.";
++            return RedirectToAction("Detay", new { id = KullaniciId });
++        }
+     }
+ }

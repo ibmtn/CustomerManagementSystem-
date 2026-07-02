@@ -66,7 +66,6 @@ namespace KcetasWeb.Controllers
             return RedirectToAction("Index");
         }
 
-        
         public IActionResult Detay(int id)
         {
             var kullanici = _kullanicilar.FirstOrDefault(x => x.KullaniciId == id);
@@ -76,44 +75,5 @@ namespace KcetasWeb.Controllers
             }
             return View(kullanici);
         }
-
-        public IActionResult Duzenle(int id)
-        {
-            var kullanici = _kullanicilar.FirstOrDefault(x => x.KullaniciId == id);
-            if (kullanici == null)
-            {
-                return NotFound();
-            }
-            return View(kullanici);
-        }
-
-        [HttpPost]
-        public IActionResult Duzenle(int KullaniciId, string AdSoyad, string KullaniciAdi, string EPosta, string Durum, short RolId)
-        {
-            var kullanici = _kullanicilar.FirstOrDefault(x => x.KullaniciId == KullaniciId);
-            if (kullanici != null)
-            {
-                string rolAdi = RolId == 1 ? "Yonetici" : (RolId == 2 ? "Gişe Memuru" : "Kullanici");
-                kullanici.AdSoyad = AdSoyad;
-                kullanici.KullaniciAdi = KullaniciAdi;
-                kullanici.EPosta = EPosta;
-                kullanici.Durum = Durum;
-                kullanici.Rol.RolAdi = rolAdi;
-            }
-            TempData["PersonelMesaji"] = AdSoyad + " isimli personel başarıyla güncellendi.";
-            return RedirectToAction("Detay", new { id = KullaniciId });
-        }
-
-        public IActionResult Sil(int id)
-        {
-            var kullanici = _kullanicilar.FirstOrDefault(x => x.KullaniciId == id);
-            if (kullanici != null)
-            {
-                _kullanicilar.Remove(kullanici);
-                TempData["PersonelMesaji"] = kullanici.AdSoyad + " isimli personel başarıyla silindi.";
-            }
-            return RedirectToAction("Index");
-        }
     }
 }
-

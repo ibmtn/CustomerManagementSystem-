@@ -1,0 +1,60 @@
+@model KcetasWeb.Models.Kullanici
+
+@{
+    ViewData["Title"] = "Personel Düzenle";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="mb-3">
+            <a href="/Admin/Detay/@Model.KullaniciId" class="btn btn-sm btn-outline-secondary">&larr; Detaya Geri Dön</a>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-warning text-dark py-3">
+                <h5 class="card-title mb-0 fw-bold">Personel Bilgilerini Düzenle</h5>
+            </div>
+            <div class="card-body p-4">
+                <form action="/Admin/Duzenle" method="post">
+                    <input type="hidden" name="KullaniciId" value="@Model.KullaniciId" />
+                    <div class="row mb-3">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-bold">Ad Soyad <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="AdSoyad" value="@Model.AdSoyad" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Kullanıcı Adı <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="KullaniciAdi" value="@Model.KullaniciAdi" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">E-Posta <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" name="EPosta" value="@Model.EPosta" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Durum <span class="text-danger">*</span></label>
+                            <select class="form-select" name="Durum" required>
+                                <option value="AKTIF" selected="@(Model.Durum == "AKTIF")">AKTİF</option>
+                                <option value="PASIF" selected="@(Model.Durum == "PASIF")">PASİF</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-bold">Sistem Rolü <span class="text-danger">*</span></label>
+                            <select class="form-select" name="RolId" required>
+                                <option value="1" selected="@(Model.Rol.RolAdi == "Yonetici")">Yönetici</option>
+                                <option value="2" selected="@(Model.Rol.RolAdi == "Gişe Memuru")">Gişe Memuru</option>
+                                <option value="3" selected="@(Model.Rol.RolAdi == "Kullanici")">Kullanıcı</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted mb-4">
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="/Admin/Detay/@Model.KullaniciId" class="btn btn-light border">İptal</a>
+                        <button type="submit" class="btn btn-warning px-4 fw-bold shadow-sm">Değişiklikleri Kaydet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

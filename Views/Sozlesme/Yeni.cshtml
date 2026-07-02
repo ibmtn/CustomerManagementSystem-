@@ -19,11 +19,7 @@
                     <div class="row mb-4">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Tüketim Noktası <span class="text-danger">*</span></label>
-                            <select class="form-select" name="TuketimNoktasiKod" required>
-                                <option value="">-- Bağlantıya Uygun Nokta Seçin --</option>
-                                <option value="TK-2026-001">TK-2026-001 (Mesken)</option>
-                                <option value="TK-2026-002">TK-2026-002 (Ticarethane)</option>
-                            </select>
+                            <input type="text" class="form-control" name="TuketimNoktasiKod" value="@Context.Request.Query["tk"]" placeholder="Örn: TK-2026-XXX" required />
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Tarife Grubu <span class="text-danger">*</span></label>

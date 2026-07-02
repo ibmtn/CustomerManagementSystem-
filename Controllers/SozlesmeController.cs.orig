@@ -40,52 +40,5 @@ namespace KcetasWeb.Controllers
             TempData["SozlesmeMesaji"] = AboneAdSoyad + " isimli abone için " + TuketimNoktasiKod + " numaralı noktada sözleşme başarıyla başlatıldı.";
             return RedirectToAction("Index");
         }
-
-        public IActionResult Detay(string id)
-        {
-            var item = _sozlesmeler.FirstOrDefault(x => x.SozlesmeNo == id);
-            if (item == null)
-            {
-                return NotFound();
-            }
-            return View(item);
-        }
-
-        public IActionResult Duzenle(string id)
-        {
-            var item = _sozlesmeler.FirstOrDefault(x => x.SozlesmeNo == id);
-            if (item == null)
-            {
-                return NotFound();
-            }
-            return View(item);
-        }
-
-        [HttpPost]
-        public IActionResult Duzenle(string SozlesmeNo, string AboneAdSoyad, string TarifeGrubu, string Statu)
-        {
-            var item = _sozlesmeler.FirstOrDefault(x => x.SozlesmeNo == SozlesmeNo);
-            if (item != null)
-            {
-                item.AboneAdSoyad = AboneAdSoyad;
-                item.TarifeGrubu = TarifeGrubu;
-                item.Statu = Statu;
-            }
-            TempData["SozlesmeMesaji"] = SozlesmeNo + " numaralı sözleşme başarıyla güncellendi.";
-            return RedirectToAction("Detay", new { id = SozlesmeNo });
-        }
-
-        public IActionResult Feshet(string id)
-        {
-            var item = _sozlesmeler.FirstOrDefault(x => x.SozlesmeNo == id);
-            if (item != null)
-            {
-                item.Statu = "Feshedildi";
-                item.UpdatedAt = DateTime.Now;
-                TempData["SozlesmeMesaji"] = id + " numaralı sözleşme başarıyla feshedildi.";
-            }
-            return RedirectToAction("Index");
-        }
     }
 }
-

@@ -1,15 +1,17 @@
+@model IEnumerable<KcetasWeb.Models.Sozlesme>
+
 @{
     ViewData["Title"] = "Sözleşmeler";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     @if (TempData["SozlesmeMesaji"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
-        <strong>Harika!</strong> @TempData["SozlesmeMesaji"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+            <strong>Harika!</strong> @TempData["SozlesmeMesaji"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
     <h2 class="h4 text-primary fw-bold">Perakende Satış Sözleşmeleri</h2>
     <a href="/Sozlesme/Yeni" class="btn btn-success fw-bold">+ Yeni Sözleşme Başlat</a>
 </div>
@@ -29,30 +31,30 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td><strong>SZL-10045</strong></td>
-                        <td>Ahmet Yılmaz</td>
-                        <td><a href="#" class="text-decoration-none">TK-2026-001</a></td>
-                        <td>Tek Zamanlı Mesken</td>
-                        <td><span class="badge bg-success">Aktif</span></td>
-                        <td><button class="btn btn-sm btn-outline-primary">Detay</button></td>
-                    </tr>
-                    <tr>
-                        <td><strong>SZL-10046</strong></td>
-                        <td>Örnek Ltd. Şti.</td>
-                        <td><a href="#" class="text-decoration-none">TK-2026-002</a></td>
-                        <td>Ticarethane</td>
-                        <td><span class="badge bg-warning text-dark">Güvence Bekliyor</span></td>
-                        <td><button class="btn btn-sm btn-outline-primary">Detay</button></td>
-                    </tr>
-                    <tr>
-                        <td><strong>SZL-10047</strong></td>
-                        <td>Ayşe Demir</td>
-                        <td><a href="#" class="text-decoration-none">TK-2026-003</a></td>
-                        <td>Mesken</td>
-                        <td><span class="badge bg-danger">Feshedildi</span></td>
-                        <td><button class="btn btn-sm btn-outline-primary">Detay</button></td>
-                    </tr>
+                    @foreach (var s in Model)
+                    {
+                        <tr>
+                            <td><strong>@s.SozlesmeNo</strong></td>
+                            <td>@s.AboneAdSoyad</td>
+                            <td><a href="#" class="text-decoration-none">@s.TuketimNoktasiKod</a></td>
+                            <td>@s.TarifeGrubu</td>
+                            <td>
+                                @if (s.Statu == "Aktif")
+                                {
+                                    <span class="badge bg-success">Aktif</span>
+                                }
+                                else if (s.Statu == "Feshedildi")
+                                {
+                                    <span class="badge bg-danger">Feshedildi</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">@s.Statu</span>
+                                }
+                            </td>
+                            <td><a href="/Sozlesme/Detay/@s.SozlesmeNo" class="btn btn-sm btn-outline-primary shadow-sm">Detay</a></td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>

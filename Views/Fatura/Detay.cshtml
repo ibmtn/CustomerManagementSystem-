@@ -1,0 +1,78 @@
+@model KcetasWeb.Models.Fatura
+
+@{
+    ViewData["Title"] = "Fatura Detayı";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 text-primary fw-bold">
+            <i class="bi bi-receipt me-2"></i> Fatura Detayı
+        </h2>
+        <a href="/Fatura/Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Listeye Dön
+        </a>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-gradient bg-primary text-white p-4">
+            <div class="d-flex align-items-center">
+                <div class="bg-white text-primary rounded-circle d-flex justify-content-center align-items-center shadow-sm" style="width: 60px; height: 60px; font-size: 24px;">
+                    <i class="bi bi-file-earmark-medical-fill"></i>
+                </div>
+                <div class="ms-3">
+                    <h3 class="mb-0 fw-bold">@Model.FaturaNo</h3>
+                    <p class="mb-0 opacity-75">Dönem: @Model.Donem</p>
+                </div>
+                <div class="ms-auto">
+                    @if (Model.Durum == "Ödendi")
+                    {
+                        <span class="badge bg-success rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Ödendi</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-hourglass-split me-1"></i> @Model.Durum</span>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-4 bg-light">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
+                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-person-badge-fill me-1"></i> Abone Tipi</label>
+                        <p class="fs-5 fw-medium text-dark mb-0">@Model.AboneTipi</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
+                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-lightning-fill me-1"></i> Toplam Tüketim</label>
+                        <p class="fs-5 fw-medium text-dark mb-0">@Model.TuketimKwh.ToString("0.00") <span class="fs-6 text-muted fw-normal">kWh</span></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light">
+                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-calendar-x-fill me-1"></i> Son Ödeme Tarihi</label>
+                        <p class="fs-5 fw-medium text-dark mb-0">
+                            @Model.SonOdemeTarihi.ToString("dd.MM.yyyy")
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light border-start border-primary border-4">
+                        <label class="text-primary small fw-bold mb-1 text-uppercase"><i class="bi bi-cash-coin me-1"></i> Toplam Ödenecek Tutar</label>
+                        <p class="fs-3 fw-bold text-primary mb-0">₺@Model.ToplamTutar.ToString("0.00")</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 text-end">
+                <button class="btn btn-outline-primary shadow-sm"><i class="bi bi-printer-fill"></i> Yazdır</button>
+                @if (Model.Durum != "Ödendi")
+                {
+                    <a href="/Fatura/OdemeYap/@Model.FaturaId" class="btn btn-success ms-2 shadow-sm" onclick="return confirm('Bu faturanın ödemesini gerçekleştirmek istediğinize emin misiniz?');"><i class="bi bi-credit-card-fill"></i> Ödeme Yap</a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
