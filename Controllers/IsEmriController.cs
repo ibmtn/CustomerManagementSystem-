@@ -27,7 +27,7 @@ public class IsEmriController : Controller
             BaslangicTarih = baslangicTarih,
             BitisTarih = bitisTarih,
             AramaMetni = arama,
-            IsEmirleri = isEmirleri.Select(ie => new IsEmriListeViewModel.IsEmriSatirViewModel
+            IsEmirleri = isEmirleri.Select(ie => new IsEmriSatirViewModel
             {
                 IsEmriId = (int)ie.IsEmriId,
                 IsEmriNo = ie.IsEmriNo,

@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using KcetasWeb.Services.Interfaces;
+using KcetasWeb.Services.Mock;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,13 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         ayarlar.LoginPath = "/Auth/Login"; // Yetkisiz biri girerse buraya at
         ayarlar.LogoutPath = "/Auth/Logout"; // Çıkış yapınca buraya at
     });
+
+// 2. MOCK SERVİSLERİN DI CONTAINER'A KAYDI
+// İleride gerçek veritabanı servisleriyle değiştirilecek
+builder.Services.AddSingleton<IIsEmriService, MockIsEmriService>();
+builder.Services.AddSingleton<IEndeksOkumaService, MockEndeksOkumaService>();
+builder.Services.AddSingleton<IFaturaService, MockFaturaService>();
+builder.Services.AddSingleton<IOutboxService, MockOutboxService>();
 
 var app = builder.Build();
 

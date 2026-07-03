@@ -25,32 +25,28 @@
                     @if (User.Identity.IsAuthenticated)
                     {
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index"></a>
-                            <li class="nav-item">
-
-</li>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link text-dark fw-bold" asp-controller="TuketimNoktasi" asp-action="Index">Tüketim Noktaları</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark fw-bold" asp-controller="Sozlesme" asp-action="Index">Sözleşmeler</a>
                         </li>
-                            <a class="nav-link fw-bold text-dark" asp-controller="Fatura" asp-action="Index">Faturalar</a>
                         <li class="nav-item">
-                            <a class="nav-link fw-bold text-primary" asp-controller="AboneSorgulama" asp-action="Index">
-                                <i class="bi bi-search"></i> Abone Sorgulama
-                            </a>
+                            <a class="nav-link fw-bold text-dark" asp-controller="IsEmri" asp-action="Index">İş Emirleri</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link fw-bold text-dark" asp-controller="EndeksOkuma" asp-action="Index">Endeks Okuma</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-bold text-dark" asp-controller="Fatura" asp-action="Index">Faturalar</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-bold text-primary" asp-controller="AboneSorgulama" asp-action="Index">Abone Sorgulama</a>
                         </li>
                         <!-- ROL KONTROLÜ: Sadece 'Yonetici' rolü olanlar görür -->
                         @if (User.IsInRole("Yonetici"))
                         {
                             <li class="nav-item">
-                               <!-- Eski hali: href="#" şeklindeydi, şimdi Controller ve Action verdik -->
-<a class="nav-link text-danger fw-bold" asp-controller="Admin" asp-action="Index">Admin Paneli</a>
+                                <a class="nav-link text-danger fw-bold" asp-controller="Admin" asp-action="Index">Admin Paneli</a>
                             </li>
                         }
                     }
