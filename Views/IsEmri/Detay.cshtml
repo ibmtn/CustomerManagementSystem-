@@ -24,10 +24,18 @@
                 <span class="badge bg-@Model.DurumRenk me-1">@Model.Durum</span>
                 <span class="badge bg-secondary bg-opacity-10 text-secondary border">@Model.Oncelik</span>
             </div>
+            <div>
             @if (Model.Durum != "Tamamlandı" && Model.Durum != "İptal Edildi")
             {
                 <a href="/IsEmri/TutanakGiris/@Model.IsEmriId" class="btn btn-success">Tutanak Gir</a>
             }
+            @if (Model.TutanakGirildiMi)
+            {
+                <a href="/IsEmri/TutanakGoruntule/@Model.IsEmriId" class="btn btn-outline-primary ms-2" target="_blank">
+                    <i class="bi bi-file-earmark-pdf"></i> Tutanağı Görüntüle / İndir
+                </a>
+            }
+            </div>
         </div>
     </div>
 </div>

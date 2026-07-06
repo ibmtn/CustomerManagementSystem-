@@ -10,7 +10,6 @@ using System.Linq;
 
 namespace KcetasWeb.Controllers;
 
-[Authorize(Roles = AppRoles.FaturalamaUzmani + "," + AppRoles.BTYoneticisi)]  
 public class IsEmriController : Controller
 {
     private readonly IIsEmriService _isEmriService;
@@ -118,5 +117,34 @@ public class IsEmriController : Controller
         TempData["MesajTip"] = "success";
 
         return RedirectToAction("Detay", new { id = model.IsEmriId });
+    }
+
+    public IActionResult TutanakGoruntule(long id)
+    {
+        var isEmri = _isEmriService.GetById(id);
+        if (isEmri == null || string.IsNullOrEmpty(isEmri.TutanakNo))
+            return NotFound();
+
+        var viewModel = new IsEmriDetayViewModel
+        {
+            IsEmriId = isEmri.IsEmriId,
+            IsEmriNo = isEmri.IsEmriNo,
+            Tip = isEmri.Tip,
+            Durum = isEmri.Durum,
+            DurumRenk = IsEmriListeViewModel.GetDurumRenk(isEmri.Durum),
+            Oncelik = isEmri.Oncelik,
+            PlanlananTarih = isEmri.PlanlananTarih,
+            SahaSonucu = isEmri.SahaSonucu,
+            Gerekce = isEmri.Gerekce,
+            MuhurNo = isEmri.MuhurNo,
+            TutanakNo = isEmri.TutanakNo,
+            UpdatedAt = isEmri.UpdatedAt,
+            EskiSayacNo = isEmri.EskiSayacNo,
+            YeniSayacNo = isEmri.YeniSayacNo,
+            EskiSonEndeksi = isEmri.EskiSonEndeksi,
+            YeniIlkEndeksi = isEmri.YeniIlkEndeksi
+        };
+
+        return View(viewModel);
     }
 }

@@ -23,6 +23,11 @@ namespace KcetasWeb.ViewModels
         public string? Gerekce { get; set; }
         public string? MuhurNo { get; set; }
         public string? TutanakNo { get; set; }
+
+        public string? EskiSayacNo { get; set; }
+        public string? YeniSayacNo { get; set; }
+        public decimal? EskiSonEndeksi { get; set; }
+        public decimal? YeniIlkEndeksi { get; set; }
         
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
