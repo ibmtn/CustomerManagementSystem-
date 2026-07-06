@@ -22,184 +22,73 @@
                 </div>
                 <div class="ms-3">
                     <h3 class="mb-0 fw-bold">@Model.FaturaNo</h3>
-                    <p class="mb-0 opacity-75">Dönem: @Model.Donem</p>
+                    <p class="mb-0 opacity-75">Dönem: @Model.FaturaTarihi.ToString("yyyy-MM")</p>
                 </div>
                 <div class="ms-auto">
-                    @if (Model.Durum == "Ödendi")
+                    @if (Model.OdemeDurumu == "Ödendi")
                     {
                         <span class="badge bg-success rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Ödendi</span>
                     }
                     else
                     {
-                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-hourglass-split me-1"></i> @Model.Durum</span>
+                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-hourglass-split me-1"></i> @Model.OdemeDurumu</span>
                     }
                 </div>
             </div>
         </div>
         <div class="card-body p-4 bg-light">
 
-            <!-- Sözleşme / Abone Bilgileri -->
-            <h6 class="text-muted fw-bold mb-3"><i class="bi bi-file-earmark-person me-1"></i> Sözleşme ve Abone Bilgileri</h6>
+            <h6 class="text-muted fw-bold mb-3"><i class="bi bi-file-earmark-person me-1"></i> Abone ve Okuma Bilgileri</h6>
             <div class="row g-4 mb-2">
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase">Sözleşme No</label>
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Sözleşme ID</label>
                         <p class="fs-6 fw-medium text-dark mb-0">@Model.SozlesmeId</p>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase">Tekil Kod</label>
-                        <p class="fs-6 fw-medium text-dark mb-0">@Model.TekilKod</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase">Abone Tipi</label>
-                        <p class="fs-6 fw-medium text-dark mb-0">@Model.AboneTipi</p>
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Endeks Okuma ID</label>
+                        <p class="fs-6 fw-medium text-dark mb-0">@Model.EndeksOkumaId</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Fatura ve Ödeme Tarihleri -->
             <h6 class="text-muted fw-bold mb-3 mt-4"><i class="bi bi-calendar3 me-1"></i> Tarih Bilgileri</h6>
             <div class="row g-4 mb-2">
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
                         <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-calendar-check-fill me-1"></i> Fatura Tarihi</label>
                         <p class="fs-6 fw-medium text-dark mb-0">@Model.FaturaTarihi.ToString("dd.MM.yyyy")</p>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
                         <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-calendar-x-fill me-1"></i> Son Ödeme Tarihi</label>
                         <p class="fs-6 fw-medium text-dark mb-0">@Model.SonOdemeTarihi.ToString("dd.MM.yyyy")</p>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-send-check-fill me-1"></i> Teslim Kanalı</label>
-                        <p class="fs-6 fw-medium text-dark mb-0">
-                            @Model.TeslimKanali
-                            @if (Model.TeslimTarihi != null)
-                            {
-                                <span class="text-muted small">(@Model.TeslimTarihi.Value.ToString("dd.MM.yyyy"))</span>
-                            }
-                        </p>
-                    </div>
-                </div>
             </div>
 
-            <!-- Endeks / Tüketim Bilgileri -->
-            <h6 class="text-muted fw-bold mb-3 mt-4"><i class="bi bi-speedometer2 me-1"></i> Endeks ve Tüketim Bilgileri</h6>
+            <h6 class="text-muted fw-bold mb-3 mt-4"><i class="bi bi-cash-stack me-1"></i> Tüketim ve Tutar Detayı</h6>
             <div class="row g-4 mb-2">
-                <div class="col-md-3">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase">İlk Endeks</label>
-                        <p class="fs-6 fw-medium text-dark mb-0">@Model.IlkEndeks.ToString("0.00")</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase">Son Endeks</label>
-                        <p class="fs-6 fw-medium text-dark mb-0">@Model.SonEndeks.ToString("0.00")</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase">Çarpan</label>
-                        <p class="fs-6 fw-medium text-dark mb-0">@Model.Carpan.ToString("0.00")</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-lightning-fill me-1"></i> Toplam Tüketim</label>
-                        <p class="fs-6 fw-medium text-dark mb-0">@Model.TuketimKwh.ToString("0.00") <span class="text-muted fw-normal">kWh</span></p>
-                    </div>
-                </div>
                 <div class="col-md-6">
                     <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase">Reaktif Endüktif</label>
-                        <p class="fs-6 fw-medium text-dark mb-0">@Model.ReaktifEnduktif.ToString("0.00")</p>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase">Reaktif Kapasitif</label>
-                        <p class="fs-6 fw-medium text-dark mb-0">@Model.ReaktifKapasitif.ToString("0.00")</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Ücretlendirme Detayı -->
-            <h6 class="text-muted fw-bold mb-3 mt-4"><i class="bi bi-cash-stack me-1"></i> Ücretlendirme Detayı</h6>
-            <div class="row g-4 mb-2">
-                <div class="col-md-3">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase">Enerji Bedeli</label>
-                        <p class="fs-6 fw-medium text-dark mb-0">₺@Model.EnerjiBedeli.ToString("0.00")</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase">Dağıtım Bedeli</label>
-                        <p class="fs-6 fw-medium text-dark mb-0">₺@Model.DagitimBedeli.ToString("0.00")</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase">Hizmet Bedeli</label>
-                        <p class="fs-6 fw-medium text-dark mb-0">₺@Model.HizmetBedeli.ToString("0.00")</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase">Kesme/Bağlama Bedeli</label>
-                        <p class="fs-6 fw-medium text-dark mb-0">₺@Model.KesmeBaglamaBedeli.ToString("0.00")</p>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase">Vergi/Fon Toplamı</label>
-                        <p class="fs-6 fw-medium text-dark mb-0">₺@Model.VergiFonToplam.ToString("0.00")</p>
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">KDV Tutarı</label>
+                        <p class="fs-6 fw-medium text-dark mb-0">₺@Model.KdvTutari.ToString("0.00")</p>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="p-3 bg-white rounded-3 shadow-sm border border-light border-start border-primary border-4 h-100">
-                        <label class="text-primary small fw-bold mb-1 text-uppercase"><i class="bi bi-cash-coin me-1"></i> Toplam Ödenecek Tutar</label>
+                        <label class="text-primary small fw-bold mb-1 text-uppercase"><i class="bi bi-cash-coin me-1"></i> Toplam Fatura Tutarı</label>
                         <p class="fs-3 fw-bold text-primary mb-0">₺@Model.ToplamTutar.ToString("0.00")</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Fatura Kalemleri -->
-            @if (Model.FaturaKalemleri != null && Model.FaturaKalemleri.Any())
-            {
-                <h6 class="text-muted fw-bold mb-3 mt-4"><i class="bi bi-list-ul me-1"></i> Fatura Kalemleri</h6>
-                <div class="table-responsive bg-white rounded-3 shadow-sm border border-light">
-                    <table class="table table-striped mb-0">
-                        <thead>
-                            <tr>
-                                <th>Kalem</th>
-                                <th class="text-end">Tutar</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var kalem in Model.FaturaKalemleri)
-                            {
-                                <tr>
-                                    <td>@kalem.Aciklama</td>
-                                    <td class="text-end">₺@kalem.Tutar.ToString("0.00")</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-
             <div class="mt-4 text-end">
                 <button class="btn btn-outline-primary shadow-sm"><i class="bi bi-printer-fill"></i> Yazdır</button>
-                @if (Model.Durum != "Ödendi")
+                @if (Model.OdemeDurumu != "Ödendi")
                 {
                     <a href="/Fatura/OdemeYap/@Model.FaturaId" class="btn btn-success ms-2 shadow-sm" onclick="return confirm('Bu faturanın ödemesini gerçekleştirmek istediğinize emin misiniz?');"><i class="bi bi-credit-card-fill"></i> Ödeme Yap</a>
                 }

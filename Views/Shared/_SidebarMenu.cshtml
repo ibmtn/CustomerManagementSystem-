@@ -1,36 +1,52 @@
-<ul class="nav nav-pills flex-column mb-auto">
-    <li class="nav-item">
-        <a class="nav-link text-dark fw-bold" asp-controller="TuketimNoktasi" asp-action="Index">Tüketim Noktaları</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark fw-bold" asp-controller="Sozlesme" asp-action="Index">Sözleşmeler</a>
-    </li>
+@using KcetasWeb.Models.entities
 
-    @if (User.IsInRole("Yonetici") || User.IsInRole("Kullanici"))
+<ul class="nav nav-pills flex-column mb-auto">
+    
+    @* Müşteri, Sözleşme, Saha Amiri, Denetçi ve BT Yöneticisi Görebilir *@
+    @if (User.IsInRole(AppRoles.MusteriTemsilcisi) || User.IsInRole(AppRoles.SozlesmeYetkilisi) || User.IsInRole(AppRoles.SahaOperasyonAmiri) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi))
     {
         <li class="nav-item">
-            <a class="nav-link fw-bold text-dark" asp-controller="IsEmri" asp-action="Index">İş Emirleri</a>
+            <a class="nav-link text-dark fw-bold" asp-controller="TuketimNoktasi" asp-action="Index">Tüketim Noktaları</a>
         </li>
     }
 
-    <li class="nav-item">
-        <a class="nav-link fw-bold text-dark" asp-controller="EndeksOkuma" asp-action="Index">Endeks Okuma</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link fw-bold text-dark" asp-controller="Fatura" asp-action="Index">Faturalar</a>
-    </li>
-
-    @if (User.IsInRole("Yonetici"))
+    @* Sözleşme Yetkilisi, Müşteri Temsilcisi, Denetçi ve BT Yöneticisi Görebilir *@
+    @if (User.IsInRole(AppRoles.SozlesmeYetkilisi) || User.IsInRole(AppRoles.MusteriTemsilcisi) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi))
     {
+        <li class="nav-item">
+            <a class="nav-link text-dark fw-bold" asp-controller="Sozlesme" asp-action="Index">Sözleşmeler</a>
+        </li>
         <li class="nav-item">
             <a class="nav-link fw-bold text-primary" asp-controller="AboneSorgulama" asp-action="Index">Abone Sorgulama</a>
         </li>
     }
 
-    @if (User.IsInRole("Yonetici"))
+    @* Saha Amiri, Sayaç Okuma Personeli, Denetçi ve BT Yöneticisi Görebilir *@
+    @if (User.IsInRole(AppRoles.SahaOperasyonAmiri) || User.IsInRole(AppRoles.SayacOkumaPersoneli) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi))
     {
         <li class="nav-item">
-            <a class="nav-link text-danger fw-bold" asp-controller="Admin" asp-action="Index">Admin Paneli</a>
+            <a class="nav-link fw-bold text-dark" asp-controller="IsEmri" asp-action="Index">İş Emirleri</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link fw-bold text-dark" asp-controller="EndeksOkuma" asp-action="Index">Endeks Okuma</a>
+        </li>
+    }
+
+    @* Faturalama Uzmanı, Müşteri Temsilcisi, Denetçi ve BT Yöneticisi Görebilir *@
+    @if (User.IsInRole(AppRoles.FaturalamaUzmani) || User.IsInRole(AppRoles.MusteriTemsilcisi) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi))
+    {
+        <li class="nav-item">
+            <a class="nav-link fw-bold text-dark" asp-controller="Fatura" asp-action="Index">Faturalar</a>
+        </li>
+    }
+
+    @* SADECE BT Yöneticisi Görebilir (Sistem Ayarları / Kullanıcı Yönetimi için) *@
+    @if (User.IsInRole(AppRoles.BTYoneticisi))
+    {
+        <li class="nav-item mt-3">
+            <a class="nav-link text-danger fw-bold" asp-controller="Admin" asp-action="Index">
+                <i class="bi bi-gear-fill me-2"></i> Admin Paneli
+            </a>
         </li>
     }
 </ul>
@@ -41,6 +57,9 @@
     <div class="mb-2">
         <span class="text-muted d-block">Hoş geldin,</span>
         <strong class="text-primary">@User.Identity?.Name</strong>
+        
+        @* Kullanıcının rolünü de isminin altında küçük bir şekilde gösterebiliriz *@
+        <small class="d-block text-secondary mt-1">@User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value</small>
     </div>
-    <a class="btn btn-outline-danger btn-sm w-100" asp-controller="Auth" asp-action="Logout">Çıkış Yap</a>
+    <a class="btn btn-outline-danger btn-sm w-100 mt-2" asp-controller="Auth" asp-action="Logout">Çıkış Yap</a>
 </div>

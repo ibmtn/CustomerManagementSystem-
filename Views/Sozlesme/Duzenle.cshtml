@@ -24,24 +24,15 @@
                             <input type="text" class="form-control" value="@Model.SozlesmeNo" disabled />
                         </div>
                         <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Abone Adı / Ünvanı <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="AboneAdSoyad" value="@Model.AboneAdSoyad" required />
+                            <label class="form-label fw-bold">Abone ID <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="AboneId" value="@Model.AboneId" required />
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Tarife Grubu <span class="text-danger">*</span></label>
-                            <select class="form-select" name="TarifeGrubu" required>
-                                <option value="Tek Zamanlı Mesken" selected="@(Model.TarifeGrubu == "Tek Zamanlı Mesken")">Tek Zamanlı Mesken</option>
-                                <option value="Çok Zamanlı Mesken" selected="@(Model.TarifeGrubu == "Çok Zamanlı Mesken")">Çok Zamanlı Mesken</option>
-                                <option value="Ticarethane" selected="@(Model.TarifeGrubu == "Ticarethane")">Ticarethane</option>
-                                <option value="Sanayi" selected="@(Model.TarifeGrubu == "Sanayi")">Sanayi</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-4">
-                            <label class="form-label fw-bold">Statü <span class="text-danger">*</span></label>
-                            <select class="form-select" name="Statu" required>
-                                <option value="Aktif" selected="@(Model.Statu == "Aktif")">Aktif</option>
-                                <option value="Güvence Bekliyor" selected="@(Model.Statu == "Güvence Bekliyor")">Güvence Bekliyor</option>
-                                <option value="Feshedildi" selected="@(Model.Statu == "Feshedildi")">Feshedildi</option>
+                        <div class="col-md-12 mb-4">
+                            <label class="form-label fw-bold">Sözleşme Durumu <span class="text-danger">*</span></label>
+                            <select class="form-select" name="Durum" required>
+                                <option value="Aktif" selected="@(Model.Durum == "Aktif")">Aktif</option>
+                                <option value="Güvence Bekliyor" selected="@(Model.Durum == "Güvence Bekliyor")">Güvence Bekliyor</option>
+                                <option value="Feshedildi" selected="@(Model.Durum == "Feshedildi")">Feshedildi</option>
                             </select>
                         </div>
                     </div>

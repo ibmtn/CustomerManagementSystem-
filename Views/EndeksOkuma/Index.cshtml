@@ -50,29 +50,29 @@
                                     <span class="fw-bold text-dark">@item.OkumaTarihi.ToString("dd.MM.yyyy")</span>
                                     <br><small class="text-muted">@item.OkumaTarihi.ToString("HH:mm")</small>
                                 </td>
-                                <td><span class="font-monospace text-primary fw-medium">@item.TuketimNoktasiKodu</span></td>
-                                <td>@item.SayacSeriNo</td>
+                                <td><span class="font-monospace text-primary fw-medium">@item.TuketimNoktasiId</span></td>
+                                <td>@item.SayacId</td>
                                 <td>
                                     <span class="fw-bold @(item.TuketimMiktari > 1000 ? "text-danger" : "text-dark")">
                                         @item.TuketimMiktari.ToString("0.00")
                                     </span>
                                 </td>
                                 <td>
-                                    @if (item.OkumaDurumu == KcetasWeb.Models.enums.OkumaDurumu.Basarili)
+                                    @if (item.Durum == "Başarılı")
                                     {
-                                        <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3">Tamamlandı</span>
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3">@item.Durum</span>
                                     }
-                                    else if (item.OkumaDurumu == KcetasWeb.Models.enums.OkumaDurumu.Anormal)
+                                    else if (item.Durum == "Anormal")
                                     {
-                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3">Anomali</span>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3">@item.Durum</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-3">@item.OkumaDurumu</span>
+                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-3">@item.Durum</span>
                                     }
                                 </td>
-                                <td class="text-end pe-4">
-                                    <a href="/EndeksOkuma/Detay/@item.OkumaId" class="btn btn-sm btn-outline-primary shadow-sm rounded-pill px-3">Detay</a>
+                                <td class="pe-4 text-end">
+                                    <a href="/EndeksOkuma/Detay/@item.EndeksOkumaId" class="btn btn-sm btn-outline-primary shadow-sm rounded-pill px-3">Detay</a>
                                 </td>
                             </tr>
                         }

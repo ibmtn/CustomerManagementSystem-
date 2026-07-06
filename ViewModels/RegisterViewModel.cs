@@ -14,11 +14,11 @@ namespace KcetasWeb.Models
         [Required(ErrorMessage = "Kullanıcı adı zorunludur.")]
         public string KullaniciAdi { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Kullanıcı tipi seçilmelidir.")]
+        // "Kullanıcı tipi" yerine kurumsal formata uygun "Görev/Unvan" yazılabilir
+        [Required(ErrorMessage = "Görev/Unvan seçilmelidir.")]
         public short RolId { get; set; }
 
-        // YENİ: Sadece Abone seçildiğinde zorunlu, controller'da manuel kontrol edilecek
-        public string? AboneTuru { get; set; }
+        // DİKKAT: AboneTuru özelliği buradan tamamen silindi!
 
         [Required(ErrorMessage = "Şifre zorunludur.")]
         [DataType(DataType.Password)]

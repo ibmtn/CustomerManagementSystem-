@@ -1,10 +1,9 @@
 @model KcetasWeb.ViewModels.IsEmriListeViewModel
-@using KcetasWeb.Models.enums
 
 @{
     ViewData["Title"] = "İş Emri Listesi";
-    var tipSecenekleri = Html.GetEnumSelectList<IsEmriTipi>();
-    var durumSecenekleri = Html.GetEnumSelectList<IsEmriDurumu>();
+    var tipSecenekleri = new List<SelectListItem> { new SelectListItem("Sayaç Sökme", "Sayaç Sökme"), new SelectListItem("Sayaç Takma", "Sayaç Takma"), new SelectListItem("Açma", "Açma"), new SelectListItem("Kesme", "Kesme") };
+    var durumSecenekleri = new List<SelectListItem> { new SelectListItem("Oluşturuldu", "Oluşturuldu"), new SelectListItem("Ekibe Atandı", "Ekibe Atandı"), new SelectListItem("Devam Ediyor", "Devam Ediyor"), new SelectListItem("Tamamlandı", "Tamamlandı") };
 }
 
 @if (TempData["Mesaj"] != null)
@@ -91,30 +90,31 @@
                         @foreach  (var item in Model.IsEmirleri)
                         {
                             <tr>
-                                <td class="fw-semibold">
-                                    <a asp-action="Detay" asp-route-id="@item.IsEmriId" class="text-decoration-none">
-                                        @item.IsEmriNo
-                                    </a>
+                                <td class="py-3">
+                                    <h6 class="mb-0 fw-bold">@item.IsEmriNo</h6>
+                                    <span class="text-muted small">@item.Tip</span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-info bg-opacity-10 text-info border border-info">
-                                        @item.TipAdi
-                                    </span>
+                                    <span class="badge bg-@item.DurumRenk">@item.Durum</span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-@item.DurumRenk">@item.DurumAdi</span>
+                                    <span class="text-dark fw-medium"><i class="bi bi-geo-alt-fill text-muted"></i> @item.TuketimNoktasiKodu</span><br />
+                                    <small class="text-muted">@item.Adres</small>
                                 </td>
-                                <td>@item.TuketimNoktasiKodu</td>
                                 <td>@item.PlanlananTarih.ToString("dd.MM.yyyy")</td>
-                                <td>@item.AtananKullaniciAdi</td>
-                                <td class="text-truncate" style="max-width: 220px;" title="@item.Adres">
-                                    @item.Adres
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center me-2" style="width: 28px; height: 28px; font-size: 12px;">
+                                            <i class="bi bi-person-fill"></i>
+                                        </div>
+                                        <span>@item.AtananKullaniciAdi</span>
+                                    </div>
                                 </td>
                                 <td class="text-end">
                                     <a asp-action="Detay" asp-route-id="@item.IsEmriId" class="btn btn-sm btn-outline-secondary">
                                         Detay
                                     </a>
-                                    @if (item.Durum != IsEmriDurumu.Tamamlandi && item.Durum != IsEmriDurumu.IptalEdildi)
+                                    @if (item.Durum != "Tamamlandı" && item.Durum != "İptal Edildi")
                                     {
                                         <a asp-action="TutanakGiris" asp-route-id="@item.IsEmriId" class="btn btn-sm btn-success">
                                             Tutanak Gir

@@ -32,7 +32,7 @@
                     </div>
                     
                     <div class="p-4">
-                        @if (Model.OkumaDurumu == KcetasWeb.Models.enums.OkumaDurumu.Basarili)
+                        @if (Model.Durum == "Başarılı")
                         {
                             <div class="alert alert-success border-0 d-flex align-items-center mb-0">
                                 <i class="bi bi-check-circle-fill fs-4 me-3"></i>
@@ -42,13 +42,13 @@
                                 </div>
                             </div>
                         }
-                        else if (Model.OkumaDurumu == KcetasWeb.Models.enums.OkumaDurumu.Anormal)
+                        else if (Model.Durum == "Anormal")
                         {
                             <div class="alert alert-danger border-0 d-flex align-items-center text-start mb-0">
                                 <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
                                 <div>
                                     <h6 class="mb-0 fw-bold">Anomali Tespit Edildi</h6>
-                                    <small>@Model.AnomaliAciklamasi</small>
+                                    <small>Anormal tüketim değeri.</small>
                                 </div>
                             </div>
                         }
@@ -57,7 +57,7 @@
                             <div class="alert alert-warning border-0 d-flex align-items-center text-start mb-0">
                                 <i class="bi bi-exclamation-circle-fill fs-4 me-3"></i>
                                 <div>
-                                    <h6 class="mb-0 fw-bold">İşlem @Model.OkumaDurumu</h6>
+                                    <h6 class="mb-0 fw-bold">İşlem @Model.Durum</h6>
                                 </div>
                             </div>
                         }
@@ -77,30 +77,30 @@
                         
                         <div class="col-md-6">
                             <div class="p-3 bg-light rounded-3 border h-100">
-                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-geo-alt-fill me-1"></i> Tüketim Noktası</label>
-                                <p class="fs-5 fw-bold text-dark mb-0 font-monospace text-primary">@Model.TuketimNoktasiKodu</p>
+                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-geo-alt-fill me-1"></i> Tüketim Noktası ID</label>
+                                <p class="fs-5 fw-bold text-dark mb-0 font-monospace text-primary">@Model.TuketimNoktasiId</p>
                             </div>
                         </div>
 
                         <div class="col-md-6">
                             <div class="p-3 bg-light rounded-3 border h-100">
-                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-upc-scan me-1"></i> Sayaç Seri No</label>
-                                <p class="fs-5 fw-bold text-dark mb-0 font-monospace">@Model.SayacSeriNo</p>
+                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-upc-scan me-1"></i> Sayaç ID</label>
+                                <p class="fs-5 fw-bold text-dark mb-0 font-monospace">@Model.SayacId</p>
                             </div>
                         </div>
 
                         <div class="col-md-6">
                             <div class="p-3 bg-light rounded-3 border h-100">
-                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-arrow-left-square me-1"></i> Önceki Endeks</label>
-                                <p class="fs-5 fw-bold text-dark mb-0">@Model.OncekiEndeks.ToString("0.00") <span class="fs-6 text-muted">kWh</span></p>
+                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-arrow-left-square me-1"></i> İlk Endeks</label>
+                                <p class="fs-5 fw-bold text-dark mb-0">@Model.IlkEndeks.ToString("0.00") <span class="fs-6 text-muted">kWh</span></p>
                             </div>
                         </div>
 
                         <div class="col-md-6">
                             <div class="p-3 bg-light rounded-3 border border-primary h-100 position-relative">
                                 <span class="position-absolute top-0 start-100 translate-middle p-2 bg-primary border border-light rounded-circle"></span>
-                                <label class="text-primary small fw-bold mb-1 text-uppercase"><i class="bi bi-arrow-right-square-fill me-1"></i> Güncel Endeks</label>
-                                <p class="fs-4 fw-bold text-primary mb-0">@Model.GuncelEndeks.ToString("0.00") <span class="fs-6 text-muted">kWh</span></p>
+                                <label class="text-primary small fw-bold mb-1 text-uppercase"><i class="bi bi-arrow-right-square-fill me-1"></i> Son Endeks</label>
+                                <p class="fs-4 fw-bold text-primary mb-0">@Model.SonEndeks.ToString("0.00") <span class="fs-6 text-muted">kWh</span></p>
                             </div>
                         </div>
 
@@ -114,7 +114,7 @@
                         <div class="col-md-6">
                             <div class="p-3 bg-light rounded-3 border h-100">
                                 <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-person-badge me-1"></i> İşlemi Yapan (Personel)</label>
-                                <p class="fs-5 fw-medium text-dark mb-0">@Model.OkuyanKullaniciAdi</p>
+                                <p class="fs-5 fw-medium text-dark mb-0">Sistem / Entegrasyon</p>
                             </div>
                         </div>
 

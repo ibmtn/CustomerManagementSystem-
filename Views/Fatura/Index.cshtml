@@ -17,8 +17,8 @@
                     <tr>
                         <th class="ps-4">Fatura No</th>
                         <th>Dönem</th>
-                        <th>Abone Tipi</th>
-                        <th>Tüketim (kWh)</th>
+                        <th>Sözleşme ID</th>
+                        <th>KDV Tutarı</th>
                         <th>Toplam Tutar</th>
                         <th>Son Ödeme</th>
                         <th>Durum</th>
@@ -30,19 +30,19 @@
                     {
                         <tr>
                             <td class="ps-4"><strong>@fatura.FaturaNo</strong></td>
-                            <td><span class="badge bg-secondary">@fatura.Donem</span></td>
-                            <td>@fatura.AboneTipi</td>
-                            <td>@fatura.TuketimKwh</td>
-                            <td class="fw-bold text-dark">₺@fatura.ToplamTutar</td>
+                            <td><span class="badge bg-secondary">@fatura.FaturaTarihi.ToString("yyyy-MM")</span></td>
+                            <td>@fatura.SozlesmeId</td>
+                            <td>₺@fatura.KdvTutari.ToString("0.00")</td>
+                            <td class="fw-bold text-dark">₺@fatura.ToplamTutar.ToString("0.00")</td>
                             <td>@fatura.SonOdemeTarihi.ToString("dd.MM.yyyy")</td>
                             <td>
-                                @if(fatura.Durum == "Ödendi")
+                                @if(fatura.OdemeDurumu == "Ödendi")
                                 {
                                     <span class="badge bg-success">Ödendi</span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-warning text-dark">Bekliyor</span>
+                                    <span class="badge bg-warning text-dark">@fatura.OdemeDurumu</span>
                                 }
                             </td>
                             <td class="pe-4 text-end">

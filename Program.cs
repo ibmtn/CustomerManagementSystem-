@@ -3,6 +3,9 @@ using KcetasWeb.Services.Interfaces;
 using KcetasWeb.Services.Mock;
 using KcetasWeb.Services.Interfaces;
 
+
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Sisteme MVC Controller yapılarını ekliyoruz
@@ -14,7 +17,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         ayarlar.LoginPath = "/Auth/Login"; // Yetkisiz biri girerse buraya at
         ayarlar.LogoutPath = "/Auth/Logout"; // Çıkış yapınca buraya at
+        ayarlar.AccessDeniedPath = "/Auth/Yetkisiz";
     });
+
+
+
 
 // 2. MOCK SERVİSLERİN DI CONTAINER'A KAYDI
 // İleride gerçek veritabanı servisleriyle değiştirilecek
@@ -37,3 +44,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+
+
+

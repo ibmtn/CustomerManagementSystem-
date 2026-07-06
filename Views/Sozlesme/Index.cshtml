@@ -23,9 +23,8 @@
                 <thead class="table-light">
                     <tr>
                         <th>Sözleşme No</th>
-                        <th>Abone Adı / Ünvanı</th>
-                        <th>Tüketim Noktası (Tekil Kod)</th>
-                        <th>Tarife Grubu</th>
+                        <th>Abone ID</th>
+                        <th>Tüketim Noktası ID</th>
                         <th>Durum</th>
                         <th>İşlemler</th>
                     </tr>
@@ -35,24 +34,25 @@
                     {
                         <tr>
                             <td><strong>@s.SozlesmeNo</strong></td>
-                            <td>@s.AboneAdSoyad</td>
-                            <td><a href="#" class="text-decoration-none">@s.TuketimNoktasiKod</a></td>
-                            <td>@s.TarifeGrubu</td>
+                            <td>@s.AboneId</td>
+                            <td><a href="#" class="text-decoration-none">@s.TuketimNoktasiId</a></td>
                             <td>
-                                @if (s.Statu == "Aktif")
+                                @if (s.Durum == "Aktif")
                                 {
                                     <span class="badge bg-success">Aktif</span>
                                 }
-                                else if (s.Statu == "Feshedildi")
+                                else if (s.Durum == "Feshedildi")
                                 {
                                     <span class="badge bg-danger">Feshedildi</span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-warning text-dark">@s.Statu</span>
+                                    <span class="badge bg-warning text-dark">@s.Durum</span>
                                 }
                             </td>
-                            <td><a href="/Sozlesme/Detay/@s.SozlesmeNo" class="btn btn-sm btn-outline-primary shadow-sm">Detay</a></td>
+                            <td>
+                                <a href="/Sozlesme/Detay/@s.SozlesmeNo" class="btn btn-sm btn-outline-primary">Detaylar</a>
+                            </td>
                         </tr>
                     }
                 </tbody>

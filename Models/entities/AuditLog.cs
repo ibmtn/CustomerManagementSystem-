@@ -1,35 +1,18 @@
-using System.ComponentModel.DataAnnotations;
-
-namespace KcetasWeb.Models.entities;
-
-public class AuditLog
+namespace KcetasWeb.Models
 {
-    [Key]
-    public int log_id { get; set; }
+    using System;
 
-    [Required]
-    [MaxLength(50)]
-    public string islem_tipi { get; set; } = string.Empty; // Ekleme, Guncelleme, Silme
-
-    [Required]
-    [MaxLength(100)]
-    public string tablo_adi { get; set; } = string.Empty;
-
-    [Required]
-    public long kayit_id { get; set; }
-
-    public string? eski_deger { get; set; } // JSON
-
-    public string? yeni_deger { get; set; } // JSON
-
-    public long? kullanici_id { get; set; }
-
-    [MaxLength(100)]
-    public string? kullanici_adi { get; set; }
-
-    [Required]
-    public DateTime islem_zamani { get; set; } = DateTime.Now;
-
-    [MaxLength(45)]
-    public string? ip_adresi { get; set; }
+    public class AuditLog
+    {
+        public long AuditId { get; set; }
+        public string IslemTipi { get; set; }
+        public string TabloAdi { get; set; }
+        public long KayitId { get; set; }
+        public string EskiDeger { get; set; }
+        public string YeniDeger { get; set; }
+        public long? KullaniciId { get; set; }
+        public string KullaniciAdi { get; set; }
+        public DateTime IslemZamani { get; set; }
+        public string IpAdresi { get; set; }
+    }
 }

@@ -20,11 +20,11 @@
         <div class="d-flex justify-content-between align-items-start">
             <div>
                 <h3 class="fw-bold text-dark mb-1">@Model.IsEmriNo</h3>
-                <span class="badge bg-info bg-opacity-10 text-info border border-info me-1">@Model.TipAdi</span>
-                <span class="badge bg-@Model.DurumRenk me-1">@Model.DurumAdi</span>
+                <span class="badge bg-info bg-opacity-10 text-info border border-info me-1">@Model.Tip</span>
+                <span class="badge bg-@Model.DurumRenk me-1">@Model.Durum</span>
                 <span class="badge bg-secondary bg-opacity-10 text-secondary border">@Model.Oncelik</span>
             </div>
-            @if (Model.Durum != IsEmriDurumu.Tamamlandi && Model.Durum != IsEmriDurumu.IptalEdildi)
+            @if (Model.Durum != "Tamamlandı" && Model.Durum != "İptal Edildi")
             {
                 <a href="/IsEmri/TutanakGiris/@Model.IsEmriId" class="btn btn-success">Tutanak Gir</a>
             }
@@ -84,26 +84,7 @@
                 {
                     <div class="col-md-6">
                         <table class="table table-borderless mb-0">
-                            <tr><td class="text-muted fw-semibold" style="width:40%">Eski Sayaç No</td><td>@(Model.EskiSayacNo ?? "-")</td></tr>
-                            <tr><td class="text-muted fw-semibold">Eski Son Endeks</td><td>@(Model.EskiSonEndeksi?.ToString("N2") ?? "-") kWh</td></tr>
-                            <tr><td class="text-muted fw-semibold">Yeni Sayaç No</td><td>@(Model.YeniSayacNo ?? "-")</td></tr>
-                            <tr><td class="text-muted fw-semibold">Yeni İlk Endeks</td><td>@(Model.YeniIlkEndeksi?.ToString("N2") ?? "-") kWh</td></tr>
                             <tr><td class="text-muted fw-semibold">Mühür No</td><td>@(Model.MuhurNo ?? "-")</td></tr>
-                        </table>
-                    </div>
-                }
-                @if (Model.IsAcmaKesme)
-                {
-                    <div class="col-md-6">
-                        <table class="table table-borderless mb-0">
-                            @if (Model.KesmeEndeksi.HasValue)
-                            {
-                                <tr><td class="text-muted fw-semibold" style="width:40%">Kesme Endeksi</td><td>@Model.KesmeEndeksi.Value.ToString("N2") kWh</td></tr>
-                            }
-                            @if (Model.AcmaEndeksi.HasValue)
-                            {
-                                <tr><td class="text-muted fw-semibold" style="width:40%">Açma Endeksi</td><td>@Model.AcmaEndeksi.Value.ToString("N2") kWh</td></tr>
-                            }
                         </table>
                     </div>
                 }
@@ -111,7 +92,7 @@
         </div>
     </div>
 }
-else if (Model.Durum != IsEmriDurumu.Tamamlandi && Model.Durum != IsEmriDurumu.IptalEdildi)
+else if (Model.Durum != "Tamamlandı" && Model.Durum != "İptal Edildi")
 {
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body text-center py-4">

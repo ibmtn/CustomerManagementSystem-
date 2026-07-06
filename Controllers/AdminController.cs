@@ -6,7 +6,7 @@ using KcetasWeb.Services.Interfaces;
 
 namespace KcetasWeb.Controllers
 {
-    [Authorize(Roles = "Yonetici")]
+    [Authorize(Roles = AppRoles.FaturalamaUzmani + "," + AppRoles.BTYoneticisi)]
     public class AdminController : Controller
     {
         private readonly IKullaniciDeposu _kullaniciDeposu;

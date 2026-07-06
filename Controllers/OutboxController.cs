@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using KcetasWeb.Models.enums;
 using KcetasWeb.Services.Interfaces;
 using KcetasWeb.ViewModels;
+using System;
+using System.Linq;
 
 namespace KcetasWeb.Controllers;
 
@@ -14,8 +15,7 @@ public class OutboxController : Controller
         _outboxService = outboxService;
     }
 
-    // GET: /Outbox
-    public IActionResult Index(OutboxDurumu? durum, string? islemTipi,
+    public IActionResult Index(string? durum, string? islemTipi,
         DateTime? baslangicTarih, DateTime? bitisTarih)
     {
         var kayitlar = _outboxService.Filtrele(durum, islemTipi, baslangicTarih, bitisTarih);
@@ -33,26 +33,24 @@ public class OutboxController : Controller
             BasarisizSayisi = istatistikler.Basarisiz,
             Kayitlar = kayitlar.Select(k => new OutboxListeViewModel.OutboxSatirViewModel
             {
-                OutboxId = k.outbox_id,
-                IslemTipi = k.islem_tipi,
-                ReferansNo = k.referans_no,
-                HedefSistem = k.hedef_sistem,
-                Durum = k.durum,
-                DurumAdi = OutboxListeViewModel.GetOutboxDurumAdi(k.durum),
-                DurumRenk = OutboxListeViewModel.GetOutboxDurumRenk(k.durum),
-                DenemeSayisi = k.deneme_sayisi,
-                SonHataMesaji = k.son_hata_mesaji,
-                OlusturulmaZamani = k.olusturulma_zamani,
-                GonderimZamani = k.gonderim_zamani,
-                PayloadOnizleme = k.payload.Length > 100 ? k.payload[..100] + "..." : k.payload
+                OutboxId = k.Id,
+                IslemTipi = k.EventType,
+                ReferansNo = k.AggregateId,
+                HedefSistem = k.AggregateType,
+                Durum = k.Status,
+                DurumRenk = OutboxListeViewModel.GetOutboxDurumRenk(k.Status),
+                DenemeSayisi = 0,
+                SonHataMesaji = "",
+                OlusturulmaZamani = k.CreatedAt,
+                GonderimZamani = k.ProcessedAt,
+                PayloadOnizleme = k.Payload != null && k.Payload.Length > 100 ? k.Payload[..100] + "..." : (k.Payload ?? "")
             }).ToList()
         };
 
         return View(viewModel);
     }
 
-    // GET: /Outbox/Detay/5
-    public IActionResult Detay(int id)
+    public IActionResult Detay(long id)
     {
         var kayit = _outboxService.GetById(id);
         if (kayit == null)
@@ -60,22 +58,21 @@ public class OutboxController : Controller
 
         return Json(new
         {
-            outboxId = kayit.outbox_id,
-            islemTipi = kayit.islem_tipi,
-            referansNo = kayit.referans_no,
-            hedefSistem = kayit.hedef_sistem,
-            durum = kayit.durum.ToString(),
-            payload = kayit.payload,
-            denemeSayisi = kayit.deneme_sayisi,
-            sonHataMesaji = kayit.son_hata_mesaji,
-            olusturulmaZamani = kayit.olusturulma_zamani.ToString("dd.MM.yyyy HH:mm"),
-            gonderimZamani = kayit.gonderim_zamani?.ToString("dd.MM.yyyy HH:mm")
+            outboxId = kayit.Id,
+            islemTipi = kayit.EventType,
+            referansNo = kayit.AggregateId,
+            hedefSistem = kayit.AggregateType,
+            durum = kayit.Status,
+            payload = kayit.Payload,
+            denemeSayisi = 0,
+            sonHataMesaji = "",
+            olusturulmaZamani = kayit.CreatedAt.ToString("dd.MM.yyyy HH:mm"),
+            gonderimZamani = kayit.ProcessedAt?.ToString("dd.MM.yyyy HH:mm")
         });
     }
 
-    // POST: /Outbox/YenidenGonder/5
     [HttpPost]
-    public IActionResult YenidenGonder(int id)
+    public IActionResult YenidenGonder(long id)
     {
         var sonuc = _outboxService.YenidenGonder(id);
 

@@ -2,20 +2,24 @@ using Microsoft.AspNetCore.Mvc;
 using KcetasWeb.Models;
 using KcetasWeb.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+
 
 namespace KcetasWeb.Controllers
 {
-    [Authorize(Roles = "Yonetici")]
+    [Authorize(Roles = AppRoles.FaturalamaUzmani + "," + AppRoles.BTYoneticisi)]
     public class AboneSorgulamaController : Controller
     {
         private readonly IKullaniciDeposu _kullaniciDeposu;
 
-        // Statik örnek veriler (demo amaçlı) - dilerseniz ileride tamamen kaldırılabilir
         private static List<Abone> _aboneler = new List<Abone>
         {
-            new Abone { AboneId = 1, AboneNo = "ABN-10045", AdSoyadUnvan = "Ahmet Yılmaz", AboneTipi = "Bireysel", TcKimlikVergiNo = "12345678901", Telefon = "05321234567", EPosta = "ahmet@ornek.com", Status = "Aktif", CreatedAt = DateTime.Now.AddDays(-100) },
-            new Abone { AboneId = 2, AboneNo = "ABN-10046", AdSoyadUnvan = "Örnek Ltd. Şti.", AboneTipi = "Kurumsal", TcKimlikVergiNo = "9876543210", Telefon = "02121234567", EPosta = "iletisim@ornek.com.tr", Status = "Aktif", CreatedAt = DateTime.Now.AddDays(-200) },
-            new Abone { AboneId = 3, AboneNo = "ABN-10047", AdSoyadUnvan = "Ayşe Demir", AboneTipi = "Bireysel", TcKimlikVergiNo = "11122233344", Telefon = "05339998877", EPosta = "ayse@ornek.com", Status = "Pasif", CreatedAt = DateTime.Now.AddDays(-50) }
+            new Abone { AboneId = 1, AboneNo = "ABN-10045", Ad = "Ahmet", Soyad = "Yılmaz", TcKimlikNo = "12345678901", Telefon = "05321234567", EPosta = "ahmet@ornek.com", Durum = "Aktif", CreatedAt = DateTime.Now.AddDays(-100) },
+            new Abone { AboneId = 2, AboneNo = "ABN-10046", Ad = "Örnek", Soyad = "Ltd. Şti.", TcKimlikNo = "98765432101", Telefon = "02121234567", EPosta = "iletisim@ornek.com.tr", Durum = "Aktif", CreatedAt = DateTime.Now.AddDays(-200) },
+            new Abone { AboneId = 3, AboneNo = "ABN-10047", Ad = "Ayşe", Soyad = "Demir", TcKimlikNo = "11122233344", Telefon = "05339998877", EPosta = "ayse@ornek.com", Durum = "Pasif", CreatedAt = DateTime.Now.AddDays(-50) }
         };
 
         public AboneSorgulamaController(IKullaniciDeposu kullaniciDeposu)
@@ -23,7 +27,6 @@ namespace KcetasWeb.Controllers
             _kullaniciDeposu = kullaniciDeposu;
         }
 
-        // Statik demo verisi + sisteme kayıt olmuş "Abone" rolündeki kullanıcıları birleştirir
         private List<Abone> TumAboneleriGetir()
         {
             var liste = new List<Abone>(_aboneler);
@@ -33,17 +36,20 @@ namespace KcetasWeb.Controllers
 
             foreach (var kullanici in kayitliAboneler)
             {
+                var adSoyad = kullanici.AdSoyad?.Split(' ') ?? new string[] { "", "" };
+                var ad = adSoyad[0];
+                var soyad = adSoyad.Length > 1 ? string.Join(" ", adSoyad.Skip(1)) : "";
+
                 liste.Add(new Abone
                 {
-                    // Statik listedeki ID'lerle çakışmasın diye ofsetli ID kullanıyoruz
                     AboneId = 100000 + kullanici.KullaniciId,
                     AboneNo = "ABN-" + (20000 + kullanici.KullaniciId),
-                    AdSoyadUnvan = kullanici.AdSoyad,
-                    AboneTipi = kullanici.AboneTuru == "Mesken" ? "Mesken" : "İş Yeri",
-                    TcKimlikVergiNo = "-",
-                    Telefon = "-",
-                    EPosta = kullanici.EPosta,
-                    Status = kullanici.Durum == "AKTIF" ? "Aktif" : "Pasif",
+                    Ad = ad,
+                    Soyad = soyad,
+                    TcKimlikNo = "11111111111",
+                    Telefon = "05000000000",
+                    EPosta = kullanici.EPosta ?? "",
+                    Durum = kullanici.Durum == "AKTIF" ? "Aktif" : "Pasif",
                     CreatedAt = kullanici.CreatedAt,
                     UpdatedAt = kullanici.UpdatedAt
                 });
@@ -64,8 +70,9 @@ namespace KcetasWeb.Controllers
 
             var results = tumAboneler.Where(a =>
                 (a.AboneNo != null && a.AboneNo.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
-                (a.AdSoyadUnvan != null && a.AdSoyadUnvan.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
-                (a.TcKimlikVergiNo != null && a.TcKimlikVergiNo.Contains(q, StringComparison.OrdinalIgnoreCase))
+                (a.Ad != null && a.Ad.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
+                (a.Soyad != null && a.Soyad.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
+                (a.TcKimlikNo != null && a.TcKimlikNo.Contains(q, StringComparison.OrdinalIgnoreCase))
             ).ToList();
 
             return View(results);

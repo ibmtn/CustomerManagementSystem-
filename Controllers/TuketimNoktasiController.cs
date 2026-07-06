@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using KcetasWeb.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace KcetasWeb.Controllers
 {
@@ -7,56 +10,46 @@ namespace KcetasWeb.Controllers
     {
         private static List<TuketimNoktasi> _tuketimNoktalari = new List<TuketimNoktasi>
         {
-            new TuketimNoktasi { TekilKod = "TK-2026-001", TuketiciGrubu = "Mesken", BaglantiGucuKw = 5.00m, BaglantiDurumu = "Aktif" },
-            new TuketimNoktasi { TekilKod = "TK-2026-002", TuketiciGrubu = "Ticarethane", BaglantiGucuKw = 15.50m, BaglantiDurumu = "Bağlantı Bekliyor" }
+            new TuketimNoktasi { TuketimNoktasiId = 1001, TuketimNoktasiNo = "TK-2026-001", AboneId = 1, SokakId = 10, BinaNo = "1", DaireNo = "12", TuketiciGrubuId = 1, TarifeTipiId = 1, Durum = "Aktif", CreatedAt = DateTime.Now.AddDays(-10) },
+            new TuketimNoktasi { TuketimNoktasiId = 1002, TuketimNoktasiNo = "TK-2026-002", AboneId = 2, SokakId = 20, BinaNo = "2", DaireNo = "4", TuketiciGrubuId = 2, TarifeTipiId = 2, Durum = "Pasif", CreatedAt = DateTime.Now.AddDays(-5) }
         };
 
-        // 1. Liste Ekranı (Sayfa ilk açıldığında çalışır)
         public IActionResult Index()
         {
             return View(_tuketimNoktalari);
         }
 
-        // 2. Yeni Kayıt Formu (Sayfa ilk açıldığında GET olarak çalışır)
         public IActionResult Yeni()
         {
             return View();
         }
 
-        // 3. FORMDAN GELEN VERİYİ YAKALAYAN METOT (POST işlemi)
         [HttpPost]
-        public IActionResult Yeni(string TuketiciGrubu, string BaglantiGucu, string AcikAdres)
+        public IActionResult Yeni(long AboneId, int SokakId, string BinaNo, string DaireNo, int TuketiciGrubuId, int TarifeTipiId)
         {
-            decimal gucu = 0;
-            if(!string.IsNullOrEmpty(BaglantiGucu))
-            {
-                decimal.TryParse(BaglantiGucu.Replace('.', ','), out gucu);
-            }
-
             int count = _tuketimNoktalari.Count + 1;
 
             _tuketimNoktalari.Add(new TuketimNoktasi
             {
-                TekilKod = $"TK-2026-{(count).ToString().PadLeft(3, '0')}",
-                TuketiciGrubu = TuketiciGrubu,
-                BaglantiGucuKw = gucu,
-                AcikAdres = AcikAdres,
-                BaglantiDurumu = "Bağlantı Bekliyor",
-                Status = "AKTIF",
+                TuketimNoktasiId = 1000 + count,
+                TuketimNoktasiNo = $"TK-2026-{(count).ToString().PadLeft(3, '0')}",
+                AboneId = AboneId,
+                SokakId = SokakId,
+                BinaNo = BinaNo,
+                DaireNo = DaireNo,
+                TuketiciGrubuId = TuketiciGrubuId,
+                TarifeTipiId = TarifeTipiId,
+                Durum = "Pasif",
                 CreatedAt = DateTime.Now
             });
 
-            // Şimdilik işlemi başarılı sayıp, ekrana JavaScript KULLANMADAN
-            // mesaj basmak için TempData kullanıyoruz:
-            TempData["BasariMesaji"] = "Harika! " + TuketiciGrubu + " grubundaki yeni kayıt başarıyla oluşturuldu.";
-
-            // Kayıt bitince kullanıcıyı tekrar listeye (Index'e) geri yolla:
+            TempData["BasariMesaji"] = "Harika! Yeni tüketim noktası başarıyla oluşturuldu.";
             return RedirectToAction("Index");
         }
 
         public IActionResult Detay(string id)
         {
-            var item = _tuketimNoktalari.FirstOrDefault(x => x.TekilKod == id);
+            var item = _tuketimNoktalari.FirstOrDefault(x => x.TuketimNoktasiNo == id);
             if (item == null)
             {
                 return NotFound();
@@ -66,7 +59,7 @@ namespace KcetasWeb.Controllers
 
         public IActionResult Duzenle(string id)
         {
-            var item = _tuketimNoktalari.FirstOrDefault(x => x.TekilKod == id);
+            var item = _tuketimNoktalari.FirstOrDefault(x => x.TuketimNoktasiNo == id);
             if (item == null)
             {
                 return NotFound();
@@ -75,24 +68,22 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Duzenle(string TekilKod, string TuketiciGrubu, string BaglantiGucu, string AcikAdres, string BaglantiDurumu)
+        public IActionResult Duzenle(string TuketimNoktasiNo, long AboneId, int SokakId, string BinaNo, string DaireNo, int TuketiciGrubuId, int TarifeTipiId, string Durum)
         {
-            var item = _tuketimNoktalari.FirstOrDefault(x => x.TekilKod == TekilKod);
+            var item = _tuketimNoktalari.FirstOrDefault(x => x.TuketimNoktasiNo == TuketimNoktasiNo);
             if (item != null)
             {
-                decimal gucu = 0;
-                if(!string.IsNullOrEmpty(BaglantiGucu))
-                {
-                    decimal.TryParse(BaglantiGucu.Replace('.', ','), out gucu);
-                }
-                item.TuketiciGrubu = TuketiciGrubu;
-                item.BaglantiGucuKw = gucu;
-                item.AcikAdres = AcikAdres;
-                item.BaglantiDurumu = BaglantiDurumu;
+                item.AboneId = AboneId;
+                item.SokakId = SokakId;
+                item.BinaNo = BinaNo;
+                item.DaireNo = DaireNo;
+                item.TuketiciGrubuId = TuketiciGrubuId;
+                item.TarifeTipiId = TarifeTipiId;
+                item.Durum = Durum;
+                item.UpdatedAt = DateTime.Now;
             }
-            TempData["BasariMesaji"] = TekilKod + " kodlu nokta başarıyla güncellendi.";
-            return RedirectToAction("Detay", new { id = TekilKod });
+            TempData["BasariMesaji"] = TuketimNoktasiNo + " kodlu nokta başarıyla güncellendi.";
+            return RedirectToAction("Detay", new { id = TuketimNoktasiNo });
         }
     }
 }
-

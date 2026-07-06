@@ -17,37 +17,23 @@
                     
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold text-muted small text-uppercase">Tüketim Noktası Kodu <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control form-control-lg shadow-sm font-monospace" name="TuketimNoktasiKodu" placeholder="Örn: TK-2026-001" required />
+                            <label class="form-label fw-bold text-muted small text-uppercase">Tüketim Noktası ID <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-lg shadow-sm font-monospace" name="TuketimNoktasiId" placeholder="Örn: 1001" required />
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold text-muted small text-uppercase">Sayaç Seri No <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control form-control-lg shadow-sm font-monospace" name="SayacSeriNo" placeholder="Örn: S-123456" required />
+                            <label class="form-label fw-bold text-muted small text-uppercase">Sayaç ID <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-lg shadow-sm font-monospace" name="SayacId" placeholder="Örn: 5001" required />
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold text-muted small text-uppercase">Önceki Endeks (kWh) <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" class="form-control form-control-lg shadow-sm" name="OncekiEndeks" required />
+                            <label class="form-label fw-bold text-muted small text-uppercase">İlk Endeks (kWh) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" class="form-control form-control-lg shadow-sm" name="IlkEndeks" required />
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold text-muted small text-uppercase">Güncel Endeks (kWh) <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" class="form-control form-control-lg shadow-sm border-primary" name="GuncelEndeks" required />
-                        </div>
-                    </div>
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-12">
-                            <label class="form-label fw-bold text-muted small text-uppercase">Tarife Grubu <span class="text-danger">*</span></label>
-                            <select class="form-select form-select-lg shadow-sm" name="TarifeGrubu" required>
-                                <option value="">-- Seçiniz --</option>
-                                <option value="Mesken">Mesken</option>
-                                <option value="Ticarethane">Ticarethane</option>
-                                <option value="Sanayi">Sanayi</option>
-                                <option value="Tarımsal Sulama">Tarımsal Sulama</option>
-                                <option value="Aydınlatma">Aydınlatma</option>
-                            </select>
+                            <label class="form-label fw-bold text-muted small text-uppercase">Son Endeks (kWh) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" class="form-control form-control-lg shadow-sm border-primary" name="SonEndeks" required />
                         </div>
                     </div>
 

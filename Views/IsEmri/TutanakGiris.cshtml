@@ -1,0 +1,75 @@
+@model KcetasWeb.ViewModels.TutanakGirisViewModel
+@{
+    ViewData["Title"] = "Tutanak Girişi - " + Model.IsEmriNo;
+}
+
+<div class="mb-3">
+    <a href="/IsEmri/Detay/@Model.IsEmriId" class="btn btn-sm btn-outline-secondary">&larr; İş Emri Detayına Dön</a>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-success bg-opacity-10 border-0">
+        <h5 class="mb-0 text-success fw-bold">Sahadan Tutanak Girişi</h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="TutanakKaydet" method="post">
+            <input type="hidden" asp-for="IsEmriId" />
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="IsEmriNo" class="form-label text-muted fw-semibold"></label>
+                    <input asp-for="IsEmriNo" class="form-control" readonly />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-muted fw-semibold">İş Emri Tipi</label>
+                    <input type="text" class="form-control" value="@Model.Tip" readonly />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="TutanakNo" class="form-label fw-bold">Tutanak No <span class="text-danger">*</span></label>
+                    <input asp-for="TutanakNo" class="form-control" placeholder="Örn: TT-2026-..." />
+                    <span asp-validation-for="TutanakNo" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="IslemTarihi" class="form-label fw-bold">İşlem Tarihi <span class="text-danger">*</span></label>
+                    <input asp-for="IslemTarihi" class="form-control" />
+                    <span asp-validation-for="IslemTarihi" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="SahaSonucu" class="form-label fw-bold">Saha Sonucu / Yapılan İşlem <span class="text-danger">*</span></label>
+                <textarea asp-for="SahaSonucu" class="form-control" rows="2" placeholder="Sahada yapılan işlemleri kısaca açıklayınız..."></textarea>
+                <span asp-validation-for="SahaSonucu" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Gerekce" class="form-label fw-bold">Gerekçe / Ek Açıklama</label>
+                <textarea asp-for="Gerekce" class="form-control" rows="2" placeholder="Varsa eklemek istediğiniz notlar..."></textarea>
+            </div>
+
+            @if (Model.IsSokmeTakma)
+            {
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3 mt-4">Mühür Bilgileri</h6>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label asp-for="MuhurNo" class="form-label">Mühür No</label>
+                        <input asp-for="MuhurNo" class="form-control" />
+                    </div>
+                </div>
+            }
+
+            <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                <button type="submit" class="btn btn-success px-4 fw-bold">
+                    <i class="bi bi-save me-2"></i> Tutanağı Kaydet
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

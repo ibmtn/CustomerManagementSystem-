@@ -7,7 +7,7 @@
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="mb-3">
-            <a href="/TuketimNoktasi/Detay/@Model.TekilKod" class="btn btn-sm btn-outline-secondary">&larr; Detaya Geri Dön</a>
+            <a href="/TuketimNoktasi/Detay/@Model.TuketimNoktasiNo" class="btn btn-sm btn-outline-secondary">&larr; Detaya Geri Dön</a>
         </div>
 
         <div class="card shadow-sm border-0">
@@ -16,40 +16,45 @@
             </div>
             <div class="card-body p-4">
                 <form action="/TuketimNoktasi/Duzenle" method="post">
-                    <input type="hidden" name="TekilKod" value="@Model.TekilKod" />
+                    <input type="hidden" name="TuketimNoktasiNo" value="@Model.TuketimNoktasiNo" />
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Tüketici Grubu <span class="text-danger">*</span></label>
-                            <select class="form-select" name="TuketiciGrubu" required>
-                                <option value="Mesken" selected="@(Model.TuketiciGrubu == "Mesken")">Mesken</option>
-                                <option value="Ticarethane" selected="@(Model.TuketiciGrubu == "Ticarethane")">Ticarethane</option>
-                                <option value="Sanayi" selected="@(Model.TuketiciGrubu == "Sanayi")">Sanayi</option>
-                                <option value="Tarımsal Sulama" selected="@(Model.TuketiciGrubu == "Tarımsal Sulama")">Tarımsal Sulama</option>
-                                <option value="Aydınlatma" selected="@(Model.TuketiciGrubu == "Aydınlatma")">Aydınlatma</option>
-                            </select>
+                            <label class="form-label fw-bold">Abone ID <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" name="AboneId" value="@Model.AboneId" required />
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Bağlantı Gücü (kW) <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="BaglantiGucu" value="@Model.BaglantiGucuKw.ToString("0.00")" required />
+                            <label class="form-label fw-bold">Sokak ID <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" name="SokakId" value="@Model.SokakId" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Bina No</label>
+                            <input type="text" class="form-control" name="BinaNo" value="@Model.BinaNo" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Daire No</label>
+                            <input type="text" class="form-control" name="DaireNo" value="@Model.DaireNo" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tüketici Grubu ID</label>
+                            <input type="number" class="form-control" name="TuketiciGrubuId" value="@Model.TuketiciGrubuId" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tarife Tipi ID</label>
+                            <input type="number" class="form-control" name="TarifeTipiId" value="@Model.TarifeTipiId" />
                         </div>
                         <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Bağlantı Durumu <span class="text-danger">*</span></label>
-                            <select class="form-select" name="BaglantiDurumu" required>
-                                <option value="Aktif" selected="@(Model.BaglantiDurumu == "Aktif")">Aktif</option>
-                                <option value="Bağlantı Bekliyor" selected="@(Model.BaglantiDurumu == "Bağlantı Bekliyor")">Bağlantı Bekliyor</option>
-                                <option value="İptal Edildi" selected="@(Model.BaglantiDurumu == "İptal Edildi")">İptal Edildi</option>
+                            <label class="form-label fw-bold">Durum <span class="text-danger">*</span></label>
+                            <select class="form-select" name="Durum" required>
+                                <option value="Aktif" selected="@(Model.Durum == "Aktif")">Aktif</option>
+                                <option value="Pasif" selected="@(Model.Durum == "Pasif")">Pasif</option>
                             </select>
-                        </div>
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Açık Adres <span class="text-danger">*</span></label>
-                            <textarea class="form-control" name="AcikAdres" rows="3" required>@Model.AcikAdres</textarea>
                         </div>
                     </div>
 
                     <hr class="text-muted mb-4">
 
                     <div class="d-flex justify-content-end gap-2">
-                        <a href="/TuketimNoktasi/Detay/@Model.TekilKod" class="btn btn-light border">İptal</a>
+                        <a href="/TuketimNoktasi/Detay/@Model.TuketimNoktasiNo" class="btn btn-light border">İptal</a>
                         <button type="submit" class="btn btn-warning px-4 fw-bold shadow-sm">Değişiklikleri Kaydet</button>
                     </div>
                 </form>

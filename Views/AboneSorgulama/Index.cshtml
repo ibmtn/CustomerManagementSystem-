@@ -84,27 +84,20 @@
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 40px; height: 40px;">
-                                                    <i class="bi @(abone.AboneTipi == "Kurumsal" ? "bi-building" : "bi-person-fill")"></i>
+                                                    <i class="bi bi-person-fill"></i>
                                                 </div>
                                                 <div>
-                                                    <h6 class="mb-0 fw-bold">@abone.AdSoyadUnvan</h6>
+                                                    <h6 class="mb-0 fw-bold">@abone.Ad @abone.Soyad</h6>
                                                     <small class="text-muted"><i class="bi bi-telephone-fill me-1"></i> @abone.Telefon</small>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td><span class="font-monospace text-muted">@abone.TcKimlikVergiNo</span></td>
+                                        <td><span class="font-monospace text-muted">@abone.TcKimlikNo</span></td>
                                         <td>
-                                            @if (abone.AboneTipi == "Bireysel")
-                                            {
-                                                <span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3">Bireysel</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-purple bg-opacity-10 text-purple border border-purple rounded-pill px-3" style="color: #6f42c1; border-color: #6f42c1;">Kurumsal</span>
-                                            }
+                                            <span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3">Bireysel</span>
                                         </td>
                                         <td>
-                                            @if(abone.Status == "Aktif")
+                                            @if(abone.Durum == "Aktif")
                                             {
                                                 <span class="badge bg-success rounded-pill px-3">Aktif</span>
                                             }

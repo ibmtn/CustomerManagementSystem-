@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using KcetasWeb.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace KcetasWeb.Controllers
 {
@@ -7,9 +10,9 @@ namespace KcetasWeb.Controllers
     {
         private static List<Sozlesme> _sozlesmeler = new List<Sozlesme>
         {
-            new Sozlesme { SozlesmeNo = "SZL-10045", AboneAdSoyad = "Ahmet Yılmaz", TuketimNoktasiKod = "TK-2026-001", TarifeGrubu = "Tek Zamanlı Mesken", Statu = "Aktif" },
-            new Sozlesme { SozlesmeNo = "SZL-10046", AboneAdSoyad = "Örnek Ltd. Şti.", TuketimNoktasiKod = "TK-2026-002", TarifeGrubu = "Ticarethane", Statu = "Güvence Bekliyor" },
-            new Sozlesme { SozlesmeNo = "SZL-10047", AboneAdSoyad = "Ayşe Demir", TuketimNoktasiKod = "TK-2026-003", TarifeGrubu = "Mesken", Statu = "Feshedildi" }
+            new Sozlesme { SozlesmeId = 1, SozlesmeNo = "SZL-10045", AboneId = 1, TuketimNoktasiId = 1001, Durum = "Aktif", BaslangicTarihi = DateTime.Now.AddMonths(-12) },
+            new Sozlesme { SozlesmeId = 2, SozlesmeNo = "SZL-10046", AboneId = 2, TuketimNoktasiId = 1002, Durum = "Güvence Bekliyor", BaslangicTarihi = DateTime.Now.AddDays(-2) },
+            new Sozlesme { SozlesmeId = 3, SozlesmeNo = "SZL-10047", AboneId = 3, TuketimNoktasiId = 1003, Durum = "Feshedildi", BaslangicTarihi = DateTime.Now.AddMonths(-24), BitisTarihi = DateTime.Now.AddDays(-10) }
         };
 
         public IActionResult Index()
@@ -22,22 +25,22 @@ namespace KcetasWeb.Controllers
             return View();
         }
 
-        // FORMDAN GELEN VERİYİ YAKALAYAN METOT
         [HttpPost]
-        public IActionResult Yeni(string TuketimNoktasiKod, string TarifeGrubu, string AboneAdSoyad)
+        public IActionResult Yeni(long TuketimNoktasiId, long AboneId)
         {
             int count = _sozlesmeler.Count + 45; // Start from SZL-10045
             _sozlesmeler.Add(new Sozlesme
             {
+                SozlesmeId = count,
                 SozlesmeNo = $"SZL-{10000 + count}",
-                AboneAdSoyad = AboneAdSoyad,
-                TuketimNoktasiKod = TuketimNoktasiKod,
-                TarifeGrubu = TarifeGrubu,
-                Statu = "Güvence Bekliyor",
+                AboneId = AboneId,
+                TuketimNoktasiId = TuketimNoktasiId,
+                Durum = "Güvence Bekliyor",
+                BaslangicTarihi = DateTime.Now,
                 CreatedAt = DateTime.Now
             });
 
-            TempData["SozlesmeMesaji"] = AboneAdSoyad + " isimli abone için " + TuketimNoktasiKod + " numaralı noktada sözleşme başarıyla başlatıldı.";
+            TempData["SozlesmeMesaji"] = AboneId + " ID'li abone için sözleşme başarıyla başlatıldı.";
             return RedirectToAction("Index");
         }
 
@@ -62,14 +65,13 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Duzenle(string SozlesmeNo, string AboneAdSoyad, string TarifeGrubu, string Statu)
+        public IActionResult Duzenle(string SozlesmeNo, long AboneId, string Durum)
         {
             var item = _sozlesmeler.FirstOrDefault(x => x.SozlesmeNo == SozlesmeNo);
             if (item != null)
             {
-                item.AboneAdSoyad = AboneAdSoyad;
-                item.TarifeGrubu = TarifeGrubu;
-                item.Statu = Statu;
+                item.AboneId = AboneId;
+                item.Durum = Durum;
             }
             TempData["SozlesmeMesaji"] = SozlesmeNo + " numaralı sözleşme başarıyla güncellendi.";
             return RedirectToAction("Detay", new { id = SozlesmeNo });
@@ -80,7 +82,8 @@ namespace KcetasWeb.Controllers
             var item = _sozlesmeler.FirstOrDefault(x => x.SozlesmeNo == id);
             if (item != null)
             {
-                item.Statu = "Feshedildi";
+                item.Durum = "Feshedildi";
+                item.BitisTarihi = DateTime.Now;
                 item.UpdatedAt = DateTime.Now;
                 TempData["SozlesmeMesaji"] = id + " numaralı sözleşme başarıyla feshedildi.";
             }
@@ -88,4 +91,3 @@ namespace KcetasWeb.Controllers
         }
     }
 }
-

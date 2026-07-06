@@ -24,7 +24,7 @@
             <div class="card shadow-lg border-0 rounded-4 overflow-hidden h-100">
                 <div class="card-body p-5 text-center bg-gradient bg-primary text-white position-relative">
                     <div class="position-absolute top-0 end-0 p-3">
-                        @if (Model.Status == "Aktif")
+                        @if (Model.Durum == "Aktif")
                         {
                             <span class="badge bg-white text-success rounded-pill px-3 py-2 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Aktif</span>
                         }
@@ -35,10 +35,10 @@
                     </div>
                     
                     <div class="bg-white text-primary rounded-circle d-flex justify-content-center align-items-center shadow mx-auto mb-4" style="width: 100px; height: 100px; font-size: 40px;">
-                        <i class="bi @(Model.AboneTipi == "Kurumsal" ? "bi-building" : "bi-person-fill")"></i>
+                        <i class="bi bi-person-fill"></i>
                     </div>
-                    <h4 class="fw-bold mb-1">@Model.AdSoyadUnvan</h4>
-                    <p class="mb-3 opacity-75">@Model.AboneTipi Abone</p>
+                    <h4 class="fw-bold mb-1">@Model.Ad @Model.Soyad</h4>
+                    <p class="mb-3 opacity-75">Bireysel Abone</p>
                     
                     <div class="d-flex justify-content-center gap-2 mt-4">
                         <button class="btn btn-light text-primary rounded-pill px-4 fw-bold shadow-sm"><i class="bi bi-pencil-square me-1"></i> Düzenle</button>
@@ -66,7 +66,7 @@
                         <div class="col-md-6">
                             <div class="p-3 bg-light rounded-3 border h-100">
                                 <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-fingerprint me-1"></i> TCKN / VKN</label>
-                                <p class="fs-5 fw-bold text-dark mb-0 font-monospace">@(string.IsNullOrEmpty(Model.TcKimlikVergiNo) ? "Belirtilmemiş" : Model.TcKimlikVergiNo)</p>
+                                <p class="fs-5 fw-bold text-dark mb-0 font-monospace">@(string.IsNullOrEmpty(Model.TcKimlikNo) ? "Belirtilmemiş" : Model.TcKimlikNo)</p>
                             </div>
                         </div>
 
@@ -84,12 +84,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-6">
-                            <div class="p-3 bg-light rounded-3 border h-100">
-                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-bell-fill me-1"></i> İletişim Tercihi</label>
-                                <p class="fs-5 fw-bold text-dark mb-0">@(string.IsNullOrEmpty(Model.IletisimTercihi) ? "SMS ve E-Posta" : Model.IletisimTercihi)</p>
-                            </div>
-                        </div>
+
 
                         <div class="col-md-6">
                             <div class="p-3 bg-light rounded-3 border h-100">

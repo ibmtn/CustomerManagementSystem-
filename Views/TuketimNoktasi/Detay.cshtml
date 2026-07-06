@@ -21,17 +21,17 @@
                     <i class="bi bi-lightning-charge-fill"></i>
                 </div>
                 <div class="ms-3">
-                    <h3 class="mb-0 fw-bold">@Model.TekilKod</h3>
-                    <p class="mb-0 opacity-75">Tüketici Grubu: @Model.TuketiciGrubu</p>
+                    <h3 class="mb-0 fw-bold">@Model.TuketimNoktasiNo</h3>
+                    <p class="mb-0 opacity-75">Abone ID: @Model.AboneId</p>
                 </div>
                 <div class="ms-auto">
-                    @if (Model.BaglantiDurumu == "Aktif")
+                    @if (Model.Durum == "Aktif")
                     {
                         <span class="badge bg-light text-success rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Aktif</span>
                     }
                     else
                     {
-                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-exclamation-triangle-fill me-1"></i> @Model.BaglantiDurumu</span>
+                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-exclamation-triangle-fill me-1"></i> @Model.Durum</span>
                     }
                 </div>
             </div>
@@ -40,8 +40,8 @@
             <div class="row g-4">
                 <div class="col-md-6">
                     <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-plug-fill me-1"></i> Bağlantı Gücü</label>
-                        <p class="fs-4 fw-bold text-dark mb-0">@Model.BaglantiGucuKw.ToString("0.00") <span class="fs-6 text-muted fw-normal">kW</span></p>
+                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-geo-alt me-1"></i> Sokak ID / Bina No</label>
+                        <p class="fs-4 fw-bold text-dark mb-0">@Model.SokakId / @Model.BinaNo</p>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -51,17 +51,15 @@
                     </div>
                 </div>
                 <div class="col-md-12">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-map-fill me-1"></i> Açık Adres</label>
-                        <p class="fs-5 fw-medium text-dark mb-0">
-                            @(string.IsNullOrEmpty(Model.AcikAdres) ? "Adres bilgisi bulunamadı." : Model.AcikAdres)
-                        </p>
+                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
+                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-diagram-3 me-1"></i> Tüketici Grubu / Tarife Tipi</label>
+                        <p class="fs-5 fw-medium text-dark mb-0">Grup ID: @Model.TuketiciGrubuId | Tarife ID: @Model.TarifeTipiId</p>
                     </div>
                 </div>
             </div>
-            
+
             <div class="mt-4 text-end">
-                <a href="/TuketimNoktasi/Duzenle/@Model.TekilKod" class="btn btn-warning shadow-sm"><i class="bi bi-pencil-square"></i> Düzenle</a>
+                <a href="/TuketimNoktasi/Duzenle/@Model.TuketimNoktasiNo" class="btn btn-warning shadow-sm"><i class="bi bi-pencil-square"></i> Düzenle</a>
             </div>
         </div>
     </div>

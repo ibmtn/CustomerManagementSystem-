@@ -22,57 +22,40 @@
                 </div>
                 <div class="ms-3">
                     <h3 class="mb-0 fw-bold">@Model.SozlesmeNo</h3>
-                    <p class="mb-0 opacity-75">Abone: @Model.AboneAdSoyad</p>
+                    <p class="mb-0 opacity-75">Abone ID: @Model.AboneId</p>
                 </div>
                 <div class="ms-auto">
-                    @if (Model.Statu == "Aktif")
+                    @if (Model.Durum == "Aktif")
                     {
                         <span class="badge bg-success rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Aktif</span>
                     }
-                    else if (Model.Statu == "Feshedildi")
+                    else if (Model.Durum == "Feshedildi")
                     {
                         <span class="badge bg-danger rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-x-circle-fill me-1"></i> Feshedildi</span>
                     }
                     else
                     {
-                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-clock-fill me-1"></i> @Model.Statu</span>
+                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-clock-fill me-1"></i> @Model.Durum</span>
                     }
                 </div>
             </div>
         </div>
         <div class="card-body p-4 bg-light">
             <div class="row g-4">
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-geo-alt-fill me-1"></i> Tüketim Noktası (Tekil Kod)</label>
-                        <p class="fs-4 fw-bold text-dark mb-0">@Model.TuketimNoktasiKod</p>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-tags-fill me-1"></i> Tarife Grubu</label>
-                        <p class="fs-5 fw-medium text-dark mb-0">@Model.TarifeGrubu</p>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-calendar-check-fill me-1"></i> Başlangıç Tarihi</label>
-                        <p class="fs-5 fw-medium text-dark mb-0">
-                            @(Model.CreatedAt != default ? Model.CreatedAt.ToString("dd.MM.yyyy") : "Belirtilmemiş")
-                        </p>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-cash-stack me-1"></i> Güvence Bedeli</label>
-                        <p class="fs-5 fw-medium text-dark mb-0">₺@Model.GuvenceBedeli.ToString("0.00")</p>
+                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-geo-alt-fill me-1"></i> Tüketim Noktası ID</label>
+                        <p class="fs-4 fw-bold text-dark mb-0">@Model.TuketimNoktasiId</p>
                     </div>
                 </div>
             </div>
             
             <div class="mt-4 text-end">
-                <a href="/Sozlesme/Feshet/@Model.SozlesmeNo" class="btn btn-danger shadow-sm" onclick="return confirm('Bu sözleşmeyi feshetmek istediğinize emin misiniz?');"><i class="bi bi-x-octagon"></i> Feshet</a>
-                <a href="/Sozlesme/Duzenle/@Model.SozlesmeNo" class="btn btn-warning ms-2 shadow-sm"><i class="bi bi-pencil-square"></i> Düzenle</a>
+                <a href="/Sozlesme/Duzenle/@Model.SozlesmeNo" class="btn btn-warning shadow-sm"><i class="bi bi-pencil-square"></i> Düzenle</a>
+                @if (Model.Durum != "Feshedildi")
+                {
+                    <a href="/Sozlesme/Feshet/@Model.SozlesmeNo" class="btn btn-danger ms-2 shadow-sm" onclick="return confirm('Sözleşmeyi feshetmek istediğinize emin misiniz?');"><i class="bi bi-x-circle-fill"></i> Feshet</a>
+                }
             </div>
         </div>
     </div>
