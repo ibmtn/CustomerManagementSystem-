@@ -32,7 +32,7 @@ namespace KcetasWeb.ViewModels
         public string Tip { get; set; } = null!;
         public long TuketimNoktasiId { get; set; }
         public string TuketimNoktasiKodu { get; set; } = null!;
-        public DateTime PlanlananTarih { get; set; }
+        public DateTime? PlanlananTarih { get; set; }
         public string AtananKullaniciAdi { get; set; } = null!;
         public string Durum { get; set; } = null!;
         public string DurumRenk { get; set; } = null!;

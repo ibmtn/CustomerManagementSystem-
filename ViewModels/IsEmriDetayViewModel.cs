@@ -12,7 +12,7 @@ namespace KcetasWeb.ViewModels
         public string DurumRenk { get; set; } = null!;
         
         public string? Oncelik { get; set; }
-        public DateTime PlanlananTarih { get; set; }
+        public DateTime? PlanlananTarih { get; set; }
         public string? AtananKullaniciAdi { get; set; }
         
         public string? TuketimNoktasiKodu { get; set; }

@@ -83,7 +83,7 @@
                 </tr>
                 <tr>
                     <th>Planlanan Tarih</th>
-                    <td>@Model.PlanlananTarih.ToString("dd.MM.yyyy")</td>
+                    <td><p class="fw-bold mb-0">@(Model.PlanlananTarih?.ToString("dd.MM.yyyy") ?? "Belirtilmedi")</p></td>
                 </tr>
             </tbody>
         </table>

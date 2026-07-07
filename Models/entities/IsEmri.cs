@@ -7,10 +7,10 @@ namespace KcetasWeb.Models
         public long is_emri_id { get; set; }
         public string is_emri_no { get; set; }
         public long tuketim_noktasi_id { get; set; }
-        public long sayac_id { get; set; }
+        public long? sayac_id { get; set; }
         public string tip { get; set; }
         public string oncelik { get; set; }
-        public DateTime planlanan_tarih { get; set; }
+        public DateTime? planlanan_tarih { get; set; }
         public long? atanan_kullanici_id { get; set; }
         public string durum { get; set; }
         public string saha_sonucu { get; set; }

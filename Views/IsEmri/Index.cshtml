@@ -101,7 +101,7 @@
                                     <span class="text-dark fw-medium"><i class="bi bi-geo-alt-fill text-muted"></i> @item.TuketimNoktasiKodu</span><br />
                                     <small class="text-muted">@item.Adres</small>
                                 </td>
-                                <td>@item.PlanlananTarih.ToString("dd.MM.yyyy")</td>
+                                <td>@(item.PlanlananTarih?.ToString("dd.MM.yyyy") ?? "-")</td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center me-2" style="width: 28px; height: 28px; font-size: 12px;">

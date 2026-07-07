@@ -16,13 +16,14 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         ayarlar.AccessDeniedPath = "/Auth/Yetkisiz";
     });
 
-// 2. MOCK SERVİSLERİN DI CONTAINER'A KAYDI
-// İleride gerçek veritabanı servisleriyle değiştirilecek
-builder.Services.AddSingleton<IIsEmriService, MockIsEmriService>();
-builder.Services.AddSingleton<IEndeksOkumaService, MockEndeksOkumaService>();
-builder.Services.AddSingleton<IFaturaService, MockFaturaService>();
-builder.Services.AddSingleton<IOutboxService, MockOutboxService>();
-builder.Services.AddSingleton<IKullaniciDeposu, KullaniciDeposu>();
+// 2. API SERVİSLERİNİN DI CONTAINER'A KAYDI
+var baseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://172.10.38.23:5050";
+
+builder.Services.AddHttpClient<IIsEmriService, KcetasWeb.Services.Api.ApiIsEmriService>(client => client.BaseAddress = new Uri(baseUrl));
+builder.Services.AddHttpClient<IEndeksOkumaService, KcetasWeb.Services.Api.ApiEndeksOkumaService>(client => client.BaseAddress = new Uri(baseUrl));
+builder.Services.AddHttpClient<IFaturaService, KcetasWeb.Services.Api.ApiFaturaService>(client => client.BaseAddress = new Uri(baseUrl));
+builder.Services.AddHttpClient<IOutboxService, KcetasWeb.Services.Api.ApiOutboxService>(client => client.BaseAddress = new Uri(baseUrl));
+builder.Services.AddHttpClient<IKullaniciDeposu, KcetasWeb.Services.Api.ApiKullaniciDeposu>(client => client.BaseAddress = new Uri(baseUrl));
 
 var app = builder.Build();
 

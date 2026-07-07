@@ -46,11 +46,11 @@
                     <tbody>
                         @foreach (var item in Model)
                         {
-                            var tuketim = item.yeni_endeks - item.onceki_endeks;
+                            var tuketim = (item.yeni_endeks ?? 0) - (item.onceki_endeks ?? 0);
                             <tr>
                                 <td class="ps-4">
-                                    <span class="fw-bold text-dark">@item.okuma_zamani.ToString("dd.MM.yyyy")</span>
-                                    <br><small class="text-muted">@item.okuma_zamani.ToString("HH:mm")</small>
+                                    <span class="fw-bold text-dark">@item.okuma_zamani?.ToString("dd.MM.yyyy")</span>
+                                    <br><small class="text-muted">@item.okuma_zamani?.ToString("HH:mm")</small>
                                 </td>
                                 <td><span class="font-monospace text-primary fw-medium">@item.sayac_id</span></td>
                                 <td>@item.onceki_endeks</td>

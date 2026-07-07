@@ -57,7 +57,7 @@ public class MockEndeksOkumaService : IEndeksOkumaService
         int manuel = _okumalar.Count(x => x.okuma_tipi == "Manuel");
         int osos = _okumalar.Count(x => x.okuma_tipi == "OSOS");
         int anomali = _okumalar.Count(x => x.status == "Anormal");
-        decimal ortalamaTuketim = toplam > 0 ? Math.Round(_okumalar.Average(x => x.yeni_endeks - x.onceki_endeks), 2) : 0;
+        decimal ortalamaTuketim = toplam > 0 ? Math.Round(_okumalar.Average(x => (x.yeni_endeks ?? 0) - (x.onceki_endeks ?? 0)), 2) : 0;
 
         return (toplam, manuel, osos, anomali, ortalamaTuketim);
     }

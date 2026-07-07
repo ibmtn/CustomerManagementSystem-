@@ -22,11 +22,11 @@
                 </div>
                 <div class="ms-3">
                     <h3 class="mb-0 fw-bold">Okuma ID: @Model.okuma_id</h3>
-                    <p class="mb-0 opacity-75">Tarih: @Model.okuma_zamani.ToString("dd.MM.yyyy HH:mm")</p>
+                    <p class="mb-0 opacity-75">Tarih: @Model.okuma_zamani?.ToString("dd.MM.yyyy HH:mm")</p>
                 </div>
                 <div class="ms-auto">
                     @{
-                        var tuketim = Model.yeni_endeks - Model.onceki_endeks;
+                        var tuketim = (Model.yeni_endeks ?? 0) - (Model.onceki_endeks ?? 0);
                     }
                     @if (Model.status == "Basarili")
                     {
