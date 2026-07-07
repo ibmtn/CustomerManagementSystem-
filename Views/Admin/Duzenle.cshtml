@@ -17,7 +17,7 @@
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="mb-3">
-            <a href="/Admin/Detay/@Model.KullaniciId" class="btn btn-sm btn-outline-secondary">&larr; Detaya Geri Dön</a>
+            <a href="/Admin/Detay/@Model.kullanici_id" class="btn btn-sm btn-outline-secondary">&larr; Detaya Geri Dön</a>
         </div>
 
         <div class="card shadow-sm border-0">
@@ -26,35 +26,35 @@
             </div>
             <div class="card-body p-4">
                 <form action="/Admin/Duzenle" method="post">
-                    <input type="hidden" name="KullaniciId" value="@Model.KullaniciId" />
+                    <input type="hidden" name="kullanici_id" value="@Model.kullanici_id" />
                     <div class="row mb-3">
                         <div class="col-md-12 mb-3">
                             <label class="form-label fw-bold">Ad Soyad <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="AdSoyad" value="@Model.AdSoyad" required />
+                            <input type="text" class="form-control" name="ad_soyad" value="@Model.ad_soyad" required />
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Kullanıcı Adı <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="KullaniciAdi" value="@Model.KullaniciAdi" required />
+                            <input type="text" class="form-control" name="kullanici_adi" value="@Model.kullanici_adi" required />
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">E-Posta <span class="text-danger">*</span></label>
-                            <input type="email" class="form-control" name="EPosta" value="@Model.EPosta" required />
+                            <input type="email" class="form-control" name="e_posta" value="@Model.e_posta" required />
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Durum <span class="text-danger">*</span></label>
-                            <select class="form-select" name="Durum" required>
-                                <option value="AKTIF" selected="@(Model.Durum == "AKTIF")">AKTİF</option>
-                                <option value="PASIF" selected="@(Model.Durum == "PASIF")">PASİF</option>
+                            <select class="form-select" name="durum" required>
+                                <option value="AKTIF" selected="@(Model.durum == "AKTIF")">AKTİF</option>
+                                <option value="PASIF" selected="@(Model.durum == "PASIF")">PASİF</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-4">
                             <label class="form-label fw-bold">Sistem Rolü <span class="text-danger">*</span></label>
-                            <select class="form-select" name="RolId" required>
+                            <select class="form-select" name="rol_id" required>
                                 @if (roller != null)
                                 {
                                     foreach (var rol in roller)
                                     {
-                                        <option value="@rol.RolId" selected="@(Model.RolId == rol.RolId)">@RolEtiketi(rol.RolAdi)</option>
+                                        <option value="@rol.rol_id" selected="@(Model.rol_id == rol.rol_id)">@RolEtiketi(rol.rol_adi)</option>
                                     }
                                 }
                             </select>
@@ -64,7 +64,7 @@
                     <hr class="text-muted mb-4">
 
                     <div class="d-flex justify-content-end gap-2">
-                        <a href="/Admin/Detay/@Model.KullaniciId" class="btn btn-light border">İptal</a>
+                        <a href="/Admin/Detay/@Model.kullanici_id" class="btn btn-light border">İptal</a>
                         <button type="submit" class="btn btn-warning px-4 fw-bold shadow-sm">Değişiklikleri Kaydet</button>
                     </div>
                 </form>

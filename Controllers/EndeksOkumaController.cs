@@ -32,7 +32,7 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Yeni(long TuketimNoktasiId, long SayacId, decimal IlkEndeks, decimal SonEndeks)
+        public IActionResult Yeni(long TuketimNoktasiId, long SayacId, decimal onceki_endeks, decimal yeni_endeks)
         {
             // Gerçek projede veritabanına ekleme yapılır, mock'ta listeye eklenir. 
             // Burada basit tutuyoruz.

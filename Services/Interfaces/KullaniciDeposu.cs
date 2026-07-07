@@ -15,22 +15,22 @@ namespace KcetasWeb.Services.Interfaces
             _kullanicilar = new List<Kullanici>
             {
                 new Kullanici {
-                    KullaniciId = 1, AdSoyad = "Ahmet Yılmaz", KullaniciAdi = "ahmety",
-                    EPosta = "ahmet@kcetas.com", Durum = "AKTIF", RolId = 5,
-                    Rol = RolListesi.BulRolId(5), CreatedAt = DateTime.Now // Saha Operasyon Amiri
+                    kullanici_id = 1, ad_soyad = "Ahmet Yılmaz", kullanici_adi = "ahmety",
+                    e_posta = "ahmet@kcetas.com", durum = "AKTIF", rol_id = 5,
+                    Rol = RolListesi.BulRolId(5), created_at = DateTime.Now // Saha Operasyon Amiri
                 },
                 new Kullanici {
-                    KullaniciId = 2, AdSoyad = "Ayşe Demir", KullaniciAdi = "aysed",
-                    EPosta = "ayse@kcetas.com", Durum = "AKTIF", RolId = 2,
-                    Rol = RolListesi.BulRolId(2), CreatedAt = DateTime.Now // Müşteri Temsilcisi
+                    kullanici_id = 2, ad_soyad = "Ayşe Demir", kullanici_adi = "aysed",
+                    e_posta = "ayse@kcetas.com", durum = "AKTIF", rol_id = 2,
+                    Rol = RolListesi.BulRolId(2), created_at = DateTime.Now // Müşteri Temsilcisi
                 },
                 new Kullanici {
-                    KullaniciId = 3, AdSoyad = "Sistem Yöneticisi", KullaniciAdi = "admin",
-                    EPosta = "admin@kcetas.com", Durum = "AKTIF", RolId = 1,
-                    Rol = RolListesi.BulRolId(1), CreatedAt = DateTime.Now // BT Yöneticisi
+                    kullanici_id = 3, ad_soyad = "Sistem Yöneticisi", kullanici_adi = "admin",
+                    e_posta = "admin@kcetas.com", durum = "AKTIF", rol_id = 1,
+                    Rol = RolListesi.BulRolId(1), created_at = DateTime.Now // BT Yöneticisi
                 }
             };
-            _sonId = _kullanicilar.Max(k => k.KullaniciId);
+            _sonId = _kullanicilar.Max(k => k.kullanici_id);
         }
 
         public bool KullaniciAdiVarMi(string kullaniciAdi)
@@ -38,7 +38,7 @@ namespace KcetasWeb.Services.Interfaces
             lock (_kilit)
             {
                 return _kullanicilar.Any(k =>
-                    k.KullaniciAdi.Equals(kullaniciAdi, StringComparison.OrdinalIgnoreCase));
+                    k.kullanici_adi.Equals(kullaniciAdi, StringComparison.OrdinalIgnoreCase));
             }
         }
 
@@ -47,19 +47,19 @@ namespace KcetasWeb.Services.Interfaces
             lock (_kilit)
             {
                 _sonId++;
-                kullanici.KullaniciId = _sonId;
-                kullanici.Rol = RolListesi.BulRolId(kullanici.RolId);
+                kullanici.kullanici_id = _sonId;
+                kullanici.Rol = RolListesi.BulRolId(kullanici.rol_id);
                 _kullanicilar.Add(kullanici);
                 return kullanici;
             }
         }
 
-        public Kullanici? BulKullaniciAdiIle(string kullaniciAdi)
+        public Kullanici BulKullaniciAdiIle(string kullaniciAdi)
         {
             lock (_kilit)
             {
                 return _kullanicilar.FirstOrDefault(k =>
-                    k.KullaniciAdi.Equals(kullaniciAdi, StringComparison.OrdinalIgnoreCase));
+                    k.kullanici_adi.Equals(kullaniciAdi, StringComparison.OrdinalIgnoreCase));
             }
         }
 
@@ -71,11 +71,11 @@ namespace KcetasWeb.Services.Interfaces
             }
         }
 
-        public Kullanici? BulId(long id)
+        public Kullanici BulId(long id)
         {
             lock (_kilit)
             {
-                return _kullanicilar.FirstOrDefault(k => k.KullaniciId == id);
+                return _kullanicilar.FirstOrDefault(k => k.kullanici_id == id);
             }
         }
 
@@ -83,16 +83,16 @@ namespace KcetasWeb.Services.Interfaces
         {
             lock (_kilit)
             {
-                var mevcut = _kullanicilar.FirstOrDefault(k => k.KullaniciId == guncel.KullaniciId);
+                var mevcut = _kullanicilar.FirstOrDefault(k => k.kullanici_id == guncel.kullanici_id);
                 if (mevcut == null) return false;
 
-                mevcut.AdSoyad = guncel.AdSoyad;
-                mevcut.KullaniciAdi = guncel.KullaniciAdi;
-                mevcut.EPosta = guncel.EPosta;
-                mevcut.Durum = guncel.Durum;
-                mevcut.RolId = guncel.RolId;
-                mevcut.Rol = RolListesi.BulRolId(guncel.RolId);
-                mevcut.UpdatedAt = DateTime.Now;
+                mevcut.ad_soyad = guncel.ad_soyad;
+                mevcut.kullanici_adi = guncel.kullanici_adi;
+                mevcut.e_posta = guncel.e_posta;
+                mevcut.durum = guncel.durum;
+                mevcut.rol_id = guncel.rol_id;
+                mevcut.Rol = RolListesi.BulRolId(guncel.rol_id);
+                mevcut.updated_at = DateTime.Now;
                 return true;
             }
         }
@@ -101,7 +101,7 @@ namespace KcetasWeb.Services.Interfaces
         {
             lock (_kilit)
             {
-                var kullanici = _kullanicilar.FirstOrDefault(k => k.KullaniciId == id);
+                var kullanici = _kullanicilar.FirstOrDefault(k => k.kullanici_id == id);
                 if (kullanici == null) return false;
                 _kullanicilar.Remove(kullanici);
                 return true;

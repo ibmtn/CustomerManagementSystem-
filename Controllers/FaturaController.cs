@@ -7,21 +7,22 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace KcetasWeb.Controllers
 {
+    [Authorize]
     public class FaturaController : Controller
     {
         private static List<Fatura> _faturalar = new List<Fatura>
         {
             new Fatura {
-                FaturaId = 1, FaturaNo = "FAT-2026-001", SozlesmeId = 1001, EndeksOkumaId = 5001,
-                FaturaTarihi = new DateTime(2026, 6, 30), SonOdemeTarihi = new DateTime(2026, 7, 15), 
-                ToplamTutar = 450.75m, KdvTutari = 75.12m, OdemeDurumu = "Ödendi", OdemeTarihi = new DateTime(2026, 7, 10),
-                YazdirmaDurumu = true, YazdirmaTarihi = new DateTime(2026, 6, 30, 10, 30, 0), TeslimatKaniti = "İmza Alındı", CreatedAt = new DateTime(2026, 6, 30)
+                fatura_id = 1, fatura_no = "FAT-2026-001", sozlesme_id = 1001, okuma_id = 5001, tekil_kod = "1001", fatura_tipi = "Mesken",
+                fatura_tarihi = new DateTime(2026, 6, 30), son_odeme_tarihi = new DateTime(2026, 7, 15), donem = "2026-06",
+                ilk_endeks = 15200, son_endeks = 15520, tuketim_kwh = 320, carpan = 1, enerji_bedeli = 912, dagatim_bedeli = 208,
+                vergi_fon_toplama = 224, toplam_tutar = 1344.00m, durum = "Ödendi", status = "Active", created_at = new DateTime(2026, 6, 30)
             },
             new Fatura {
-                FaturaId = 2, FaturaNo = "FAT-2026-002", SozlesmeId = 1002, EndeksOkumaId = 5002,
-                FaturaTarihi = new DateTime(2026, 6, 30), SonOdemeTarihi = new DateTime(2026, 7, 15), 
-                ToplamTutar = 3250.00m, KdvTutari = 541.66m, OdemeDurumu = "Bekliyor", 
-                YazdirmaDurumu = false, CreatedAt = new DateTime(2026, 6, 30)
+                fatura_id = 2, fatura_no = "FAT-2026-002", sozlesme_id = 1002, okuma_id = 5002, tekil_kod = "1002", fatura_tipi = "Ticarethane",
+                fatura_tarihi = new DateTime(2026, 6, 30), son_odeme_tarihi = new DateTime(2026, 7, 15), donem = "2026-06",
+                ilk_endeks = 18400, son_endeks = 18750, tuketim_kwh = 350, carpan = 1, enerji_bedeli = 1207.50m, dagatim_bedeli = 227.50m,
+                vergi_fon_toplama = 287, toplam_tutar = 1722.00m, durum = "Bekliyor", status = "Active", created_at = new DateTime(2026, 6, 30)
             }
         };
 
@@ -38,22 +39,24 @@ namespace KcetasWeb.Controllers
         [HttpPost]
         public IActionResult Olustur(Fatura fatura)
         {
-            fatura.FaturaId = _faturalar.Count > 0 ? _faturalar.Max(f => f.FaturaId) + 1 : 1;
-            fatura.FaturaNo = $"FAT-{DateTime.Now.Year}-{(fatura.FaturaId).ToString().PadLeft(3, '0')}";
-            fatura.FaturaTarihi = DateTime.Now;
-            fatura.SonOdemeTarihi = DateTime.Now.AddDays(15);
-            fatura.OdemeDurumu = "Bekliyor";
-            fatura.CreatedAt = DateTime.Now;
+            fatura.fatura_id = _faturalar.Count > 0 ? _faturalar.Max(f => f.fatura_id) + 1 : 1;
+            fatura.fatura_no = $"FAT-{DateTime.Now.Year}-{(fatura.fatura_id).ToString().PadLeft(3, '0')}";
+            fatura.fatura_tarihi = DateTime.Now;
+            fatura.son_odeme_tarihi = DateTime.Now.AddDays(15);
+            fatura.donem = DateTime.Now.ToString("yyyy-MM");
+            fatura.durum = "Bekliyor";
+            fatura.status = "Active";
+            fatura.created_at = DateTime.Now;
             
             _faturalar.Add(fatura);
             
-            TempData["BasariMesaji"] = fatura.FaturaNo + " numaralı fatura başarıyla oluşturuldu.";
+            TempData["BasariMesaji"] = fatura.fatura_no + " numaralı fatura başarıyla oluşturuldu.";
             return RedirectToAction("Index");
         }
 
         public IActionResult Detay(int id)
         {
-            var fatura = _faturalar.FirstOrDefault(x => x.FaturaId == id);
+            var fatura = _faturalar.FirstOrDefault(x => x.fatura_id == id);
             if (fatura == null)
             {
                 return NotFound();
@@ -63,13 +66,12 @@ namespace KcetasWeb.Controllers
 
         public IActionResult OdemeYap(int id)
         {
-            var fatura = _faturalar.FirstOrDefault(x => x.FaturaId == id);
+            var fatura = _faturalar.FirstOrDefault(x => x.fatura_id == id);
             if (fatura != null)
             {
-                fatura.OdemeDurumu = "Ödendi";
-                fatura.OdemeTarihi = DateTime.Now;
-                fatura.UpdatedAt = DateTime.Now;
-                TempData["FaturaMesaji"] = fatura.FaturaNo + " numaralı fatura başarıyla ödendi.";
+                fatura.durum = "Ödendi";
+                fatura.updated_at = DateTime.Now;
+                TempData["FaturaMesaji"] = fatura.fatura_no + " numaralı fatura başarıyla ödendi.";
             }
             return RedirectToAction("Index");
         }

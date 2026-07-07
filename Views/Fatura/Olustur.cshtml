@@ -16,12 +16,12 @@
             <div class="row g-3 mb-4">
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Sözleşme ID</label>
-                    <input asp-for="SozlesmeId" class="form-control" type="number" required />
+                    <input asp-for="sozlesme_id" class="form-control" type="number" required />
                 </div>
                 
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Endeks Okuma ID</label>
-                    <input asp-for="EndeksOkumaId" class="form-control" type="number" required />
+                    <input asp-for="okuma_id" class="form-control" type="number" required />
                 </div>
             </div>
 
@@ -30,15 +30,15 @@
                     <label class="form-label fw-bold">Toplam Tutar</label>
                     <div class="input-group">
                         <span class="input-group-text">₺</span>
-                        <input asp-for="ToplamTutar" type="number" step="0.01" class="form-control" required />
+                        <input asp-for="toplam_tutar" type="number" step="0.01" class="form-control" required />
                     </div>
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-bold">KDV Tutarı</label>
+                    <label class="form-label fw-bold">Vergi ve Fonlar</label>
                     <div class="input-group">
                         <span class="input-group-text">₺</span>
-                        <input asp-for="KdvTutari" type="number" step="0.01" class="form-control" required />
+                        <input asp-for="vergi_fon_toplama" type="number" step="0.01" class="form-control" required />
                     </div>
                 </div>
             </div>

@@ -1,7 +1,16 @@
 @using KcetasWeb.Models.entities
 
 <ul class="nav nav-pills flex-column mb-auto">
-    
+
+    @if (User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
+    {
+        <li class="nav-item">
+            <a class="nav-link text-primary fw-bold" asp-controller="Dashboard" asp-action="Index">
+                <i class="bi bi-speedometer2 me-1"></i> Gösterge Paneli
+            </a>
+        </li>
+    }
+
     @if (User.IsInRole(AppRoles.MusteriTemsilcisi) || User.IsInRole(AppRoles.SozlesmeYetkilisi) || User.IsInRole(AppRoles.SahaOperasyonAmiri) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi))
     {
         <li class="nav-item">
@@ -39,12 +48,12 @@
         </li>
     }
 
-    <li class="nav-item">
-        <a class="nav-link text-warning fw-bold" asp-controller="Outbox" asp-action="Index">Outbox Sistemi</a>
-    </li>
-
-    @if (User.IsInRole(AppRoles.BTYoneticisi))
+    @if (User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
     {
+        <li class="nav-item">
+            <a class="nav-link text-warning fw-bold" asp-controller="Outbox" asp-action="Index">Outbox Sistemi</a>
+        </li>
+
         <li class="nav-item mt-3">
             <a class="nav-link text-danger fw-bold" asp-controller="Admin" asp-action="Index">
                 <i class="bi bi-gear-fill me-2"></i> Admin Paneli
@@ -59,8 +68,10 @@
     <div class="mb-2">
         <span class="text-muted d-block">Hoş geldin,</span>
         <strong class="text-primary">@User.Identity?.Name</strong>
-        
-        <small class="d-block text-secondary mt-1">@User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value</small>
+        <small class="d-block text-secondary mt-1">
+            @User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value
+        </small>
     </div>
+
     <a class="btn btn-outline-danger btn-sm w-100 mt-2" asp-controller="Auth" asp-action="Logout">Çıkış Yap</a>
 </div>

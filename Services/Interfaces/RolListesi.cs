@@ -7,18 +7,18 @@ namespace KcetasWeb.Services.Interfaces
     {
         public static readonly List<Rol> Roller = new()
         {
-            new Rol { RolId = 1, RolAdi = AppRoles.BTYoneticisi, Aciklama = "Entegrasyon/BT Yöneticisi", CreatedAt = DateTime.Now },
-            new Rol { RolId = 2, RolAdi = AppRoles.MusteriTemsilcisi, Aciklama = "Müşteri Temsilcisi", CreatedAt = DateTime.Now },
-            new Rol { RolId = 3, RolAdi = AppRoles.SozlesmeYetkilisi, Aciklama = "Sözleşme Yetkilisi", CreatedAt = DateTime.Now },
-            new Rol { RolId = 4, RolAdi = AppRoles.SayacOkumaPersoneli, Aciklama = "Sayaç Okuma Personeli", CreatedAt = DateTime.Now },
-            new Rol { RolId = 5, RolAdi = AppRoles.SahaOperasyonAmiri, Aciklama = "Saha Operasyon Amiri", CreatedAt = DateTime.Now },
-            new Rol { RolId = 6, RolAdi = AppRoles.FaturalamaUzmani, Aciklama = "Faturalama Uzmanı", CreatedAt = DateTime.Now },
-            new Rol { RolId = 7, RolAdi = AppRoles.Denetci, Aciklama = "Denetçi/Rapor Kullanıcısı", CreatedAt = DateTime.Now }
+            new Rol { rol_id = 1, rol_adi = AppRoles.BTYoneticisi, aciklama = "Entegrasyon/BT Yöneticisi", created_at = DateTime.Now },
+            new Rol { rol_id = 2, rol_adi = AppRoles.MusteriTemsilcisi, aciklama = "Müşteri Temsilcisi", created_at = DateTime.Now },
+            new Rol { rol_id = 3, rol_adi = AppRoles.SozlesmeYetkilisi, aciklama = "Sözleşme Yetkilisi", created_at = DateTime.Now },
+            new Rol { rol_id = 4, rol_adi = AppRoles.SayacOkumaPersoneli, aciklama = "Sayaç Okuma Personeli", created_at = DateTime.Now },
+            new Rol { rol_id = 5, rol_adi = AppRoles.SahaOperasyonAmiri, aciklama = "Saha Operasyon Amiri", created_at = DateTime.Now },
+            new Rol { rol_id = 6, rol_adi = AppRoles.FaturalamaUzmani, aciklama = "Faturalama Uzmanı", created_at = DateTime.Now },
+            new Rol { rol_id = 7, rol_adi = AppRoles.Denetci, aciklama = "Denetçi/Rapor Kullanıcısı", created_at = DateTime.Now }
         };
 
         public static Rol? BulRolId(short rolId)
         {
-            return Roller.FirstOrDefault(r => r.RolId == rolId);
+            return Roller.FirstOrDefault(r => r.rol_id == rolId);
         }
     }
 }

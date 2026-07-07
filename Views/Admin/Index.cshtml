@@ -51,13 +51,13 @@
                     @foreach (var personel in Model)
                     {
                         <tr>
-                            <td><strong>#@personel.KullaniciId</strong></td>
-                            <td>@personel.AdSoyad</td>
-                            <td>@personel.KullaniciAdi</td>
-                            <td>@personel.EPosta</td>
-                            <td><span class="badge @RolBadgeRengi(personel.Rol?.RolAdi)">@RolEtiketi(personel.Rol?.RolAdi)</span></td>
+                            <td><strong>#@personel.kullanici_id</strong></td>
+                            <td>@personel.ad_soyad</td>
+                            <td>@personel.kullanici_adi</td>
+                            <td>@personel.e_posta</td>
+                            <td><span class="badge @RolBadgeRengi(personel.Rol?.rol_adi)">@RolEtiketi(personel.Rol?.rol_adi)</span></td>
                             <td>
-                                @if (personel.Durum == "AKTIF")
+                                @if (personel.durum == "AKTIF")
                                 {
                                     <span class="badge bg-success">Aktif</span>
                                 }
@@ -67,7 +67,7 @@
                                 }
                             </td>
                             <td>
-                                <a href="/Admin/Detay/@personel.KullaniciId" class="btn btn-sm btn-outline-primary shadow-sm">Detay</a>
+                                <a href="/Admin/Detay/@personel.kullanici_id" class="btn btn-sm btn-outline-primary shadow-sm">Detay</a>
                             </td>
                         </tr>
                     }

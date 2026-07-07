@@ -1,125 +1,102 @@
 @model KcetasWeb.Models.EndeksOkuma
 
 @{
-    ViewData["Title"] = "Endeks Okuma Detayı";
+    ViewData["Title"] = "Okuma Detayı";
 }
 
-<div class="container-fluid mt-3">
-    <!-- Header -->
+<div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="h3 mb-0 text-gray-800 fw-bold">
-                <i class="bi bi-file-earmark-bar-graph text-primary me-2"></i> Endeks Okuma Detayı
-            </h2>
-            <p class="text-muted mt-1 mb-0">Ölçüm bilgileri ve tüketim detayları.</p>
-        </div>
-        <a href="/EndeksOkuma/Index" class="btn btn-outline-secondary shadow-sm rounded-pill px-4">
-            <i class="bi bi-arrow-left me-1"></i> Listeye Dön
+        <h2 class="h4 text-primary fw-bold">
+            <i class="bi bi-speedometer2 me-2"></i> Endeks Okuma Detayı
+        </h2>
+        <a href="/EndeksOkuma/Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Listeye Dön
         </a>
     </div>
 
-    <div class="row">
-        <!-- Sol İstatistik Kartı -->
-        <div class="col-xl-4 col-lg-5 mb-4">
-            <div class="card shadow-lg border-0 rounded-4 overflow-hidden h-100">
-                <div class="card-body p-0 text-center bg-white position-relative">
-                    <div class="bg-gradient bg-primary text-white p-5">
-                        <div class="bg-white text-primary rounded-circle d-flex justify-content-center align-items-center shadow mx-auto mb-3" style="width: 80px; height: 80px; font-size: 36px;">
-                            <i class="bi bi-lightning-charge-fill"></i>
-                        </div>
-                        <h6 class="text-uppercase fw-bold opacity-75 mb-1">Toplam Tüketim</h6>
-                        <h2 class="fw-bold mb-0">@Model.TuketimMiktari.ToString("0.00") <span class="fs-5 opacity-75">kWh</span></h2>
-                    </div>
-                    
-                    <div class="p-4">
-                        @if (Model.Durum == "Başarılı")
-                        {
-                            <div class="alert alert-success border-0 d-flex align-items-center mb-0">
-                                <i class="bi bi-check-circle-fill fs-4 me-3"></i>
-                                <div class="text-start">
-                                    <h6 class="mb-0 fw-bold">Kayıt Başarılı</h6>
-                                    <small>Bu okuma faturalandırma için uygundur.</small>
-                                </div>
-                            </div>
-                        }
-                        else if (Model.Durum == "Anormal")
-                        {
-                            <div class="alert alert-danger border-0 d-flex align-items-center text-start mb-0">
-                                <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
-                                <div>
-                                    <h6 class="mb-0 fw-bold">Anomali Tespit Edildi</h6>
-                                    <small>Anormal tüketim değeri.</small>
-                                </div>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="alert alert-warning border-0 d-flex align-items-center text-start mb-0">
-                                <i class="bi bi-exclamation-circle-fill fs-4 me-3"></i>
-                                <div>
-                                    <h6 class="mb-0 fw-bold">İşlem @Model.Durum</h6>
-                                </div>
-                            </div>
-                        }
-                    </div>
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-gradient bg-primary text-white p-4">
+            <div class="d-flex align-items-center">
+                <div class="bg-white text-primary rounded-circle d-flex justify-content-center align-items-center shadow-sm" style="width: 60px; height: 60px; font-size: 24px;">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </div>
+                <div class="ms-3">
+                    <h3 class="mb-0 fw-bold">Okuma ID: @Model.okuma_id</h3>
+                    <p class="mb-0 opacity-75">Tarih: @Model.okuma_zamani.ToString("dd.MM.yyyy HH:mm")</p>
+                </div>
+                <div class="ms-auto">
+                    @{
+                        var tuketim = Model.yeni_endeks - Model.onceki_endeks;
+                    }
+                    @if (Model.status == "Basarili")
+                    {
+                        <span class="badge bg-success rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Başarılı</span>
+                    }
+                    else if (Model.status == "Anormal")
+                    {
+                        <span class="badge bg-danger rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-exclamation-triangle-fill me-1"></i> Anormal</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-info-circle-fill me-1"></i> @Model.status</span>
+                    }
                 </div>
             </div>
         </div>
-
-        <!-- Sağ Detay Kartı -->
-        <div class="col-xl-8 col-lg-7 mb-4">
-            <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-header bg-white py-3 border-bottom-0 pt-4 px-4">
-                    <h5 class="m-0 font-weight-bold text-primary"><i class="bi bi-card-text me-2"></i> Okuma Detayları</h5>
+        
+        @if (Model.status == "Anormal")
+        {
+            <div class="alert alert-danger rounded-0 border-0 m-0 p-3 d-flex align-items-center">
+                <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
+                <div>
+                    <strong>Sistem Uyarısı:</strong> Bu okuma anormal olarak işaretlenmiştir. Gerekçe: <em>@Model.AnomaliAciklamasi</em>
                 </div>
-                <div class="card-body px-4 pb-4 pt-2">
-                    <div class="row g-4">
-                        
-                        <div class="col-md-6">
-                            <div class="p-3 bg-light rounded-3 border h-100">
-                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-geo-alt-fill me-1"></i> Tüketim Noktası ID</label>
-                                <p class="fs-5 fw-bold text-dark mb-0 font-monospace text-primary">@Model.TuketimNoktasiId</p>
-                            </div>
-                        </div>
+            </div>
+        }
 
-                        <div class="col-md-6">
-                            <div class="p-3 bg-light rounded-3 border h-100">
-                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-upc-scan me-1"></i> Sayaç ID</label>
-                                <p class="fs-5 fw-bold text-dark mb-0 font-monospace">@Model.SayacId</p>
-                            </div>
+        <div class="card-body p-4 bg-light">
+            <div class="row g-4 mb-2">
+                <div class="col-md-6">
+                    <h6 class="text-muted fw-bold mb-3"><i class="bi bi-geo-alt me-1"></i> Lokasyon ve Cihaz</h6>
+                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
+                        <div class="mb-3">
+                            <label class="text-muted small fw-bold mb-1 text-uppercase">Sözleşme ID</label>
+                            <p class="fs-5 fw-bold text-dark mb-0">@Model.sozlesme_id</p>
                         </div>
-
-                        <div class="col-md-6">
-                            <div class="p-3 bg-light rounded-3 border h-100">
-                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-arrow-left-square me-1"></i> İlk Endeks</label>
-                                <p class="fs-5 fw-bold text-dark mb-0">@Model.IlkEndeks.ToString("0.00") <span class="fs-6 text-muted">kWh</span></p>
-                            </div>
+                        <div class="mb-3">
+                            <label class="text-muted small fw-bold mb-1 text-uppercase">İş Emri ID</label>
+                            <p class="fs-6 fw-medium text-dark mb-0">@Model.is_emri_id</p>
                         </div>
-
-                        <div class="col-md-6">
-                            <div class="p-3 bg-light rounded-3 border border-primary h-100 position-relative">
-                                <span class="position-absolute top-0 start-100 translate-middle p-2 bg-primary border border-light rounded-circle"></span>
-                                <label class="text-primary small fw-bold mb-1 text-uppercase"><i class="bi bi-arrow-right-square-fill me-1"></i> Son Endeks</label>
-                                <p class="fs-4 fw-bold text-primary mb-0">@Model.SonEndeks.ToString("0.00") <span class="fs-6 text-muted">kWh</span></p>
-                            </div>
+                        <div>
+                            <label class="text-muted small fw-bold mb-1 text-uppercase">Sayaç ID</label>
+                            <p class="fs-6 fw-medium text-dark mb-0">@Model.sayac_id</p>
                         </div>
-
-                        <div class="col-md-6">
-                            <div class="p-3 bg-light rounded-3 border h-100">
-                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-calendar-event me-1"></i> Okuma Tarihi</label>
-                                <p class="fs-5 fw-medium text-dark mb-0">@Model.OkumaTarihi.ToString("dd.MM.yyyy HH:mm")</p>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="p-3 bg-light rounded-3 border h-100">
-                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-person-badge me-1"></i> İşlemi Yapan (Personel)</label>
-                                <p class="fs-5 fw-medium text-dark mb-0">Sistem / Entegrasyon</p>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
+
+                <div class="col-md-6">
+                    <h6 class="text-muted fw-bold mb-3"><i class="bi bi-speedometer me-1"></i> Endeks Detayları</h6>
+                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="text-muted small fw-bold mb-1 text-uppercase">İlk Endeks</label>
+                                <p class="fs-6 fw-medium text-dark mb-0">@Model.onceki_endeks</p>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small fw-bold mb-1 text-uppercase">Son Endeks</label>
+                                <p class="fs-6 fw-medium text-dark mb-0">@Model.yeni_endeks</p>
+                            </div>
+                            <div class="col-12 mt-3 pt-3 border-top border-2 border-primary">
+                                <label class="text-primary small fw-bold mb-1 text-uppercase"><i class="bi bi-lightning-charge me-1"></i> Toplam Tüketim</label>
+                                <p class="fs-3 fw-bold text-primary mb-0">@tuketim <span class="fs-6 text-muted fw-normal">kWh</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 text-end">
+                <button class="btn btn-outline-primary shadow-sm"><i class="bi bi-printer-fill"></i> Tutanak Yazdır</button>
             </div>
         </div>
     </div>

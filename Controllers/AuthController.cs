@@ -3,9 +3,9 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
-using KcetasWeb.Models;                 // RegisterViewModel için
-using KcetasWeb.Models.entities;        // Kullanici, Rol, AppRoles için
-using KcetasWeb.Services.Interfaces;    // IKullaniciDeposu, RolListesi için
+using KcetasWeb.Models;
+using KcetasWeb.Models.entities;
+using KcetasWeb.Services.Interfaces;
 
 namespace KcetasWeb.Controllers
 {
@@ -27,8 +27,6 @@ namespace KcetasWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string kullaniciAdi, string sifre)
         {
-            // --- 1. GELİŞTİRİCİ TEST KULLANICILARI ---
-            // Şifre 123 ise girilen kullanıcı adına göre ilgili rol atanır
             if (sifre == "123")
             {
                 switch (kullaniciAdi.ToLower())
@@ -36,7 +34,7 @@ namespace KcetasWeb.Controllers
                     case "admin":
                     case "bt":
                         await GirisYap("BT Yöneticisi", AppRoles.BTYoneticisi);
-                        return RedirectToAction("Index", "Home");
+                        return RedirectToAction("Index", "Dashboard");
 
                     case "musteri":
                         await GirisYap("Müşteri Temsilcisi", AppRoles.MusteriTemsilcisi);
@@ -64,17 +62,26 @@ namespace KcetasWeb.Controllers
                 }
             }
 
-            // --- 2. VERİTABANI (KullaniciDeposu) KULLANICILARI ---
             var kayitliKullanici = _kullaniciDeposu.BulKullaniciAdiIle(kullaniciAdi);
+
             if (kayitliKullanici != null)
             {
-                var sonuc = _sifreHasher.VerifyHashedPassword(kayitliKullanici, kayitliKullanici.SifreHash, sifre);
+                var sonuc = _sifreHasher.VerifyHashedPassword(
+                    kayitliKullanici,
+                    kayitliKullanici.sifre_hash,
+                    sifre
+                );
+
                 if (sonuc == PasswordVerificationResult.Success)
                 {
-                    var rol = RolListesi.BulRolId(kayitliKullanici.RolId);
-                    var rolAdi = rol?.RolAdi ?? AppRoles.MusteriTemsilcisi;
+                    var rol = RolListesi.BulRolId(kayitliKullanici.rol_id);
+                    var rolAdi = rol?.rol_adi ?? AppRoles.MusteriTemsilcisi;
 
-                    await GirisYap(kayitliKullanici.AdSoyad, rolAdi);
+                    await GirisYap(kayitliKullanici.ad_soyad, rolAdi);
+
+                    if (rolAdi == AppRoles.BTYoneticisi || rolAdi == "Yonetici")
+                        return RedirectToAction("Index", "Dashboard");
+
                     return RedirectToAction("Index", "Home");
                 }
             }
@@ -85,32 +92,41 @@ namespace KcetasWeb.Controllers
 
         private async Task GirisYap(string ad, string rol)
         {
-            var kartBilgileri = new List<Claim>
+            var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, ad),
                 new Claim(ClaimTypes.Role, rol)
             };
 
-            var kullaniciKimligi = new ClaimsIdentity(kartBilgileri, CookieAuthenticationDefaults.AuthenticationScheme);
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(kullaniciKimligi));
+            var identity = new ClaimsIdentity(
+                claims,
+                CookieAuthenticationDefaults.AuthenticationScheme
+            );
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(identity)
+            );
         }
 
         public IActionResult Register()
         {
-            // ID'si 1 olanı (BT Yöneticisi) kayıt ekranında gizliyoruz
-            ViewBag.Roller = RolListesi.Roller.Where(r => r.RolId != 1).ToList();
+            ViewBag.Roller = RolListesi.Roller
+                .Where(r => r.rol_id != 1)
+                .ToList();
+
             return View(new RegisterViewModel());
         }
 
         [HttpPost]
         public IActionResult Register(RegisterViewModel model)
         {
-            ViewBag.Roller = RolListesi.Roller.Where(r => r.RolId != 1).ToList();
+            ViewBag.Roller = RolListesi.Roller
+                .Where(r => r.rol_id != 1)
+                .ToList();
 
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
             if (_kullaniciDeposu.KullaniciAdiVarMi(model.KullaniciAdi))
             {
@@ -120,15 +136,15 @@ namespace KcetasWeb.Controllers
 
             var yeniKullanici = new Kullanici
             {
-                AdSoyad = model.AdSoyad,
-                EPosta = model.EPosta,
-                KullaniciAdi = model.KullaniciAdi,
-                RolId = model.RolId,
-                Durum = "Aktif",
-                CreatedAt = DateTime.Now
+                ad_soyad = model.AdSoyad,
+                e_posta = model.EPosta,
+                kullanici_adi = model.KullaniciAdi,
+                rol_id = model.RolId,
+                durum = "Aktif",
+                created_at = DateTime.Now
             };
 
-            yeniKullanici.SifreHash = _sifreHasher.HashPassword(yeniKullanici, model.Sifre);
+            yeniKullanici.sifre_hash = _sifreHasher.HashPassword(yeniKullanici, model.Sifre);
 
             _kullaniciDeposu.Ekle(yeniKullanici);
 
@@ -142,7 +158,6 @@ namespace KcetasWeb.Controllers
             return RedirectToAction("Login");
         }
 
-        // Yetkisi olmayan bir sayfaya girmeye çalışınca gösterilecek sayfa
         [HttpGet]
         public IActionResult Yetkisiz()
         {

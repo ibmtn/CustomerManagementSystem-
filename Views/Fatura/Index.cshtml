@@ -31,7 +31,7 @@
                         <th class="ps-4">Fatura No</th>
                         <th>Dönem</th>
                         <th>Sözleşme ID</th>
-                        <th>KDV Tutarı</th>
+                        <th>Vergi ve Fonlar</th>
                         <th>Toplam Tutar</th>
                         <th>Son Ödeme</th>
                         <th>Durum</th>
@@ -42,24 +42,24 @@
                     @foreach (var fatura in Model)
                     {
                         <tr>
-                            <td class="ps-4"><strong>@fatura.FaturaNo</strong></td>
-                            <td><span class="badge bg-secondary">@fatura.FaturaTarihi.ToString("yyyy-MM")</span></td>
-                            <td>@fatura.SozlesmeId</td>
-                            <td>₺@fatura.KdvTutari.ToString("0.00")</td>
-                            <td class="fw-bold text-dark">₺@fatura.ToplamTutar.ToString("0.00")</td>
-                            <td>@fatura.SonOdemeTarihi.ToString("dd.MM.yyyy")</td>
+                            <td class="ps-4"><strong>@fatura.fatura_no</strong></td>
+                            <td><span class="badge bg-secondary">@fatura.donem</span></td>
+                            <td>@fatura.sozlesme_id</td>
+                            <td>₺@fatura.vergi_fon_toplama.ToString("0.00")</td>
+                            <td class="fw-bold text-dark">₺@fatura.toplam_tutar.ToString("0.00")</td>
+                            <td>@fatura.son_odeme_tarihi.ToString("dd.MM.yyyy")</td>
                             <td>
-                                @if(fatura.OdemeDurumu == "Ödendi")
+                                @if(fatura.durum == "Ödendi")
                                 {
                                     <span class="badge bg-success">Ödendi</span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-warning text-dark">@fatura.OdemeDurumu</span>
+                                    <span class="badge bg-warning text-dark">@fatura.durum</span>
                                 }
                             </td>
                             <td class="pe-4 text-end">
-                                <a href="/Fatura/Detay/@fatura.FaturaId" class="btn btn-sm btn-light border text-primary shadow-sm">Detay</a>
+                                <a href="/Fatura/Detay/@fatura.fatura_id" class="btn btn-sm btn-light border text-primary shadow-sm">Detay</a>
                             </td>
                         </tr>
                     }

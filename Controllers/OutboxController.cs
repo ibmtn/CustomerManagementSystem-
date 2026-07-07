@@ -39,17 +39,17 @@ public class OutboxController : Controller
             BasarisizSayisi = istatistikler.Basarisiz,
             Kayitlar = kayitlar.Select(k => new OutboxListeViewModel.OutboxSatirViewModel
             {
-                OutboxId = k.Id,
-                IslemTipi = k.EventType,
-                ReferansNo = k.AggregateId,
-                HedefSistem = k.AggregateType,
-                Durum = k.Status,
-                DurumRenk = OutboxListeViewModel.GetOutboxDurumRenk(k.Status),
-                DenemeSayisi = 0,
-                SonHataMesaji = "",
-                OlusturulmaZamani = k.CreatedAt,
-                GonderimZamani = k.ProcessedAt,
-                PayloadOnizleme = k.Payload != null && k.Payload.Length > 100 ? k.Payload[..100] + "..." : (k.Payload ?? "")
+                OutboxId = k.outbox_id,
+                IslemTipi = "Fatura Entegrasyonu",
+                ReferansNo = k.corrolation_id,
+                HedefSistem = k.hedef_sistem,
+                Durum = k.durum,
+                DurumRenk = OutboxListeViewModel.GetOutboxDurumRenk(k.durum),
+                DenemeSayisi = k.retry_count,
+                SonHataMesaji = k.hata_mesaji,
+                OlusturulmaZamani = k.created_at,
+                GonderimZamani = k.gonderim_zamani,
+                PayloadOnizleme = k.paload != null && k.paload.Length > 100 ? k.paload[..100] + "..." : (k.paload ?? "")
             }).ToList()
         };
 
@@ -64,16 +64,16 @@ public class OutboxController : Controller
 
         return Json(new
         {
-            outboxId = kayit.Id,
-            islemTipi = kayit.EventType,
-            referansNo = kayit.AggregateId,
-            hedefSistem = kayit.AggregateType,
-            durum = kayit.Status,
-            payload = kayit.Payload,
-            denemeSayisi = 0,
-            sonHataMesaji = "",
-            olusturulmaZamani = kayit.CreatedAt.ToString("dd.MM.yyyy HH:mm"),
-            gonderimZamani = kayit.ProcessedAt?.ToString("dd.MM.yyyy HH:mm")
+            outboxId = kayit.outbox_id,
+            islemTipi = "Fatura Entegrasyonu",
+            referansNo = kayit.corrolation_id,
+            hedefSistem = kayit.hedef_sistem,
+            durum = kayit.durum,
+            payload = kayit.paload,
+            denemeSayisi = kayit.retry_count,
+            sonHataMesaji = kayit.hata_mesaji,
+            olusturulmaZamani = kayit.created_at.ToString("dd.MM.yyyy HH:mm"),
+            gonderimZamani = kayit.gonderim_zamani.ToString("dd.MM.yyyy HH:mm")
         });
     }
 

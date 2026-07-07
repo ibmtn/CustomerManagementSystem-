@@ -1,0 +1,26 @@
+@{
+    ViewData["Title"] = "Yetkisiz Erişim";
+    Layout = "_Layout";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="mb-4">
+                <i class="bi bi-shield-lock-fill text-danger" style="font-size: 5rem;"></i>
+            </div>
+            <h1 class="h3 text-danger fw-bold">Erişim Engellendi</h1>
+            <p class="text-muted mt-3">
+                Bu sayfaya erişim yetkiniz bulunmamaktadır. Gerekli izinlere sahip olduğunuzdan emin olun veya yöneticinizle iletişime geçin.
+            </p>
+            <div class="mt-4">
+                <a href="/Home/Index" class="btn btn-primary px-4 shadow-sm fw-bold">
+                    <i class="bi bi-house-door me-1"></i> Ana Sayfaya Dön
+                </a>
+                <a href="/Auth/Logout" class="btn btn-outline-secondary ms-2 px-4 fw-bold">
+                    <i class="bi bi-box-arrow-right me-1"></i> Başka Hesapla Giriş Yap
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -45,13 +45,13 @@
                         </div>
                         <div class="col-md-6 mb-4">
                             <label class="form-label fw-bold">Sistem Rolü <span class="text-danger">*</span></label>
-                            <select class="form-select" name="RolId" required>
+                            <select class="form-select" name="rol_id" required>
                                 <option value="">-- Rol Seçiniz --</option>
                                 @if (roller != null)
                                 {
                                     foreach (var rol in roller)
                                     {
-                                        <option value="@rol.RolId">@RolEtiketi(rol.RolAdi)</option>
+                                        <option value="@rol.rol_id">@RolEtiketi(rol.rol_adi)</option>
                                     }
                                 }
                             </select>

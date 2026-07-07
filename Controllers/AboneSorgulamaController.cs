@@ -33,27 +33,27 @@ namespace KcetasWeb.Controllers
             var liste = new List<Abone>(_aboneler);
 
             var kayitliAboneler = _kullaniciDeposu.Listele()
-                .Where(k => k.Rol?.RolAdi == "Abone");
+                .Where(k => k.Rol?.rol_adi == "Abone");
 
             foreach (var kullanici in kayitliAboneler)
             {
-                var adSoyad = kullanici.AdSoyad?.Split(' ') ?? new string[] { "", "" };
+                var adSoyad = kullanici.ad_soyad?.Split(' ') ?? new string[] { "", "" };
                 var ad = adSoyad[0];
                 var soyad = adSoyad.Length > 1 ? string.Join(" ", adSoyad.Skip(1)) : "";
 
                 liste.Add(new Abone
                 {
-                    AboneId = 100000 + kullanici.KullaniciId,
-                    AboneNo = "ABN-" + (20000 + kullanici.KullaniciId),
+                    AboneId = 100000 + kullanici.kullanici_id,
+                    AboneNo = "ABN-" + (20000 + kullanici.kullanici_id),
                     AboneTipi = "Bireysel",
                     Ad = ad,
                     Soyad = soyad,
                     TcKimlikNo = "11111111111",
                     Telefon = "05000000000",
-                    EPosta = kullanici.EPosta ?? "",
-                    Durum = kullanici.Durum == "AKTIF" ? "Aktif" : "Pasif",
-                    CreatedAt = kullanici.CreatedAt,
-                    UpdatedAt = kullanici.UpdatedAt
+                    EPosta = kullanici.e_posta ?? "",
+                    Durum = kullanici.durum == "AKTIF" ? "Aktif" : "Pasif",
+                    CreatedAt = kullanici.created_at,
+                    UpdatedAt = kullanici.updated_at
                 });
             }
 

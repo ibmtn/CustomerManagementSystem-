@@ -51,8 +51,8 @@
                             {
                                 foreach (var rol in roller)
                                 {
-                                    var etiket = rol.RolAdi == "Kullanici" ? "Personel" : rol.RolAdi;
-                                    <option value="@rol.RolId" data-rol-adi="@rol.RolAdi">@etiket</option>
+                                    var etiket = rol.rol_adi == "Kullanici" ? "Personel" : rol.rol_adi;
+                                    <option value="@rol.rol_id" data-rol-adi="@rol.rol_adi">@etiket</option>
                                 }
                             }
                         </select>

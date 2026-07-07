@@ -19,7 +19,7 @@ namespace KcetasWeb.Controllers
         public IActionResult Index()
         {
             var liste = _kullaniciDeposu.Listele()
-                .OrderByDescending(k => k.CreatedAt)
+                .OrderByDescending(k => k.created_at)
                 .ToList();
             return View(liste);
         }
@@ -41,16 +41,16 @@ namespace KcetasWeb.Controllers
 
             var yeniKullanici = new Kullanici
             {
-                AdSoyad = AdSoyad,
-                KullaniciAdi = KullaniciAdi,
-                EPosta = EPosta,
-                RolId = RolId,
-                Durum = "AKTIF",
-                CreatedAt = DateTime.Now
+                ad_soyad = AdSoyad,
+                kullanici_adi = KullaniciAdi,
+                e_posta = EPosta,
+                rol_id = RolId,
+                durum = "AKTIF",
+                created_at = DateTime.Now
             };
 
             var hasher = new PasswordHasher<Kullanici>();
-            yeniKullanici.SifreHash = hasher.HashPassword(yeniKullanici, Sifre);
+            yeniKullanici.sifre_hash = hasher.HashPassword(yeniKullanici, Sifre);
 
             _kullaniciDeposu.Ekle(yeniKullanici);
 
@@ -74,22 +74,21 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Duzenle(long KullaniciId, string AdSoyad, string KullaniciAdi, string EPosta, string Durum, short RolId)
+        public IActionResult Duzenle(Kullanici model)
         {
-            var guncellenecek = new Kullanici
-            {
-                KullaniciId = KullaniciId,
-                AdSoyad = AdSoyad,
-                KullaniciAdi = KullaniciAdi,
-                EPosta = EPosta,
-                Durum = Durum,
-                RolId = RolId
-            };
+            var mevcut = _kullaniciDeposu.BulId(model.kullanici_id);
+            if (mevcut == null) return NotFound();
 
-            _kullaniciDeposu.Guncelle(guncellenecek);
+            mevcut.ad_soyad = model.ad_soyad;
+            mevcut.kullanici_adi = model.kullanici_adi;
+            mevcut.e_posta = model.e_posta;
+            mevcut.durum = model.durum;
+            mevcut.rol_id = model.rol_id;
 
-            TempData["PersonelMesaji"] = AdSoyad + " isimli kullanıcı başarıyla güncellendi.";
-            return RedirectToAction("Detay", new { id = KullaniciId });
+            _kullaniciDeposu.Guncelle(mevcut);
+
+            TempData["PersonelMesaji"] = mevcut.ad_soyad + " isimli kullanıcı başarıyla güncellendi.";
+            return RedirectToAction("Detay", new { id = model.kullanici_id });
         }
 
         public IActionResult Sil(long id)
@@ -98,7 +97,7 @@ namespace KcetasWeb.Controllers
             if (kullanici != null)
             {
                 _kullaniciDeposu.Sil(id);
-                TempData["PersonelMesaji"] = kullanici.AdSoyad + " isimli kullanıcı başarıyla silindi.";
+                TempData["PersonelMesaji"] = kullanici.ad_soyad + " isimli kullanıcı başarıyla silindi.";
             }
             return RedirectToAction("Index");
         }
