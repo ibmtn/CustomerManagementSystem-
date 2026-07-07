@@ -54,7 +54,7 @@ namespace KcetasWeb.Services.Interfaces
             }
         }
 
-        public Kullanici? BulKullaniciAdiIle(string kullaniciAdi)
+        public Kullanici BulKullaniciAdiIle(string kullaniciAdi)
         {
             lock (_kilit)
             {
@@ -71,7 +71,7 @@ namespace KcetasWeb.Services.Interfaces
             }
         }
 
-        public Kullanici? BulId(long id)
+        public Kullanici BulId(long id)
         {
             lock (_kilit)
             {
