@@ -4,15 +4,15 @@ namespace KcetasWeb.Models
 
     public class AuditLog
     {
-        public long AuditId { get; set; }
-        public string IslemTipi { get; set; }
-        public string TabloAdi { get; set; }
-        public long KayitId { get; set; }
-        public string EskiDeger { get; set; }
-        public string YeniDeger { get; set; }
-        public long? KullaniciId { get; set; }
-        public string KullaniciAdi { get; set; }
-        public DateTime IslemZamani { get; set; }
-        public string IpAdresi { get; set; }
+        public long audit_id { get; set; }
+        public string varlik_tipi { get; set; }
+        public long vaklik_id { get; set; }
+        public string islem_tipi { get; set; }
+        public string eski_deger { get; set; }
+        public string yeni_deger { get; set; }
+        public int kullanici_id { get; set; }
+        public long? islem_gerekcesi { get; set; }
+        public DateTime islem_zamani { get; set; }
+        
     }
 }

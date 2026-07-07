@@ -2,20 +2,20 @@ namespace KcetasWeb.Models.entities
 {
     public class Kullanici
     {
-        public long KullaniciId { get; set; }
-        public string AdSoyad { get; set; }
-        public string KullaniciAdi { get; set; }
-        public string EPosta { get; set; }
-        public string SifreHash { get; set; }
+        public long kullanici_id { get; set; }
+        public string ad_soyad { get; set; }
+        public string kullanici_adi { get; set; }
+        public string e_posta { get; set; }
+        public string sifre_hash { get; set; }
         
         // Foreign Key (Rol tablosuna bağlantı)
-        public short RolId { get; set; }
+        public short rol_id { get; set; }
         
-        public string Durum { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public string durum { get; set; }
+        public DateTime created_at { get; set; }
         
         // UpdatedAt null (boş) olabileceği için DateTime? (soru işareti) kullandık
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime? updated_at { get; set; }
 
         // İlişki: Her kullanıcının veritabanında bağlı olduğu bir Rol nesnesi vardır
         public Rol Rol { get; set; }
