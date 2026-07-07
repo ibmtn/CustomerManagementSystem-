@@ -52,12 +52,53 @@
 
             @if (Model.IsSokmeTakma)
             {
-                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3 mt-4">Mühür Bilgileri</h6>
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3 mt-4">Sökme / Takma Detayları ve Mühür Bilgileri</h6>
                 <div class="row mb-3">
-                    <div class="col-md-12">
+                    <div class="col-md-6 mb-3">
                         <label asp-for="MuhurNo" class="form-label">Mühür No</label>
                         <input asp-for="MuhurNo" class="form-control" />
                     </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="EskiSayacNo" class="form-label">Eski Sayaç Seri No</label>
+                        <input asp-for="EskiSayacNo" class="form-control" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="EskiSonEndeksi" class="form-label">Eski Sayaç Son Endeks</label>
+                        <input asp-for="EskiSonEndeksi" type="number" step="0.001" class="form-control" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="YeniSayacNo" class="form-label">Yeni Sayaç Seri No</label>
+                        <input asp-for="YeniSayacNo" class="form-control" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="YeniIlkEndeksi" class="form-label">Yeni Sayaç İlk Endeks</label>
+                        <input asp-for="YeniIlkEndeksi" type="number" step="0.001" class="form-control" />
+                    </div>
+                </div>
+            }
+
+            @if (Model.IsAcmaKesme)
+            {
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3 mt-4">Açma / Kesme Endeks Bilgileri</h6>
+                <div class="row mb-3">
+                    @if (Model.Tip == "Kesme")
+                    {
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="KesmeEndeksi" class="form-label fw-bold">Kesme Endeksi <span class="text-danger">*</span></label>
+                            <input asp-for="KesmeEndeksi" type="number" step="0.001" class="form-control" required />
+                            <div class="form-text">Kesme anındaki sayacın üzerindeki değer.</div>
+                        </div>
+                    }
+                    else if (Model.Tip == "Açma")
+                    {
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="AcmaEndeksi" class="form-label fw-bold">Açma Endeksi <span class="text-danger">*</span></label>
+                            <input asp-for="AcmaEndeksi" type="number" step="0.001" class="form-control" required />
+                            <div class="form-text">Açma anındaki sayacın üzerindeki değer.</div>
+                        </div>
+                    }
                 </div>
             }
 

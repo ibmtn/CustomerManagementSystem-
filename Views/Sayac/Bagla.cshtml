@@ -1,56 +1,74 @@
 @model KcetasWeb.Models.Sayac
+
 @{
-    ViewData["Title"] = "Sayaç Bağla";
+    ViewData["Title"] = Model.durum == "Bağlı" ? "Sayacı Sök veya Değiştir" : "Sayacı Bağla";
     var tuketimNoktalari = ViewBag.TuketimNoktalari as List<KcetasWeb.Models.TuketimNoktasi>;
 }
 
-<div class="mb-4">
-    <h2 class="text-primary fw-bold">Sayaç Bağlantı İşlemi</h2>
-    <p class="text-muted"><strong>@Model.SayacNo</strong> numaralı sayacın bağlantı durumunu yönetin.</p>
-</div>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="mb-3">
+            <a href="/Sayac" class="btn btn-sm btn-outline-secondary">&larr; Listeye Geri Dön</a>
+        </div>
 
-<div class="card shadow-sm border-0">
-    <div class="card-body">
-        <form asp-action="Bagla" method="post">
-            <input type="hidden" name="SayacId" value="@Model.SayacId" />
-            
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Sayaç Marka/Model ID</label>
-                    <input type="text" class="form-control" value="Marka: @Model.MarkaId / Model: @Model.ModelId" readonly>
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="card-title mb-0 fw-bold">@(Model.durum == "Bağlı" ? "Sayaç İşlemi (Sökme/Değişim)" : "Sayaç İşlemi (Bağlama)")</h5>
+            </div>
+            <div class="card-body p-4">
+                
+                <div class="alert alert-info shadow-sm mb-4">
+                    <strong>Sayaç Seri No:</strong> @Model.seri_no <br/>
+                    <strong>Marka / Model:</strong> @Model.marka / @Model.model <br/>
+                    <strong>Faz:</strong> @Model.faz
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Tip</label>
-                    <input type="text" class="form-control" value="@Model.Tip" readonly>
-                </div>
-            </div>
 
-            <div class="mb-4">
-                <label class="form-label fw-bold">Tüketim Noktası (Bağlanacak Yer)</label>
-                <select class="form-select" name="TuketimNoktasiId">
-                    <option value="0">-- Boşa Al (Depoya Kaldır) --</option>
-                    @if (tuketimNoktalari != null)
-                    {
-                        foreach (var nokta in tuketimNoktalari)
-                        {
-                            if (nokta.TuketimNoktasiId == Model.TuketimNoktasiId)
-                            {
-                                <option value="@nokta.TuketimNoktasiId" selected>@nokta.tekil_kod (Mevcut)</option>
-                            }
-                            else
-                            {
-                                <option value="@nokta.TuketimNoktasiId">@nokta.tekil_kod</option>
-                            }
-                        }
-                    }
-                </select>
-                <div class="form-text">Boşa al seçeneği ile sayacı tüketim noktasından söküp depoya kaldırabilirsiniz.</div>
-            </div>
+                <form action="/Sayac/Bagla" method="post">
+                    <input type="hidden" name="sayac_id" value="@Model.sayac_id" />
 
-            <div class="text-end">
-                <a asp-action="Index" class="btn btn-secondary me-2">İptal</a>
-                <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> İşlemi Kaydet</button>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Tüketim Noktası (Bağlanacak Yer) <span class="text-danger">*</span></label>
+                        <select class="form-select" name="tuketim_noktasi_id" required>
+                            <option value="0">-- Boşa Al (Depoya Kaldır / Sök) --</option>
+                            @if (tuketimNoktalari != null)
+                            {
+                                foreach (var nokta in tuketimNoktalari)
+                                {
+                                    if (nokta.TuketimNoktasiId == Model.tuketim_noktasi_id)
+                                    {
+                                        <option value="@nokta.TuketimNoktasiId" selected>@nokta.tekil_kod (Mevcut Bağlı)</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@nokta.TuketimNoktasiId">@nokta.tekil_kod</option>
+                                    }
+                                }
+                            }
+                        </select>
+                        <div class="form-text">Sayacı sökmek istiyorsanız "Boşa Al" seçeneğini seçin.</div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Mühür Numarası <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" name="muhur_no" value="@(Model.muhur_no > 0 ? Model.muhur_no : "")" required placeholder="Örn: 556677" />
+                            <div class="form-text">İşlem sırasında takılan mühür numarası zorunludur.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Endeks Değeri <span class="text-danger">*</span></label>
+                            <input type="number" step="0.001" class="form-control" name="ilk_endeks" required placeholder="0.000" />
+                            <div class="form-text">Bağlanıyorsa İlk Endeks, Sökülüyorsa Son Endeks giriniz.</div>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted mb-4">
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="/Sayac" class="btn btn-light border">İptal</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-bold shadow-sm">İşlemi Kaydet</button>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
     </div>
 </div>

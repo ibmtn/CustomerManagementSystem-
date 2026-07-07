@@ -4,28 +4,30 @@ namespace KcetasWeb.Models
 
     public class IsEmri
     {
-        public long IsEmriId { get; set; }
-        public string IsEmriNo { get; set; }
-        public long TuketimNoktasiId { get; set; }
-        public long SayacId { get; set; }
-        public string Tip { get; set; }
-        public string Oncelik { get; set; }
-        public DateTime PlanlananTarih { get; set; }
-        public long? AtananKullaniciId { get; set; }
-        public string Durum { get; set; }
-        public string SahaSonucu { get; set; }
-        public string Gerekce { get; set; }
-        public string MuhurNo { get; set; }
-        public string TutanakNo { get; set; }
-        public string Status { get; set; }
+        public long is_emri_id { get; set; }
+        public string is_emri_no { get; set; }
+        public long tuketim_noktasi_id { get; set; }
+        public long sayac_id { get; set; }
+        public string tip { get; set; }
+        public string oncelik { get; set; }
+        public DateTime planlanan_tarih { get; set; }
+        public long? atanan_kullanici_id { get; set; }
+        public string durum { get; set; }
+        public string saha_sonucu { get; set; }
+        public string gerekce { get; set; }
+        public string muhur_no { get; set; }
+        public string tutanak_no { get; set; }
+        public string status { get; set; }
         
-        // MVP Eksikleri (Bağlama/Sökme, Açma/Kesme):
-        public string? EskiSayacNo { get; set; }
-        public decimal? EskiSonEndeksi { get; set; }
-        public string? YeniSayacNo { get; set; }
-        public decimal? YeniIlkEndeksi { get; set; }
-        public decimal? KesmeEndeksi { get; set; }
-        public decimal? AcmaEndeksi { get; set; }
+        // Açma-Kesme Endeksleri
+        public decimal? kesme_endeksi { get; set; }
+        public decimal? acma_endeksi { get; set; }
+        
+        // Sökme-Takma Endeksleri
+        public string? eski_sayac_no { get; set; }
+        public string? yeni_sayac_no { get; set; }
+        public decimal? eski_son_endeksi { get; set; }
+        public decimal? yeni_ilk_endeksi { get; set; }
 
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

@@ -2,14 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using KcetasWeb.Services.Interfaces;
 using KcetasWeb.ViewModels;
 using Microsoft.AspNetCore.Authorization;
-using KcetasWeb.Models.entities;
+using KcetasWeb.Models;
 using System;
 using System.Linq;
 
-
-
 namespace KcetasWeb.Controllers;
 
+[Authorize(Roles = "BTYoneticisi,SahaEkibi,IsEmriYetkilisi")]
 public class IsEmriController : Controller
 {
     private readonly IIsEmriService _isEmriService;
@@ -33,15 +32,15 @@ public class IsEmriController : Controller
             AramaMetni = arama,
             IsEmirleri = isEmirleri.Select(ie => new IsEmriSatirViewModel
             {
-                IsEmriId = ie.IsEmriId,
-                IsEmriNo = ie.IsEmriNo,
-                Tip = ie.Tip,
-                TuketimNoktasiId = ie.TuketimNoktasiId,
+                IsEmriId = ie.is_emri_id,
+                IsEmriNo = ie.is_emri_no,
+                Tip = ie.tip,
+                TuketimNoktasiId = ie.tuketim_noktasi_id,
                 TuketimNoktasiKodu = "Bilgi Yok",
-                PlanlananTarih = ie.PlanlananTarih,
-                AtananKullaniciAdi = "Kullanıcı " + ie.AtananKullaniciId,
-                Durum = ie.Durum,
-                DurumRenk = IsEmriListeViewModel.GetDurumRenk(ie.Durum),
+                PlanlananTarih = ie.planlanan_tarih,
+                AtananKullaniciAdi = "Kullanıcı " + ie.atanan_kullanici_id,
+                Durum = ie.durum,
+                DurumRenk = IsEmriListeViewModel.GetDurumRenk(ie.durum),
                 Adres = "Adres bilgisi alınamadı"
             }).ToList()
         };
@@ -57,21 +56,21 @@ public class IsEmriController : Controller
 
         var viewModel = new IsEmriDetayViewModel
         {
-            IsEmriId = isEmri.IsEmriId,
-            IsEmriNo = isEmri.IsEmriNo,
-            Tip = isEmri.Tip,
-            Durum = isEmri.Durum,
-            DurumRenk = IsEmriListeViewModel.GetDurumRenk(isEmri.Durum),
-            Oncelik = isEmri.Oncelik,
-            PlanlananTarih = isEmri.PlanlananTarih,
-            AtananKullaniciAdi = "Kullanıcı " + isEmri.AtananKullaniciId,
+            IsEmriId = isEmri.is_emri_id,
+            IsEmriNo = isEmri.is_emri_no,
+            Tip = isEmri.tip,
+            Durum = isEmri.durum,
+            DurumRenk = IsEmriListeViewModel.GetDurumRenk(isEmri.durum),
+            Oncelik = isEmri.oncelik,
+            PlanlananTarih = isEmri.planlanan_tarih,
+            AtananKullaniciAdi = "Kullanıcı " + isEmri.atanan_kullanici_id,
             TuketimNoktasiKodu = "Bilgi Yok",
             Adres = "Adres bilgisi alınamadı",
             SayacSeriNo = "Sayaç bilgisi yok",
-            SahaSonucu = isEmri.SahaSonucu,
-            Gerekce = isEmri.Gerekce,
-            MuhurNo = isEmri.MuhurNo,
-            TutanakNo = isEmri.TutanakNo,
+            SahaSonucu = isEmri.saha_sonucu,
+            Gerekce = isEmri.gerekce,
+            MuhurNo = isEmri.muhur_no,
+            TutanakNo = isEmri.tutanak_no,
             CreatedAt = isEmri.CreatedAt,
             UpdatedAt = isEmri.UpdatedAt
         };
@@ -87,9 +86,9 @@ public class IsEmriController : Controller
 
         var viewModel = new TutanakGirisViewModel
         {
-            IsEmriId = isEmri.IsEmriId,
-            IsEmriNo = isEmri.IsEmriNo,
-            Tip = isEmri.Tip,
+            IsEmriId = isEmri.is_emri_id,
+            IsEmriNo = isEmri.is_emri_no,
+            Tip = isEmri.tip,
             IslemTarihi = DateTime.Now
         };
 
@@ -110,10 +109,28 @@ public class IsEmriController : Controller
             model.TutanakNo,
             model.SahaSonucu,
             model.Gerekce,
-            model.MuhurNo
+            model.MuhurNo,
+            model.KesmeEndeksi,
+            model.AcmaEndeksi,
+            model.EskiSayacNo,
+            model.YeniSayacNo,
+            model.EskiSonEndeksi,
+            model.YeniIlkEndeksi
         );
+        
+        string mesaj = "Tutanak başarıyla kaydedildi.";
+        
+        // Simülasyon: Kesme veya Açma yapıldıysa
+        if (model.Tip == "Kesme" && model.KesmeEndeksi.HasValue)
+        {
+            mesaj = $"Tutanak başarıyla kaydedildi. (Kesme Endeksi: {model.KesmeEndeksi}). Borç veya sözleşme nedeniyle yapılan kesme için, bir sonraki faturaya yansıtılacak olan 'Kesme-Bağlama Bedeli' (Örn: 118,50 TL) simülasyonu başlatılmıştır.";
+        }
+        else if (model.Tip == "Açma" && model.AcmaEndeksi.HasValue)
+        {
+            mesaj = $"Tutanak başarıyla kaydedildi. (Açma Endeksi: {model.AcmaEndeksi}). Ödeme/Sözleşme onayı sonrası açma işlemi tamamlandı.";
+        }
 
-        TempData["Mesaj"] = "Tutanak başarıyla kaydedildi.";
+        TempData["Mesaj"] = mesaj;
         TempData["MesajTip"] = "success";
 
         return RedirectToAction("Detay", new { id = model.IsEmriId });
@@ -122,27 +139,29 @@ public class IsEmriController : Controller
     public IActionResult TutanakGoruntule(long id)
     {
         var isEmri = _isEmriService.GetById(id);
-        if (isEmri == null || string.IsNullOrEmpty(isEmri.TutanakNo))
+        if (isEmri == null || string.IsNullOrEmpty(isEmri.tutanak_no))
             return NotFound();
 
         var viewModel = new IsEmriDetayViewModel
         {
-            IsEmriId = isEmri.IsEmriId,
-            IsEmriNo = isEmri.IsEmriNo,
-            Tip = isEmri.Tip,
-            Durum = isEmri.Durum,
-            DurumRenk = IsEmriListeViewModel.GetDurumRenk(isEmri.Durum),
-            Oncelik = isEmri.Oncelik,
-            PlanlananTarih = isEmri.PlanlananTarih,
-            SahaSonucu = isEmri.SahaSonucu,
-            Gerekce = isEmri.Gerekce,
-            MuhurNo = isEmri.MuhurNo,
-            TutanakNo = isEmri.TutanakNo,
+            IsEmriId = isEmri.is_emri_id,
+            IsEmriNo = isEmri.is_emri_no,
+            Tip = isEmri.tip,
+            Durum = isEmri.durum,
+            DurumRenk = IsEmriListeViewModel.GetDurumRenk(isEmri.durum),
+            Oncelik = isEmri.oncelik,
+            PlanlananTarih = isEmri.planlanan_tarih,
+            SahaSonucu = isEmri.saha_sonucu,
+            Gerekce = isEmri.gerekce,
+            MuhurNo = isEmri.muhur_no,
+            TutanakNo = isEmri.tutanak_no,
             UpdatedAt = isEmri.UpdatedAt,
-            EskiSayacNo = isEmri.EskiSayacNo,
-            YeniSayacNo = isEmri.YeniSayacNo,
-            EskiSonEndeksi = isEmri.EskiSonEndeksi,
-            YeniIlkEndeksi = isEmri.YeniIlkEndeksi
+            EskiSayacNo = isEmri.eski_sayac_no,
+            YeniSayacNo = isEmri.yeni_sayac_no,
+            EskiSonEndeksi = isEmri.eski_son_endeksi,
+            YeniIlkEndeksi = isEmri.yeni_ilk_endeksi,
+            KesmeEndeksi = isEmri.kesme_endeksi,
+            AcmaEndeksi = isEmri.acma_endeksi
         };
 
         return View(viewModel);

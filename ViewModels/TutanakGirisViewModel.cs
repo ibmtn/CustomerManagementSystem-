@@ -22,6 +22,16 @@ namespace KcetasWeb.ViewModels
         
         public string? MuhurNo { get; set; }
         
+        // Sökme/Takma Endeksleri
+        public string? EskiSayacNo { get; set; }
+        public string? YeniSayacNo { get; set; }
+        public decimal? EskiSonEndeksi { get; set; }
+        public decimal? YeniIlkEndeksi { get; set; }
+        
+        // Açma/Kesme Endeksleri
+        public decimal? KesmeEndeksi { get; set; }
+        public decimal? AcmaEndeksi { get; set; }
+
         public bool IsSokmeTakma => Tip == "Sayaç Sökme" || Tip == "Sayaç Takma" || Tip == "Sayaç Değişim";
         public bool IsAcmaKesme => Tip == "Açma" || Tip == "Kesme";
     }

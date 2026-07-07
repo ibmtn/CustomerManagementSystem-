@@ -29,6 +29,9 @@ namespace KcetasWeb.ViewModels
         public decimal? EskiSonEndeksi { get; set; }
         public decimal? YeniIlkEndeksi { get; set; }
         
+        public decimal? KesmeEndeksi { get; set; }
+        public decimal? AcmaEndeksi { get; set; }
+        
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         

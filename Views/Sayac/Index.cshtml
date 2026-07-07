@@ -1,76 +1,75 @@
 @model IEnumerable<KcetasWeb.Models.Sayac>
+
 @{
-    ViewData["Title"] = "Sayaç Listesi ve Bağlama";
+    ViewData["Title"] = "Sayaç Envanteri";
     var tuketimNoktalari = ViewBag.TuketimNoktalari as List<KcetasWeb.Models.TuketimNoktasi>;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-primary fw-bold">Sayaç Listesi</h2>
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <h2 class="h4 text-primary fw-bold">Sayaç Envanteri ve Durumları</h2>
 </div>
 
 @if (TempData["BasariMesaji"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
         @TempData["BasariMesaji"]
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
 
-<div class="card shadow-sm border-0">
-    <div class="card-body">
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
+            <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>Sayaç No</th>
-                        <th>Marka / Model ID</th>
-                        <th>Tip</th>
+                        <th class="ps-4">Seri No</th>
+                        <th>Marka / Model</th>
+                        <th>Faz Bilgisi</th>
+                        <th>Çarpan</th>
                         <th>Durum</th>
-                        <th>Bağlı Tüketim Noktası</th>
-                        <th class="text-end">İşlemler</th>
+                        <th>Bağlı Olduğu Nokta</th>
+                        <th class="text-end pe-4">İşlemler</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model)
+                    @if (Model != null && Model.Any())
                     {
-                        var bagliNokta = tuketimNoktalari?.FirstOrDefault(t => t.TuketimNoktasiId == item.TuketimNoktasiId);
-                        <tr>
-                            <td class="fw-bold">@item.SayacNo</td>
-                            <td>Marka: @item.MarkaId / Model: @item.ModelId</td>
-                            <td>@item.Tip</td>
-                            <td>
-                                @if (item.Durum == "Bağlı")
-                                {
-                                    <span class="badge bg-success">Bağlı</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-warning text-dark">Depoda</span>
-                                }
-                            </td>
-                            <td>
-                                @if (bagliNokta != null)
-                                {
-                                    <span>@bagliNokta.tekil_kod</span>
-                                }
-                                else
-                                {
-                                    <span class="text-muted">-</span>
-                                }
-                            </td>
-                            <td class="text-end">
-                                <a asp-action="Bagla" asp-route-id="@item.SayacId" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-link"></i> Bağla / Yönet
-                                </a>
-                            </td>
-                        </tr>
+                        foreach (var item in Model)
+                        {
+                            var bagliNokta = tuketimNoktalari?.FirstOrDefault(t => t.TuketimNoktasiId == item.tuketim_noktasi_id);
+                            <tr>
+                                <td class="ps-4 fw-bold text-dark">@item.seri_no</td>
+                                <td>@item.marka / @item.model</td>
+                                <td><span class="badge bg-secondary">@item.faz</span></td>
+                                <td>@item.carpan</td>
+                                <td>
+                                    <span class="badge bg-@(item.durum == "Bağlı" ? "success" : "warning text-dark")">
+                                        @item.durum
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (bagliNokta != null)
+                                    {
+                                        <span class="fw-bold text-primary">@bagliNokta.tekil_kod</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">Yok (Depoda)</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="/Sayac/Bagla/@item.sayac_id" class="btn btn-sm btn-outline-primary rounded-3 px-3">
+                                        @(item.durum == "Bağlı" ? "Sök / Değiştir" : "Bağla")
+                                    </a>
+                                </td>
+                            </tr>
+                        }
                     }
-                    @if (!Model.Any())
+                    else
                     {
                         <tr>
-                            <td colspan="6" class="text-center py-4 text-muted">
-                                Sistemde kayıtlı sayaç bulunmamaktadır.
-                            </td>
+                            <td colspan="7" class="text-center py-4 text-muted">Kayıtlı sayaç bulunmamaktadır.</td>
                         </tr>
                     }
                 </tbody>
