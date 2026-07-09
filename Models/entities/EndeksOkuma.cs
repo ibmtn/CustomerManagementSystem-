@@ -48,6 +48,9 @@ namespace KcetasWeb.Models
         
         [System.Text.Json.Serialization.JsonPropertyName("anomaliAciklamasi")]
         public string? AnomaliAciklamasi { get; set; }
+        public string sökme_nedeni {get; set;}
+        public string aciklama {get; set;}
+        public decimal son_endeks {get; set;}
         
         [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
         public DateTime CreatedAt { get; set; }

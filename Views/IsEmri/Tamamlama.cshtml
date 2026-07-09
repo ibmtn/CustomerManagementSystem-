@@ -1,0 +1,90 @@
+@model KcetasWeb.ViewModels.IsEmriDetayViewModel
+@{
+    ViewData["Title"] = "Tamamlama - " + Model.IsEmriNo;
+}
+
+@if (TempData["Mesaj"] != null)
+{
+    <div class="alert alert-@(TempData["MesajTip"] ?? "info") alert-dismissible fade show" role="alert">
+        @TempData["Mesaj"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="mb-3">
+    <a href="/IsEmri" class="btn btn-sm btn-outline-secondary">&larr; İş Emirleri Listesine Dön</a>
+</div>
+
+<div class="row">
+    <!-- Genel Bilgiler -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-light border-0"><h6 class="fw-bold mb-0">Sayaç Bağlama</h6></div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><td class="text-muted fw-semibold" style="width:40%">Sayaç Seri No</td><td><strong>@(Model.SayacSeriNo ?? "-")</strong></td></tr>
+                    <tr><td class="text-muted fw-semibold">Çarpan</td><td>@(Model.carpan.ToString() ?? "-")</td></tr>
+                    <tr><td class="text-muted fw-semibold">İlk Endeks</td><td>@(Model.YeniIlkEndeksi.ToString() ?? "-")</td></tr>
+                    <tr><td class="text-muted fw-semibold">Mühür No</td><td>@(Model.MuhurNo ?? "-")</td></tr>
+                    <tr><td class="text-muted fw-semibold">İşlem Tarihi</td><td>@(Model.CreatedAt.ToString() ?? "-")</td></tr>
+                    @* <tr><td class="text-muted fw-semibold">Fotoğraf</td><td>@(Model.Oncelik ?? "-")</td></tr> *@
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-light border-0"><h6 class="fw-bold mb-0">Sayaç Değiştirme</h6></div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><td class="text-muted fw-semibold" style="width:40%">Eski Sayaç</td><td><strong>@(Model.EskiSayacNo ?? "-")</strong></td></tr>
+                    <tr><td class="text-muted fw-semibold">Eski Son Endeks</td><td>@(Model.EskiSonEndeksi.ToString() ?? "-")</td></tr>
+                    <tr><td class="text-muted fw-semibold">Yeni Sayaç</td><td>@(Model.YeniSayacNo.ToString() ?? "-")</td></tr>
+                    <tr><td class="text-muted fw-semibold">Yeni İlk Endeks</td><td>@(Model.YeniIlkEndeksi.ToString() ?? "-")</td></tr>
+                    @* <tr><td class="text-muted fw-semibold">Değişim Nedeni</td><td>@(Model.CreatedAt.ToString() ?? "-")</td></tr> *@
+                    <tr><td class="text-muted fw-semibold">Mühür No</td><td>@(Model.MuhurNo ?? "-")</td></tr> 
+                    <tr><td class="text-muted fw-semibold">Tutanak No</td><td>@(Model.TutanakNo?? "-")</td></tr> 
+                </table>
+            </div>
+        </div>
+    </div><div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-light border-0"><h6 class="fw-bold mb-0">Sayaç Sökme</h6></div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><td class="text-muted fw-semibold" style="width:40%">Son Endeksi</td><td><strong>@(Model.son_endeks.ToString() ?? "-")</strong></td></tr>
+                    <tr><td class="text-muted fw-semibold">Mühür Durumu</td><td>@(Model.EskiSonEndeksi.ToString() ?? "-")</td></tr>
+                    <tr><td class="text-muted fw-semibold">Sökme Nedeni</td><td>@(Model.sökme_nedeni.ToString() ?? "-")</td></tr>
+                    @* <tr><td class="text-muted fw-semibold">Tutanak Kesme</td><td>@(Model.YeniIlkEndeksi.ToString() ?? "-")</td></tr>  *@
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-light border-0"><h6 class="fw-bold mb-0">Kesme İş Emri</h6></div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><td class="text-muted fw-semibold" style="width:40%">Kesme Endeksi</td><td><strong>@(Model.KesmeEndeksi.ToString() ?? "-")</strong></td></tr>
+                    <tr><td class="text-muted fw-semibold">Mühür No</td><td>@(Model.MuhurNo.ToString() ?? "-")</td></tr>
+                    @* <tr><td class="text-muted fw-semibold">Sonuç</td><td>@(Model.sökme_nedeni.ToString() ?? "-")</td></tr> *@
+                    
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-light border-0"><h6 class="fw-bold mb-0">Açma İş Emri</h6></div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><td class="text-muted fw-semibold" style="width:40%">Enerji Verildi mi</td><td><strong>@(Model.KesmeEndeksi.ToString() ?? "-")</strong></td></tr>
+                    <tr><td class="text-muted fw-semibold">Mühür No</td><td>@(Model.MuhurNo.ToString() ?? "-")</td></tr>
+                    <tr><td class="text-muted fw-semibold">Açıklama</td><td>@(Model.aciklama ?? "-")</td></tr>
+                    
+                </table>
+            </div>
+        </div>
+    </div>

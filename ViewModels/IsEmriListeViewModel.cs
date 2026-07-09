@@ -11,6 +11,13 @@ namespace KcetasWeb.ViewModels
         public DateTime? BitisTarih { get; set; }
         public string? AramaMetni { get; set; }
         
+        // Yeni Filtre Alanları
+        public string? FiltreIsEmriNo { get; set; }
+        public string? FiltreTekilKod { get; set; }
+        public string? FiltreAboneAdi { get; set; }
+        public string? FiltrePersonel { get; set; }
+        public string? FiltreOncelik { get; set; }
+        
 
         
 
@@ -34,19 +41,23 @@ namespace KcetasWeb.ViewModels
         public string IsEmriNo { get; set; } = null!;
         public string Tip { get; set; } = null!;
         public long TuketimNoktasiId { get; set; }
+        public string tekil_kod { get; set; }
         public string TuketimNoktasiKodu { get; set; } = null!;
         public DateTime? PlanlananTarih { get; set; }
-        public DateTime? olusturulma_tarihi { get; set; }
+        public DateTime olusturulma_tarihi {get; set;}
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
         public string AtananKullaniciAdi { get; set; } = null!;
         public string Durum { get; set; } = null!;
         public string DurumRenk { get; set; } = null!;
         public string Adres { get; set; } = null!;
         public string oncelik { get; set; }
-        public string Ad { get; set; }
-        public string Soyad { get; set; }
-        public string? Unvan { get; set; }
+        public string? musteri_ad { get; set; }
+        public string? musteri_soyad { get; set; }
+        public string? musteri_unvan { get; set; }
+        
 
-        public string AboneGorunum => $"{Ad} {Soyad} ({Unvan})";
+        public string musteriDurum => $"{musteri_ad} {musteri_soyad} {musteri_unvan}";
         
     }
 }

@@ -13,7 +13,7 @@ namespace KcetasWeb.Controllers
         public static List<TuketimNoktasi> _tuketimNoktalari = new List<TuketimNoktasi>
         {
             new TuketimNoktasi {
-                TuketimNoktasiId = 1001, tekil_kod = "TK-2026-001",
+                TuketimNoktasiId = 1, tekil_kod = "TK-2026-001",
                 musteri_ad = "Ahmet", musteri_soyad = "Yılmaz", tckn = "12345678901", telefon = "05321234567",
                 ilce_id = 1, mahalle = "Merkez", bina_no = "1", bagimsiz_bolum_no = "12", acik_adres = "Merkez Mah. 1. Sokak No:1 D:12",
                 tuketici_grubu = "Mesken", baglanti_grubu = "AG", status = "Aktif",
@@ -21,7 +21,7 @@ namespace KcetasWeb.Controllers
                 CreatedAt = DateTime.Now.AddDays(-10)
             },
             new TuketimNoktasi {
-                TuketimNoktasiId = 1002, tekil_kod = "TK-2026-002",
+                TuketimNoktasiId = 2, tekil_kod = "TK-2026-002",
                 musteri_unvan = "Örnek Ltd. Şti.", vkn = "1234567890", telefon = "02121234567",
                 ilce_id = 2, mahalle = "Sanayi", bina_no = "2", bagimsiz_bolum_no = "4", acik_adres = "Sanayi Mah. 2. Cadde No:2 D:4",
                 tuketici_grubu = "Ticarethane", baglanti_grubu = "OG", status = "Pasif",
@@ -43,10 +43,9 @@ namespace KcetasWeb.Controllers
         [HttpPost]
         public IActionResult Yeni(TuketimNoktasi model)
         {
-            int count = _tuketimNoktalari.Count + 1;
-            
-            model.TuketimNoktasiId = 1000 + count;
-            model.tekil_kod = $"TK-2026-{count.ToString().PadLeft(3, '0')}";
+            int maxId = _tuketimNoktalari.Any() ? (int)_tuketimNoktalari.Max(x => x.TuketimNoktasiId) : 0;
+            model.TuketimNoktasiId = maxId + 1;
+            model.tekil_kod = $"TK-2026-{(maxId + 1).ToString().PadLeft(3, '0')}";
             model.status = "Pasif";
             model.CreatedAt = DateTime.Now;
 

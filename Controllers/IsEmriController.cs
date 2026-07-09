@@ -20,70 +20,90 @@ public class IsEmriController : Controller
         _kullaniciDeposu = kullaniciDeposu;
     }
 
-    public IActionResult Index(string? tip, string? durum,
-        DateTime? baslangicTarih, DateTime? bitisTarih, string? arama)
+    public IActionResult Index(IsEmriListeViewModel filtre)
     {
-        var isEmirleri = _isEmriService.Filtrele(tip, durum, baslangicTarih, bitisTarih, arama);
+        var isEmirleri = _isEmriService.Filtrele(filtre.FiltreTip, filtre.FiltreDurum, filtre.BaslangicTarih, filtre.BitisTarih, filtre.AramaMetni);
 
-        var viewModel = new IsEmriListeViewModel
-        {
-            FiltreTip = tip,
-            FiltreDurum = durum,
-            BaslangicTarih = baslangicTarih,
-            BitisTarih = bitisTarih,
-            AramaMetni = arama,
-            IsEmirleri = isEmirleri.Select(ie => {
-                var kullanici = ie.atanan_kullanici_id.HasValue ? _kullaniciDeposu.BulId(ie.atanan_kullanici_id.Value) : null;
-                return new IsEmriSatirViewModel
-                {
-                    IsEmriId = ie.is_emri_id,
-                    IsEmriNo = ie.is_emri_no,
-                    Tip = ie.tip,
-                    TuketimNoktasiId = ie.tuketim_noktasi_id,
-                    TuketimNoktasiKodu = "Bilgi Yok",
-                    PlanlananTarih = ie.planlanan_tarih,
-                    AtananKullaniciAdi = kullanici != null ? kullanici.ad_soyad : "Atanmadı",
-                    Durum = ie.durum,
-                    DurumRenk = IsEmriListeViewModel.GetDurumRenk(ie.durum),
-                    Adres = "Adres bilgisi alınamadı"
-                };
-            }).ToList()
-        };
+        filtre.IsEmirleri = isEmirleri.Select(ie => {
+            var kullanici = ie.atanan_kullanici_id.HasValue ? _kullaniciDeposu.BulId(ie.atanan_kullanici_id.Value) : null;
+            var tn = TuketimNoktasiController._tuketimNoktalari.FirstOrDefault(t => t.TuketimNoktasiId == ie.tuketim_noktasi_id);
 
-        return View(viewModel);
+            return new IsEmriSatirViewModel
+            {
+                IsEmriId = ie.is_emri_id,
+                IsEmriNo = ie.is_emri_no,
+                Tip = ie.tip,
+                TuketimNoktasiId = ie.tuketim_noktasi_id,
+                tekil_kod = tn != null ? tn.tekil_kod : $"TK-ID-{ie.tuketim_noktasi_id}",
+                TuketimNoktasiKodu = tn != null ? tn.tekil_kod : $"TK-ID-{ie.tuketim_noktasi_id}",
+                musteri_ad = tn?.musteri_ad,
+                musteri_soyad = tn?.musteri_soyad,
+                musteri_unvan = tn?.musteri_unvan,
+                PlanlananTarih = ie.planlanan_tarih,
+                olusturulma_tarihi = ie.CreatedAt,
+                oncelik = ie.oncelik,
+                AtananKullaniciAdi = kullanici != null ? kullanici.ad_soyad : "Atanmadı",
+                Durum = ie.durum,
+                DurumRenk = IsEmriListeViewModel.GetDurumRenk(ie.durum),
+                Adres = tn != null ? tn.acik_adres : "Adres bilgisi alınamadı"
+            };
+        }).ToList();
+
+        if (!string.IsNullOrEmpty(filtre.FiltreIsEmriNo))
+            filtre.IsEmirleri = filtre.IsEmirleri.Where(x => x.IsEmriNo != null && x.IsEmriNo.Contains(filtre.FiltreIsEmriNo, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        if (!string.IsNullOrEmpty(filtre.FiltreTekilKod))
+            filtre.IsEmirleri = filtre.IsEmirleri.Where(x => x.tekil_kod != null && x.tekil_kod.Contains(filtre.FiltreTekilKod, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        if (!string.IsNullOrEmpty(filtre.FiltreAboneAdi))
+            filtre.IsEmirleri = filtre.IsEmirleri.Where(x => x.musteriDurum != null && x.musteriDurum.Contains(filtre.FiltreAboneAdi, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        if (!string.IsNullOrEmpty(filtre.FiltrePersonel))
+            filtre.IsEmirleri = filtre.IsEmirleri.Where(x => x.AtananKullaniciAdi != null && x.AtananKullaniciAdi.Contains(filtre.FiltrePersonel, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        if (!string.IsNullOrEmpty(filtre.FiltreOncelik))
+            filtre.IsEmirleri = filtre.IsEmirleri.Where(x => x.oncelik != null && x.oncelik.Contains(filtre.FiltreOncelik, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        return View(filtre);
     }
 
-    public IActionResult Detay(long id)
-    {
-        var isEmri = _isEmriService.GetById(id);
-        if (isEmri == null)
-            return NotFound();
-
-        var viewModel = new IsEmriDetayViewModel
+        public IActionResult Detay(long id)
         {
-            IsEmriId = isEmri.is_emri_id,
-            IsEmriNo = isEmri.is_emri_no,
-            Tip = isEmri.tip,
-            Durum = isEmri.durum,
-            DurumRenk = IsEmriListeViewModel.GetDurumRenk(isEmri.durum),
-            Oncelik = isEmri.oncelik,
-            PlanlananTarih = isEmri.planlanan_tarih,
-            AtananKullaniciAdi = isEmri.atanan_kullanici_id.HasValue 
-                ? (_kullaniciDeposu.BulId(isEmri.atanan_kullanici_id.Value)?.ad_soyad ?? "Atanmadı") 
-                : "Atanmadı",
-            TuketimNoktasiKodu = "Bilgi Yok",
-            Adres = "Adres bilgisi alınamadı",
-            SayacSeriNo = "Sayaç bilgisi yok",
-            SahaSonucu = isEmri.saha_sonucu,
-            Gerekce = isEmri.gerekce,
-            MuhurNo = isEmri.muhur_no,
-            TutanakNo = isEmri.tutanak_no,
-            CreatedAt = isEmri.CreatedAt,
-            UpdatedAt = isEmri.UpdatedAt
-        };
+            var isEmri = _isEmriService.GetById(id);
+            if (isEmri == null)
+                return NotFound();
 
-        return View(viewModel);
-    }
+            var tn = TuketimNoktasiController._tuketimNoktalari.FirstOrDefault(t => t.TuketimNoktasiId == isEmri.tuketim_noktasi_id);
+
+            var viewModel = new IsEmriDetayViewModel
+            {
+                IsEmriId = isEmri.is_emri_id,
+                IsEmriNo = isEmri.is_emri_no,
+                Tip = isEmri.tip,
+                Durum = isEmri.durum,
+                DurumRenk = IsEmriListeViewModel.GetDurumRenk(isEmri.durum),
+                Oncelik = isEmri.oncelik,
+                PlanlananTarih = isEmri.planlanan_tarih,
+                AtananKullaniciAdi = isEmri.atanan_kullanici_id.HasValue 
+                    ? (_kullaniciDeposu.BulId(isEmri.atanan_kullanici_id.Value)?.ad_soyad ?? "Atanmadı") 
+                    : "Atanmadı",
+                musteri_ad = tn?.musteri_ad,
+                musteri_soyad = tn?.musteri_soyad,
+                musteri_unvan = tn?.musteri_unvan,
+                telefon = tn?.telefon,
+                TuketimNoktasiKodu = tn != null ? tn.tekil_kod : $"TK-ID-{isEmri.tuketim_noktasi_id}",
+                Adres = tn != null ? tn.acik_adres : "Adres bilgisi alınamadı",
+                SayacSeriNo = "Sayaç bilgisi yok",
+                SahaSonucu = isEmri.saha_sonucu,
+                Gerekce = isEmri.gerekce,
+                MuhurNo = isEmri.muhur_no,
+                TutanakNo = isEmri.tutanak_no,
+                CreatedAt = isEmri.CreatedAt,
+                UpdatedAt = isEmri.UpdatedAt
+            };
+
+            return View(viewModel);
+        }
 
     public IActionResult TutanakGiris(long id)
     {
@@ -149,6 +169,8 @@ public class IsEmriController : Controller
         if (isEmri == null || string.IsNullOrEmpty(isEmri.tutanak_no))
             return NotFound();
 
+        var tn = TuketimNoktasiController._tuketimNoktalari.FirstOrDefault(t => t.TuketimNoktasiId == isEmri.tuketim_noktasi_id);
+
         var viewModel = new IsEmriDetayViewModel
         {
             IsEmriId = isEmri.is_emri_id,
@@ -162,6 +184,8 @@ public class IsEmriController : Controller
             Gerekce = isEmri.gerekce,
             MuhurNo = isEmri.muhur_no,
             TutanakNo = isEmri.tutanak_no,
+            TuketimNoktasiKodu = tn != null ? tn.tekil_kod : $"TK-ID-{isEmri.tuketim_noktasi_id}",
+            Adres = tn != null ? tn.acik_adres : "Adres bilgisi alınamadı",
             UpdatedAt = isEmri.UpdatedAt,
             EskiSayacNo = isEmri.eski_sayac_no,
             YeniSayacNo = isEmri.yeni_sayac_no,

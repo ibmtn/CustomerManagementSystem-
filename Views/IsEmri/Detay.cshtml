@@ -33,8 +33,11 @@
             @if (Model.TutanakGirildiMi)
             {
                 <a href="/IsEmri/TutanakGoruntule/@Model.IsEmriId" class="btn btn-outline-primary ms-2" target="_blank">
-                    <i class="bi bi-file-earmark-pdf"></i> Tutanağı Görüntüle / İndir
+                    <i class="bi bi-eye"></i> Tutanak Görüntüle
                 </a>
+                <button onclick="window.print()" class="btn btn-primary ms-2">
+                    <i class="bi bi-download"></i> İndir
+                </button>
             }
             </div>
         </div>
@@ -42,6 +45,21 @@
 </div>
 
 <div class="row">
+    <!-- Genel Bilgiler -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-light border-0"><h6 class="fw-bold mb-0">Genel Bilgiler</h6></div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><td class="text-muted fw-semibold" style="width:40%">İş Emri No</td><td><strong>@(Model.IsEmriNo ?? "-")</strong></td></tr>
+                    <tr><td class="text-muted fw-semibold">Tip</td><td>@(Model.Tip ?? "-")</td></tr>
+                    <tr><td class="text-muted fw-semibold">Durum</td><td>@(Model.Durum ?? "-")</td></tr>
+                    <tr><td class="text-muted fw-semibold">Öncelik</td><td>@(Model.Oncelik ?? "-")</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Tüketim Noktası Bilgileri -->
     <div class="col-md-6 mb-4">
         <div class="card shadow-sm border-0 h-100">
             <div class="card-header bg-light border-0"><h6 class="fw-bold mb-0">Tüketim Noktası Bilgileri</h6></div>
@@ -49,23 +67,49 @@
                 <table class="table table-borderless mb-0">
                     <tr><td class="text-muted fw-semibold" style="width:40%">Tüketim Noktası</td><td><strong>@(Model.TuketimNoktasiKodu ?? "-")</strong></td></tr>
                     <tr><td class="text-muted fw-semibold">Adres</td><td>@(Model.Adres ?? "-")</td></tr>
-                    <tr><td class="text-muted fw-semibold">Sayaç Seri No</td><td>@(Model.SayacSeriNo ?? "-")</td></tr>
                 </table>
             </div>
         </div>
     </div>
+    <!-- Abone Bilgisi -->
     <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-light border-0"><h6 class="fw-bold mb-0">Abone Bilgisi</h6></div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><td class="text-muted fw-semibold" style="width:40%">Ad Soyad / Ünvan</td><td><strong>@(Model.musteriDurum ?? "-")</strong></td></tr>
+                    <tr><td class="text-muted fw-semibold">Telefon</td><td>@(Model.telefon ?? "-")</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Sayaç Bilgisi -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-light border-0"><h6 class="fw-bold mb-0">Sayaç Bilgisi</h6></div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><td class="text-muted fw-semibold" style="width:40%">Seri No</td><td><strong>@(Model.SayacSeriNo ?? "-")</strong></td></tr>
+                    <tr><td class="text-muted fw-semibold">Marka / Model</td><td>@(Model.marka ?? "-") / @(Model.model ?? "-")</td></tr>
+                    <tr><td class="text-muted fw-semibold">Çarpan</td><td>@(Model.carpan.ToString() ?? "-")</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Atama & Zamanlama -->
+    <div class="col-md-12 mb-4">
         <div class="card shadow-sm border-0 h-100">
             <div class="card-header bg-light border-0"><h6 class="fw-bold mb-0">Atama & Zamanlama</h6></div>
             <div class="card-body">
                 <table class="table table-borderless mb-0">
-                    <tr><td class="text-muted fw-semibold" style="width:40%">Planlanan Tarih</td><td><strong>@(Model.PlanlananTarih.HasValue ? Model.PlanlananTarih.Value.ToString("dd.MM.yyyy") : "Planlanmadı")</strong></td></tr>
-                    <tr><td class="text-muted fw-semibold">Atanan Personel</td><td>@(Model.AtananKullaniciAdi ?? "Henüz atanmadı")</td></tr>
-                    <tr><td class="text-muted fw-semibold">Oluşturulma</td><td class="small">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td></tr>
-                    @if (Model.UpdatedAt.HasValue)
-                    {
-                        <tr><td class="text-muted fw-semibold">Son Güncelleme</td><td class="small">@(Model.UpdatedAt?.ToString("dd.MM.yyyy HH:mm") ?? "-")</td></tr>
-                    }
+                    <tr>
+                        <td class="text-muted fw-semibold" style="width:20%">Planlanan Tarih</td><td><strong>@(Model.PlanlananTarih.HasValue ? Model.PlanlananTarih.Value.ToString("dd.MM.yyyy") : "Planlanmadı")</strong></td>
+                        <td class="text-muted fw-semibold" style="width:20%">Atanan Personel</td><td>@(Model.AtananKullaniciAdi ?? "Henüz atanmadı")</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted fw-semibold">Oluşturulma</td><td class="small">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td class="text-muted fw-semibold">Son Güncelleme</td><td class="small">@(Model.UpdatedAt?.ToString("dd.MM.yyyy HH:mm") ?? "-")</td>
+                    </tr>
                 </table>
             </div>
         </div>

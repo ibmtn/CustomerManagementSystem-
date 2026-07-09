@@ -2,7 +2,13 @@
 
 @{
     ViewData["Title"] = "İş Emri Listesi";
-    var tipSecenekleri = new List<SelectListItem> { new SelectListItem("Sayaç Sökme", "Sayaç Sökme"), new SelectListItem("Sayaç Takma", "Sayaç Takma"), new SelectListItem("Açma", "Açma"), new SelectListItem("Kesme", "Kesme") };
+    var tipSecenekleri = new List<SelectListItem> { 
+        new SelectListItem("Sayaç Bağlama", "Sayaç Bağlama"), 
+        new SelectListItem("Sayaç Değiştirme", "Sayaç Değiştirme"), 
+        new SelectListItem("Sayaç Sökme", "Sayaç Sökme"), 
+        new SelectListItem("Enerji Kesme", "Enerji Kesme"), 
+        new SelectListItem("Enerji Açma", "Enerji Açma") 
+    };
     var durumSecenekleri = new List<SelectListItem> { new SelectListItem("Oluşturuldu", "Oluşturuldu"), new SelectListItem("Ekibe Atandı", "Ekibe Atandı"), new SelectListItem("Devam Ediyor", "Devam Ediyor"), new SelectListItem("Tamamlandı", "Tamamlandı") };
 }
 
@@ -25,6 +31,34 @@
 <div class="card shadow-sm border-0 mb-4">
     <div class="card-body">
         <form asp-action="Index" method="get" class="row g-3 align-items-end">
+            <!-- 1. Satır: Yeni Eklenen Filtreler -->
+            <div class="col-md-2">
+                <label class="form-label">İş Emri No</label>
+                <input asp-for="FiltreIsEmriNo" type="text" class="form-control" placeholder="Örn: IE-2026-001"/>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Tekil Kod</label>
+                <input asp-for="FiltreTekilKod" type="text" class="form-control" placeholder="Örn: TK-2026-001" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Abone Adı / Ünvanı</label>
+                <input asp-for="FiltreAboneAdi" type="text" class="form-control" placeholder="İsim veya Ünvan"/>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Atanan Personel</label>
+                <input asp-for="FiltrePersonel" type="text" class="form-control" placeholder="Personel Adı" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Öncelik</label>
+                <select asp-for="FiltreOncelik" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="Yüksek">Yüksek</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Düşük">Düşük</option>
+                </select>
+            </div>
+
+            <!-- 2. Satır: Mevcut Filtreler -->
             <div class="col-md-2">
                 <label class="form-label">Tip</label>
                 <select asp-for="FiltreTip" asp-items="tipSecenekleri" class="form-select">
@@ -46,14 +80,14 @@
                 <input asp-for="BitisTarih" type="date" class="form-control" />
             </div>
             <div class="col-md-2">
-                <label class="form-label">Ara</label>
-                <input asp-for="AramaMetni" type="text" class="form-control" placeholder="İş emri no, adres..." />
+                <label class="form-label">Genel Ara</label>
+                <input asp-for="AramaMetni" type="text" class="form-control" placeholder="Genel arama..." />
             </div>
             <div class="col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-primary flex-fill">
                     <i class="bi bi-search"></i> Filtrele
                 </button>
-                <a asp-action="Index" class="btn btn-outline-secondary">
+                <a asp-action="Index" class="btn btn-outline-secondary" title="Filtreleri Temizle">
                     <i class="bi bi-x-lg"></i>
                 </a>
             </div>
@@ -102,19 +136,19 @@
                                     <span class="badge bg-@item.DurumRenk px-2 py-1">@item.Durum</span>
                                 </td>
                                 <td>
-                                    <span class="text-secondary fw-medium">@item.AboneGorunum</span>
+                                    <span class="text-secondary fw-medium">@item.musteriDurum</span>
                                 </td>
                                 <td>
                                     <span>@item.oncelik</span>
                                 </td>
                                 <td>
-                                    <span class="text-dark fw-medium"><i class="bi bi-geo-alt-fill text-muted"></i> @item.TuketimNoktasiKodu</span><br />
+                                    <span class="text-dark fw-medium"><i class="bi bi-geo-alt-fill text-muted"></i> @item.tekil_kod</span><br />
                                     <small class="text-muted">@item.Adres</small>
                                 </td>
                                 <td>@(item.PlanlananTarih?.ToString("dd.MM.yyyy") ?? "-")</td>
                                 <td>
                                     <span>
-                                        @item.olusturulma_tarihi
+                                        @item.CreatedAt
                                     </span>
                                 </td>
                                 <td>
