@@ -24,6 +24,7 @@
                 <thead class="table-light">
                     <tr>
                         <th class="ps-4">Tekil Kod</th>
+                        <th>baglantı gücü</th>
                         <th>İlçe</th>
                         <th>TCKN / VKN</th>
                         <th>Bina / Daire</th>
@@ -40,7 +41,9 @@
                             var tcMaskeli = !string.IsNullOrEmpty(item.tckn) && item.tckn.Length >= 4 ? "***" + item.tckn.Substring(item.tckn.Length - 4) : item.tckn;
                             <tr>
                                 <td class="ps-4 fw-bold text-dark">@item.tekil_kod</td>
+                                <td>@item.BaglantiGucuKw</td>
                                 <td>@item.ilce_adi</td>
+                                
                                 <td>
                                     <span class="badge bg-secondary">@tcMaskeli</span>
                                     @if(!string.IsNullOrEmpty(item.vkn)) { <span class="badge bg-info">VKN:@item.vkn</span> }

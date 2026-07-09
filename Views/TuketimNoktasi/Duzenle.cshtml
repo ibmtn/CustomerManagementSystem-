@@ -22,18 +22,7 @@
                     <!-- Müşteri Bilgileri -->
                     <h5 class="text-warning border-bottom pb-2 mb-3 mt-2"><i class="bi bi-person-badge"></i> Müşteri (Abone) Bilgileri</h5>
                     <div class="row mb-3">
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">Ad</label>
-                            <input type="text" class="form-control" name="musteri_ad" value="@Model.musteri_ad" />
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">Soyad</label>
-                            <input type="text" class="form-control" name="musteri_soyad" value="@Model.musteri_soyad" />
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">Ünvan (Tüzel Kişi)</label>
-                            <input type="text" class="form-control" name="musteri_unvan" value="@Model.musteri_unvan" />
-                        </div>
+                        <!-- Removed Ad, Soyad, Unvan fields -->
                         
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">TC Kimlik No (Gerçek Kişi)</label>
@@ -65,12 +54,22 @@
                     <h5 class="text-warning border-bottom pb-2 mb-3 mt-4"><i class="bi bi-house-door"></i> Tesisat ve Adres Bilgileri</h5>
                     <div class="row mb-3">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">İlçe ID</label>
-                            <input type="number" class="form-control" name="ilce_id" value="@Model.ilce_id" />
+                            <label class="form-label fw-bold">İl Seçiniz <span class="text-danger">*</span></label>
+                            <select class="form-select" name="il_adi" id="ilSelect" required onchange="ilceDoldur()">
+                                <option value="">İl Seçin</option>
+                            </select>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">Mahalle</label>
-                            <input type="text" class="form-control" name="mahalle" value="@Model.mahalle" />
+                            <label class="form-label fw-bold">İlçe Seçiniz <span class="text-danger">*</span></label>
+                            <select class="form-select" name="ilce_id" id="ilceSelect" required onchange="mahalleDoldur()">
+                                <option value="">Önce İl Seçin</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Mahalle Seçiniz <span class="text-danger">*</span></label>
+                            <select class="form-select" name="mahalle" id="mahalleSelect" required>
+                                <option value="">Önce İlçe Seçin</option>
+                            </select>
                         </div>
                         <div class="col-md-2 mb-3">
                             <label class="form-label fw-bold">Bina No</label>
@@ -136,3 +135,112 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        const iller = [
+            "Adana", "Adıyaman", "Afyonkarahisar", "Ağrı", "Amasya", "Ankara", "Antalya", "Artvin", "Aydın", "Balıkesir", "Bilecik", "Bingöl", "Bitlis", "Bolu", "Burdur", "Bursa", "Çanakkale", "Çankırı", "Çorum", "Denizli", "Diyarbakır", "Edirne", "Elazığ", "Erzincan", "Erzurum", "Eskişehir", "Gaziantep", "Giresun", "Gümüşhane", "Hakkari", "Hatay", "Isparta", "Mersin", "İstanbul", "İzmir", "Kars", "Kastamonu", "Kayseri", "Kırklareli", "Kırşehir", "Kocaeli", "Konya", "Kütahya", "Malatya", "Manisa", "Kahramanmaraş", "Mardin", "Muğla", "Muş", "Nevşehir", "Niğde", "Ordu", "Rize", "Sakarya", "Samsun", "Siirt", "Sinop", "Sivas", "Tekirdağ", "Tokat", "Trabzon", "Tunceli", "Şanlıurfa", "Uşak", "Van", "Yozgat", "Zonguldak", "Aksaray", "Bayburt", "Karaman", "Kırıkkale", "Batman", "Şırnak", "Bartın", "Ardahan", "Iğdır", "Yalova", "Karabük", "Kilis", "Osmaniye", "Düzce"
+        ];
+
+        const kayseriIlceler = {
+            "1": "Melikgazi", "2": "Kocasinan", "3": "Talas", "4": "Akkışla", 
+            "5": "Bünyan", "6": "Develi", "7": "Felahiye", "8": "Hacılar",
+            "9": "İncesu", "10": "Özvatan", "11": "Pınarbaşı", "12": "Sarıoğlan",
+            "13": "Sarız", "14": "Tomarza", "15": "Yahyalı", "16": "Yeşilhisar"
+        };
+
+        const mahalleler = {
+            "1": ["Alparslan", "Belsin", "Erciyes", "Gültepe", "İldem", "Kılıçaslan", "Yıldırım Beyazıt"],
+            "2": ["Argıncık", "Erkilet", "Fevziçakmak", "Mimarsinan", "Yenişehir", "Ziyagökalp", "Mevlana"],
+            "3": ["Bahçelievler", "Kiçiköy", "Mevlana", "Yenidoğan", "Tablakaya", "Harman", "Kuruköprü"],
+            "4": ["Gömürgen", "Kululu", "Akin", "Uğurlu"],
+            "5": ["Büyüktuzhisar", "Güllüce", "Karakaya", "Samağır"],
+            "6": ["Aşık Seyrani", "Aygözme", "Camicedit", "Everek", "Fenese", "Harman", "Izgın"],
+            "7": ["Acırlı", "Büyüktoraman", "Çukur", "Kale"],
+            "8": ["Akyazı", "Beğendik", "Erciyes", "Yediağaç", "Yukarı"],
+            "9": ["Bahçelievler", "Garipçe", "Karakoyunlu", "Saraycık", "Süksün"],
+            "10": ["Alparslan", "Bahçelievler", "Cumhuriyet", "Güney"],
+            "11": ["Büyükkaramanlı", "Hürriyet", "Kayaönü", "Yeniocak"],
+            "12": ["Bakarcak", "Çiftlik", "Güzelyazı", "Palas"],
+            "13": ["Büyük Söbeçimen", "Damlaca", "Kuşçu", "Yedioluk"],
+            "14": ["İncili", "Kösefakılı", "Pusatlı", "Şiraz"],
+            "15": ["100. Yıl", "Çiğilli", "Fevziçakmak", "Seydili", "Yenice"],
+            "16": ["Camikebir", "Cumhuriyet", "Fatih", "Kuzey", "Mithatpaşa"],
+            "99": ["Merkez Mahallesi", "Yeni Mahalle", "Cumhuriyet Mahallesi"]
+        };
+
+        var currentIl = "@Html.Raw(Model.il_adi ?? "Kayseri")";
+        var currentIlce = "@Model.ilce_id";
+        var currentMahalle = "@Html.Raw(Model.mahalle ?? "")";
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var ilSelect = document.getElementById("ilSelect");
+            iller.forEach(function(il, index) {
+                var option = document.createElement("option");
+                option.value = il;
+                option.text = il;
+                if(il === currentIl) option.selected = true;
+                ilSelect.appendChild(option);
+            });
+            ilceDoldur(true);
+        });
+
+        function ilceDoldur(isInitialLoad = false) {
+            var ilAd = document.getElementById("ilSelect").value;
+            var ilceSelect = document.getElementById("ilceSelect");
+            var mahalleSelect = document.getElementById("mahalleSelect");
+            
+            ilceSelect.innerHTML = '<option value="">İlçe Seçin</option>';
+            mahalleSelect.innerHTML = '<option value="">Önce İlçe Seçin</option>';
+
+            if (ilAd === "Kayseri") {
+                Object.keys(kayseriIlceler).forEach(function(id) {
+                    var option = document.createElement("option");
+                    option.value = id;
+                    option.text = kayseriIlceler[id];
+                    if (isInitialLoad && id == currentIlce) option.selected = true;
+                    ilceSelect.appendChild(option);
+                });
+            } else if (ilAd) {
+                var option = document.createElement("option");
+                option.value = "99";
+                option.text = "Merkez İlçe";
+                if (isInitialLoad && "99" == currentIlce) option.selected = true;
+                ilceSelect.appendChild(option);
+            }
+            mahalleDoldur(isInitialLoad);
+        }
+
+        function mahalleDoldur(isInitialLoad = false) {
+            var ilceId = document.getElementById("ilceSelect").value;
+            var mahalleSelect = document.getElementById("mahalleSelect");
+            
+            mahalleSelect.innerHTML = '<option value="">Mahalle Seçin</option>';
+            
+            if (ilceId && mahalleler[ilceId]) {
+                var mahalleFound = false;
+                mahalleler[ilceId].forEach(function(mahalle) {
+                    var option = document.createElement("option");
+                    option.value = mahalle;
+                    option.text = mahalle;
+                    if (isInitialLoad && mahalle === currentMahalle) {
+                        option.selected = true;
+                        mahalleFound = true;
+                    }
+                    mahalleSelect.appendChild(option);
+                });
+
+                // Eger modeldeki mahalle listede yoksa, ozel olarak ekle (duzenleme sayfasinda veri kaybi olmamasi icin)
+                if (isInitialLoad && currentMahalle && !mahalleFound) {
+                    var option = document.createElement("option");
+                    option.value = currentMahalle;
+                    option.text = currentMahalle;
+                    option.selected = true;
+                    mahalleSelect.appendChild(option);
+                }
+            } else {
+                mahalleSelect.innerHTML = '<option value="">Önce İlçe Seçin</option>';
+            }
+        }
+    </script>
+}

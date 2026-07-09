@@ -27,7 +27,9 @@ namespace KcetasWeb.ViewModels
         public string? baglanti_grubu { get; set; }
         public string? status { get; set; }
 
-        
+        public string Ad { get; set; }
+        public string Soyad { get; set; }
+        public string? Unvan { get; set; }
         // MVP Eksikleri:
         public decimal BaglantiGucuKw { get; set; }
         public string? Enlem { get; set; }
@@ -39,6 +41,7 @@ namespace KcetasWeb.ViewModels
         
         
         public int il_id { get; set; }
+        public string il_adi { get; set; }
         public string ilce_adi { get; set; }
 
     }

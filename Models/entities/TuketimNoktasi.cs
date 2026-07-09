@@ -15,6 +15,7 @@ namespace KcetasWeb.Models
         public string? e_posta { get; set; }
         public string? iletisim_tercihi { get; set; }
         public int ilce_id { get; set; }
+        public string? il_adi { get; set; }
         public string? ilce_adi { get; set; }
         public string? mahalle { get; set; }
         public string? bina_no { get; set; }

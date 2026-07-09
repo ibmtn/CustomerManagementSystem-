@@ -1,3 +1,4 @@
+@using Microsoft.AspNetCore.Http.Features
 @model KcetasWeb.Models.TuketimNoktasi
 
 @{
@@ -44,7 +45,7 @@
                         <h5 class="text-success border-bottom pb-2 mb-3"><i class="bi bi-person-badge"></i> Müşteri Bilgileri</h5>
                         
                         <label class="text-muted small fw-bold mb-1 text-uppercase">Ad Soyad / Ünvan</label>
-                        <p class="fs-5 fw-bold text-dark mb-3">@(Model.musteri_ad) @(Model.musteri_soyad) @(Model.musteri_unvan)</p>
+                        <p class="fs-5 fw-bold text-dark mb-3">@(Model.musteri_ad) (@Model.musteri_soyad) @(Model.musteri_unvan)</p>
                         
                         <label class="text-muted small fw-bold mb-1 text-uppercase">TCKN / VKN</label>
                         <p class="fs-5 fw-bold text-dark mb-3">
@@ -75,7 +76,7 @@
                         <p class="fs-5 fw-bold text-dark mb-3">@Model.baglanti_grubu / @Model.BaglantiGucuKw kW</p>
                         
                         <label class="text-muted small fw-bold mb-1 text-uppercase">Açık Adres</label>
-                        <p class="fs-5 fw-bold text-dark mb-3">@Model.acik_adres</p>
+                        <p class="fs-5 fw-bold text-dark mb-3">@Model.acik_adres @(Model.mahalle) @(Model.ilce_adi) @(Model.il_adi)</p>
                         
                         <label class="text-muted small fw-bold mb-1 text-uppercase">Koordinat (Enlem, Boylam)</label>
                         <p class="fs-5 fw-bold text-dark mb-0">@Model.Enlem, @Model.Boylam</p>
