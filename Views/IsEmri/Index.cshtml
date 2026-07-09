@@ -79,8 +79,11 @@
                             <th>İş Emri No</th>
                             <th>Tip</th>
                             <th>Durum</th>
+                            <th>Abone</th>
+                            <th>Öncelik Durumu</th>
                             <th>Tüketim Noktası & Adres</th>
                             <th>Planlanan Tarih</th>
+                            <th>Oluşturulma Tarihi</th>
                             <th>Atanan Kullanıcı</th>
                             <th class="text-end">İşlem</th>
                         </tr>
@@ -99,10 +102,21 @@
                                     <span class="badge bg-@item.DurumRenk px-2 py-1">@item.Durum</span>
                                 </td>
                                 <td>
+                                    <span class="text-secondary fw-medium">@item.AboneGorunum</span>
+                                </td>
+                                <td>
+                                    <span>@item.oncelik</span>
+                                </td>
+                                <td>
                                     <span class="text-dark fw-medium"><i class="bi bi-geo-alt-fill text-muted"></i> @item.TuketimNoktasiKodu</span><br />
                                     <small class="text-muted">@item.Adres</small>
                                 </td>
                                 <td>@(item.PlanlananTarih?.ToString("dd.MM.yyyy") ?? "-")</td>
+                                <td>
+                                    <span>
+                                        @item.olusturulma_tarihi
+                                    </span>
+                                </td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center me-2" style="width: 28px; height: 28px; font-size: 12px;">

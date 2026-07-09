@@ -10,6 +10,7 @@ namespace KcetasWeb.ViewModels
         public DateTime? BaslangicTarih { get; set; }
         public DateTime? BitisTarih { get; set; }
         public string? AramaMetni { get; set; }
+        
 
         
 
@@ -35,10 +36,17 @@ namespace KcetasWeb.ViewModels
         public long TuketimNoktasiId { get; set; }
         public string TuketimNoktasiKodu { get; set; } = null!;
         public DateTime? PlanlananTarih { get; set; }
+        public DateTime? olusturulma_tarihi { get; set; }
         public string AtananKullaniciAdi { get; set; } = null!;
         public string Durum { get; set; } = null!;
         public string DurumRenk { get; set; } = null!;
         public string Adres { get; set; } = null!;
+        public string oncelik { get; set; }
+        public string Ad { get; set; }
+        public string Soyad { get; set; }
+        public string? Unvan { get; set; }
+
+        public string AboneGorunum => $"{Ad} {Soyad} ({Unvan})";
         
     }
 }

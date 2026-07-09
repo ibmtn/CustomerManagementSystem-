@@ -19,7 +19,7 @@ public class MockIsEmriService : IIsEmriService
             tip = "Sayaç Sökme",
             oncelik = "Yüksek",
             planlanan_tarih = new DateTime(2026, 4, 10),
-            atanan_kullanici_id = 101,
+            atanan_kullanici_id = 1, // Ahmet Yılmaz (Saha Operasyon Amiri)
             durum = "Tamamlandı",
             saha_sonucu = "Sayaç başarıyla söküldü",
             gerekce = "Sayaç arızası nedeniyle sökme",
@@ -38,7 +38,7 @@ public class MockIsEmriService : IIsEmriService
             tip = "Kesme",
             oncelik = "Normal",
             planlanan_tarih = new DateTime(2026, 4, 15),
-            atanan_kullanici_id = 102,
+            atanan_kullanici_id = 2, // Ayşe Demir (Müşteri Temsilcisi)
             durum = "Devam Ediyor",
             status = "Active",
             CreatedAt = DateTime.Now.AddDays(-15)

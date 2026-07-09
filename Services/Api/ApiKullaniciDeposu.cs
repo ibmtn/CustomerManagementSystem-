@@ -23,15 +23,8 @@ namespace KcetasWeb.Services.Api
 
         public Kullanici? BulId(long id)
         {
-            try
-            {
-                var url = $"/api/Kullanici/{id}";
-                return _httpClient.GetFromJsonAsync<Kullanici>(url, _jsonOptions).GetAwaiter().GetResult();
-            }
-            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                return null;
-            }
+            var liste = Listele();
+            return liste.FirstOrDefault(k => k.kullanici_id == id);
         }
 
         public Kullanici? BulKullaniciAdiIle(string kullaniciAdi)
