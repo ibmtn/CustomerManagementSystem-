@@ -1,9 +1,12 @@
-@model KcetasWeb.Models.Sayac
+
+ @model KcetasWeb.Models.Sayac
 
 @{
     ViewData["Title"] = "Sayaç Detayı";
+    var isEmirleri = ViewBag.IsEmirleri as List<KcetasWeb.Models.IsEmri>; 
     var tuketimNoktalari = ViewBag.TuketimNoktalari as List<KcetasWeb.Models.TuketimNoktasi>;
     var bagliNokta = tuketimNoktalari?.FirstOrDefault(t => t.TuketimNoktasiId == Model.tuketim_noktasi_id);
+    var endeksler = ViewBag.Endeksler as List<KcetasWeb.Models.EndeksOkuma>;
 }
 
 <div class="container mt-4">
@@ -111,6 +114,202 @@
             <div class="mt-4 pt-3 border-top text-center text-muted small">
                 Bu sayaç sisteme en son @(Model.UpdatedAt?.ToString("dd.MM.yyyy HH:mm") ?? Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")) tarihinde güncellenmiştir.
             </div>
+<div class="card shadow-sm border-0 rounded-4 mt-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-clipboard-check"></i>
+            İş Emirleri
+        </h5>
+    </div>
+
+    <div class="card-body">
+
+        @if (isEmirleri != null && isEmirleri.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+
+                    <thead>
+                        <tr>
+                            <th>İş Emri No</th>
+                            <th>Tip</th>
+                            <th>Durum</th>
+                            <th>Planlanan Tarih</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                    @foreach (var isEmri in isEmirleri)
+                    {
+                        <tr>
+                            <td>@isEmri.is_emri_no</td>
+                            <td>@isEmri.tip</td>
+                            <td>@isEmri.durum</td>
+                            <td>@isEmri.planlanan_tarih?.ToString("dd.MM.yyyy")</td>
+                        </tr>
+                    }
+
+                    </tbody>
+
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info mb-0">
+                Bu sayaç için kayıtlı iş emri bulunmamaktadır.
+            </div>
+        }
+
+    </div>
+</div>
+<div class="card shadow-lg border-0 rounded-4 mt-4">
+
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-clipboard-check me-2"></i>
+            İş Emirleri
+        </h5>
+    </div>
+
+    <div class="card-body">
+
+        @if (isEmirleri != null && isEmirleri.Any())
+        {
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>İş Emri No</th>
+                            <th>Tip</th>
+                            <th>Durum</th>
+                            <th>Öncelik</th>
+                            <th>Planlanan Tarih</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                    @foreach (var item in isEmirleri)
+                    {
+                        <tr>
+
+                            <td class="fw-bold">
+                                @item.is_emri_no
+                            </td>
+
+                            <td>
+                                @item.tip
+                            </td>
+
+                            <td>
+                                <span class="badge bg-info">
+                                    @item.durum
+                                </span>
+                            </td>
+
+                            <td>
+                                @item.oncelik
+                            </td>
+
+                            <td>
+                                @(item.planlanan_tarih?.ToString("dd.MM.yyyy") ?? "-")
+                            </td>
+
+                        </tr>
+                    }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info mb-0">
+                Bu sayaç için kayıtlı iş emri bulunmamaktadır.
+            </div>
+        }
+
+    </div>
+
+</div>
+<div class="card shadow-lg border-0 rounded-4 mt-4">
+
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-speedometer2 me-2"></i>
+            Endeks Geçmişi
+        </h5>
+    </div>
+
+    <div class="card-body">
+
+        @if (endeksler != null && endeksler.Any())
+        {
+            <div class="table-responsive">
+
+                <table class="table table-striped align-middle">
+
+                    <thead>
+                        <tr>
+                            <th>Okuma Tarihi</th>
+                            <th>Önceki Endeks</th>
+                            <th>Yeni Endeks</th>
+                            <th>Okuma Tipi</th>
+                            <th>Kaynak</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                    @foreach (var item in endeksler)
+                    {
+                        <tr>
+
+                            <td>
+                                @item.okuma_zamani?.ToString("dd.MM.yyyy HH:mm")
+                            </td>
+
+                            <td>
+                                @item.onceki_endeks
+                            </td>
+
+                            <td class="fw-bold text-primary">
+                                @item.yeni_endeks
+                            </td>
+
+                            <td>
+                                @item.okuma_tipi
+                            </td>
+
+                            <td>
+                                @item.okuma_kaynagi
+                            </td>
+
+                        </tr>
+                    }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-warning mb-0">
+                Bu sayaç için kayıtlı endeks bulunmamaktadır.
+            </div>
+        }
+
+    </div>
+
+</div>
         </div>
     </div>
 </div>

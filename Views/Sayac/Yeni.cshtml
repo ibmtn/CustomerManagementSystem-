@@ -7,10 +7,13 @@
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-lg-8">
+
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="h4 text-primary fw-bold">
-                    <i class="bi bi-plus-circle me-2"></i> Yeni Sayaç Ekle
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Yeni Sayaç Ekle
                 </h2>
+
                 <a href="/Sayac/Index" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left"></i> Listeye Dön
                 </a>
@@ -18,61 +21,169 @@
 
             <div class="card shadow-lg border-0 rounded-4">
                 <div class="card-body p-5">
+
                     <form asp-action="Yeni" method="post">
-                        
+
                         <div class="row g-4">
+
+                            <!-- Seri No -->
                             <div class="col-md-6">
-                                <label asp-for="seri_no" class="form-label fw-bold text-muted">Seri Numarası <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-upc-scan text-primary"></i></span>
-                                    <input asp-for="seri_no" class="form-control border-start-0 ps-0" placeholder="Örn: S-1004" required />
-                                </div>
+                                <label class="form-label fw-bold text-muted">
+                                    Seri Numarası
+                                </label>
+
+                                <input class="form-control"
+                                       value="Sistem tarafından otomatik oluşturulacaktır."
+                                       readonly />
                             </div>
-                            
+
+                            <!-- Marka -->
                             <div class="col-md-6">
-                                <label asp-for="marka" class="form-label fw-bold text-muted">Marka <span class="text-danger">*</span></label>
+                                <label asp-for="marka" class="form-label fw-bold text-muted">
+                                    Marka <span class="text-danger">*</span>
+                                </label>
+
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-tag-fill text-primary"></i></span>
-                                    <input asp-for="marka" class="form-control border-start-0 ps-0" placeholder="Örn: Makel, Luna" required />
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-tag-fill text-primary"></i>
+                                    </span>
+
+                                    <input asp-for="marka"
+                                           class="form-control border-start-0 ps-0"
+                                           required />
                                 </div>
                             </div>
 
+                            <!-- Model -->
                             <div class="col-md-6">
-                                <label asp-for="model" class="form-label fw-bold text-muted">Model <span class="text-danger">*</span></label>
+                                <label asp-for="model" class="form-label fw-bold text-muted">
+                                    Model <span class="text-danger">*</span>
+                                </label>
+
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-cpu-fill text-primary"></i></span>
-                                    <input asp-for="model" class="form-control border-start-0 ps-0" placeholder="Örn: M500" required />
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-cpu-fill text-primary"></i>
+                                    </span>
+
+                                    <input asp-for="model"
+                                           class="form-control border-start-0 ps-0"
+                                           required />
                                 </div>
                             </div>
 
+                            <!-- Faz -->
                             <div class="col-md-6">
-                                <label asp-for="faz" class="form-label fw-bold text-muted">Faz Tipi <span class="text-danger">*</span></label>
-                                <select asp-for="faz" class="form-select" required>
+                                <label asp-for="faz" class="form-label fw-bold text-muted">
+                                    Faz Tipi
+                                </label>
+
+                                <select asp-for="faz" class="form-select">
                                     <option value="Monofaze">Monofaze</option>
                                     <option value="Trifaze">Trifaze</option>
                                 </select>
                             </div>
 
+                            <!-- Üretim Yılı -->
                             <div class="col-md-6">
-                                <label asp-for="carpan" class="form-label fw-bold text-muted">Çarpan Değeri <span class="text-danger">*</span></label>
+                                <label asp-for="uretim_yili" class="form-label fw-bold text-muted">
+                                    Üretim Yılı
+                                </label>
+
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-x-circle-fill text-primary"></i></span>
-                                    <input asp-for="carpan" type="number" step="0.01" class="form-control border-start-0 ps-0" placeholder="1.00" required />
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-calendar-date text-primary"></i>
+                                    </span>
+
+                                    <input asp-for="uretim_yili"
+                                           type="number"
+                                           min="2000"
+                                           max="@DateTime.Now.Year"
+                                           class="form-control border-start-0 ps-0"
+                                           required />
                                 </div>
-                                <div class="form-text">Genellikle direkt sayaçlar için 1, akım trafolu sayaçlar için trafo oranıdır.</div>
                             </div>
+
+                            <!-- Çarpan -->
+                            <div class="col-md-6">
+                                <label asp-for="carpan" class="form-label fw-bold text-muted">
+                                    Çarpan
+                                </label>
+
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-x-circle-fill text-primary"></i>
+                                    </span>
+
+                                    <input asp-for="carpan"
+                                           type="number"
+                                           step="0.01"
+                                           class="form-control border-start-0 ps-0"
+                                           required />
+                                </div>
+
+                                <div class="form-text">
+                                    Direkt sayaçlar için genellikle 1 kullanılır.
+                                </div>
+                            </div>
+
+                            <!-- Mühür No -->
+                            <div class="col-md-6">
+                                <label asp-for="muhur_no" class="form-label fw-bold text-muted">
+                                    Mühür No <span class="text-danger">*</span>
+                                </label>
+                                <!-- İlk Endeks -->
+<div class="col-md-6">
+    <label asp-for="son_endeks" class="form-label fw-bold text-muted">
+        İlk Endeks <span class="text-danger">*</span>
+    </label>
+
+    <div class="input-group">
+        <span class="input-group-text bg-light border-end-0">
+            <i class="bi bi-speedometer2 text-primary"></i>
+        </span>
+
+        <input asp-for="son_endeks"
+               type="number"
+               step="0.01"
+               min="0"
+               class="form-control border-start-0 ps-0"
+               placeholder="Örn: 0"
+               required />
+    </div>
+
+    <div class="form-text">
+        Sayaç sisteme ilk eklendiğinde kaydedilecek başlangıç endeksi.
+    </div>
+</div>
+
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-shield-lock text-primary"></i>
+                                    </span>
+
+                                    <input asp-for="muhur_no"
+                                           type="number"
+                                           class="form-control border-start-0 ps-0"
+                                           required />
+                                </div>
+                            </div>
+
                         </div>
 
-                        <hr class="my-4 text-muted">
-                        
+                        <hr class="my-4">
+
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <button type="submit" class="btn btn-primary px-4 shadow-sm">
-                                <i class="bi bi-save me-2"></i> Sisteme Ekle
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-save me-2"></i>
+                                Sisteme Ekle
                             </button>
                         </div>
+
                     </form>
+
                 </div>
             </div>
+
         </div>
     </div>
 </div>
