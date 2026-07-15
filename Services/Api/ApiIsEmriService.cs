@@ -40,7 +40,7 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                return _httpClient.GetFromJsonAsync<IsEmri>($"/api/IsEmirleri/all", _jsonOptions).GetAwaiter().GetResult();
+                return _httpClient.GetFromJsonAsync<IsEmri>($"/api/IsEmirleri/{id}", _jsonOptions).GetAwaiter().GetResult();
             }
             catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {

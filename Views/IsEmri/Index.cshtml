@@ -119,7 +119,6 @@
                             <th>İş Emri No</th>
                             <th>Tip</th>
                             <th>Durum</th>
-
                             <th>Öncelik Durumu</th>
                             <th>Tüketim Noktası & Adres</th>
                             <th>Planlanan Tarih</th>
@@ -136,10 +135,10 @@
                                     @item.IsEmriNo
                                 </td>
                                 <td>
-                                    <span class="text-secondary fw-medium">@item.Tip</span>
+                                    <span class="badge bg-light text-dark border fw-bold px-2 py-1 shadow-sm">@item.Tip</span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-@item.DurumRenk px-2 py-1">@item.Durum</span>
+                                    <span class="badge bg-@item.DurumRenk px-2 py-1 shadow-sm text-white">@item.Durum</span>
                                 </td>
 
                                 <td>

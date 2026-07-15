@@ -136,7 +136,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var sayac in ViewBag.Sayaclar)
+                                @foreach (KcetasWeb.Models.Sayac sayac in ViewBag.Sayaclar)
                                 {
                                     <tr>
                                         <td class="fw-bold">@sayac.seri_no</td>
@@ -177,13 +177,13 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var soz in ViewBag.Sozlesmeler)
+                                @foreach (KcetasWeb.Models.Sozlesme soz in ViewBag.Sozlesmeler)
                                 {
                                     <tr>
                                         <td class="fw-bold">@soz.sozlesme_no</td>
                                         <td>@(soz.baslangic_tarihi.HasValue ? soz.baslangic_tarihi.Value.ToString("dd.MM.yyyy") : "-") - @(soz.bitis_tarihi.HasValue && soz.bitis_tarihi.Value.Year > 2000 ? soz.bitis_tarihi.Value.ToString("dd.MM.yyyy") : "Devam Ediyor")</td>
                                         <td>@soz.sozlesme_tipi</td>
-                                        <td><span class="badge bg-success">@soz.status</span></td>
+                                        <td><span class="badge bg-success">@soz.durum</span></td>
                                         <td><a href="/Sozlesme/Detay/@soz.sozlesme_id" class="btn btn-sm btn-outline-primary">Detay</a></td>
                                     </tr>
                                 }
@@ -218,12 +218,12 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var ie in ViewBag.IsEmirleri)
+                                @foreach (KcetasWeb.Models.IsEmri ie in ViewBag.IsEmirleri)
                                 {
                                     <tr>
                                         <td class="fw-bold">@ie.is_emri_no</td>
                                         <td>@ie.tip</td>
-                                        <td>@ie.CreatedAt.ToString("dd.MM.yyyy")</td>
+                                        <td>@ie.created_at.ToString("dd.MM.yyyy")</td>
                                         <td><span class="badge bg-info">@ie.durum</span></td>
                                         <td><a href="/IsEmri/Detay/@ie.is_emri_id" class="btn btn-sm btn-outline-primary">Detay</a></td>
                                     </tr>
@@ -259,7 +259,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var e in ViewBag.Endeksler)
+                                @foreach (KcetasWeb.Models.EndeksOkuma e in ViewBag.Endeksler)
                                 {
                                     <tr>
                                         <td>@(e.okuma_zamani?.ToString("dd.MM.yyyy HH:mm") ?? "-")</td>

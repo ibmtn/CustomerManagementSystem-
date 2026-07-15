@@ -80,8 +80,26 @@ namespace KcetasWeb.Controllers
                     sayac_id = o.sayac_id,
                     is_emri_id = o.is_emri_id,
                     sozlesme_id = o.sozlesme_id,
-                    okuma_tipi = o.okuma_tipi ?? "Normal",
-                    okuma_kaynagi = o.okuma_kaynagi,
+                    okuma_tipi = o.okuma_tipi switch
+                    {
+                        "SON_OKUMA"=> "Son Okuma",
+                        "KESME_ENDEKSI" => "Kesme Endeksi",
+                        "SAYAC_DEGISIM_OKUMASI" => "Sayaç Değişim Okuması",
+                        "SAYAC_ARIZA_OKUMASI" => "Sayaç Arıza Okuması",
+                        "MUHURLEME_ENDEKSI" => "Mühürleme Endeksi",
+                        "RUTIN_DONEM" => "Rutin Dönem",
+                        "ILK_OKUMA" => "İlk Okuma",
+                        "ACILIS" => "Açılış",
+                        "OSOS" => "OSOS",
+                        _ => o.okuma_tipi ?? "Normal"
+                    },
+                    okuma_kaynagi = o.okuma_kaynagi switch
+                    {
+                        "MANUEL" => "Manuel",
+                        "MOBIL" => "Mobil",
+                        "OSOS" => "OSOS",
+                        _ => o.okuma_kaynagi ?? "Bilinmiyor"
+                    },
                     onceki_endeks = o.onceki_endeks,
                     yeni_endeks = o.yeni_endeks,
                     okuma_zamani = o.okuma_zamani,

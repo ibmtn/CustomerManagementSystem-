@@ -25,11 +25,11 @@ namespace KcetasWeb.ViewModels
 
         public static string GetDurumRenk(string durum) => durum switch
         {
-            "Oluşturuldu" => "secondary",
-            "Ekibe Atandı" => "info",
-            "Devam Ediyor" => "primary",
-            "Tamamlandı" => "success",
-            "İptal Edildi" => "danger",
+            "Oluşturuldu" or "Olusturuldu" or "Açık" or "Acik" => "secondary",
+            "Ekibe Atandı" or "EkibeAtandi" => "info",
+            "Devam Ediyor" or "DevamEdiyor" => "primary",
+            "Tamamlandı" or "Tamamlandi" => "success",
+            "İptal Edildi" or "IptalEdildi" or "İptal" => "danger",
             "Durduruldu" => "warning",
             _ => "dark"
         };
