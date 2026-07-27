@@ -28,7 +28,7 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var response = await _httpClient.GetFromJsonAsync<PaginatedResponse<Abone>>($"/api/Aboneler?page={page}&pageSize={pageSize}", _jsonOptions);
+                var response = await _httpClient.GetFromJsonAsync<PaginatedResponse<Abone>>($"/api/Aboneler/arama?page={page}&pageSize={pageSize}", _jsonOptions);
                 return response ?? new PaginatedResponse<Abone> { CurrentPage = page, PageSize = pageSize };
             }
             catch
@@ -55,6 +55,16 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
+                var allResponse = await _httpClient.GetFromJsonAsync<List<Abone>>("/api/Aboneler/All", _jsonOptions);
+                if (allResponse != null && allResponse.Count > 0)
+                {
+                    return allResponse;
+                }
+            }
+            catch { }
+
+            try
+            {
                 var list = new List<Abone>();
                 int currentPage = 1;
                 int totalPages = 1;
@@ -63,7 +73,7 @@ namespace KcetasWeb.Services.Api
                 {
                     try
                     {
-                        var response = await _httpClient.GetAsync($"/api/Aboneler?page={currentPage}&pageSize=100");
+                        var response = await _httpClient.GetAsync($"/api/Aboneler/arama?page={currentPage}&pageSize=100");
                         if (!response.IsSuccessStatusCode) break;
                         var jsonStr = await response.Content.ReadAsStringAsync();
                         using var doc = System.Text.Json.JsonDocument.Parse(jsonStr);
@@ -71,8 +81,20 @@ namespace KcetasWeb.Services.Api
                         if (doc.RootElement.TryGetProperty("totalPages", out var tp) && tp.ValueKind == System.Text.Json.JsonValueKind.Number)
                         {
                             totalPages = tp.GetInt32();
-                            // Maksimum 50 sayfa (50 x 100 = 5000 kayit)
                             if (totalPages > 50) totalPages = 50;
+                        }
+                        else if (doc.RootElement.TryGetProperty("totalCount", out var tc) && tc.ValueKind != System.Text.Json.JsonValueKind.Null)
+                        {
+                            if (tc.TryGetInt32(out int totalCount) && totalCount > 0)
+                            {
+                                int ps = 100;
+                                if (doc.RootElement.TryGetProperty("pageSize", out var psProp) && psProp.TryGetInt32(out int psVal) && psVal > 0)
+                                {
+                                    ps = psVal;
+                                }
+                                totalPages = (int)Math.Ceiling((double)totalCount / ps);
+                                if (totalPages > 50) totalPages = 50;
+                            }
                         }
 
                         if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Array)
