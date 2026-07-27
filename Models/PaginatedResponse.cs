@@ -10,8 +10,14 @@ namespace KcetasWeb.Models
 
         public int Count { get => TotalCount; set => TotalCount = value; }
 
+        private int _totalPages;
+
         [System.Text.Json.Serialization.JsonPropertyName("totalPages")]
-        public int TotalPages { get; set; }
+        public int TotalPages 
+        { 
+            get => _totalPages == 0 && PageSize > 0 ? (int)System.Math.Ceiling((double)TotalCount / PageSize) : _totalPages; 
+            set => _totalPages = value; 
+        }
 
         [System.Text.Json.Serialization.JsonPropertyName("currentPage")]
         public int CurrentPage { get; set; }

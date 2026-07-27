@@ -39,10 +39,6 @@
                     </div>
                     <h4 class="fw-bold mb-1">@(Model.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Kurumsal ? Model.Unvan : $"{Model.Ad} {Model.Soyad}")</h4>
                     <p class="mb-3 opacity-75">@(Model.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Kurumsal ? "Kurumsal Abone" : "Bireysel Abone")</p>
-                    
-                    <div class="d-flex justify-content-center gap-2 mt-4">
-                        <button class="btn btn-light text-primary rounded-pill px-4 fw-bold shadow-sm"><i class="bi bi-pencil-square me-1"></i> Düzenle</button>
-                    </div>
                 </div>
             </div>
         </div>

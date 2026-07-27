@@ -55,8 +55,8 @@ namespace KcetasWeb.Controllers
                 AdSoyad = (a.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Bireysel) ? $"{a.Ad} {a.Soyad}" : a.Unvan ?? "",
                 KimlikNoMaskeli = (a.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Bireysel) ? Maskele(a.tckn) : Maskele(a.vkn),
                 Telefon = a.telefon,
-                Mail = string.IsNullOrEmpty(a.e_posta) ? "(Belirtilmemiş)" : a.e_posta,
-                EPostaApi = string.IsNullOrEmpty(a.e_posta) ? "(Belirtilmemiş)" : a.e_posta,
+                Mail = string.IsNullOrWhiteSpace(a.e_posta) ? "(Belirtilmemiş)" : a.e_posta,
+                EPostaApi = string.IsNullOrWhiteSpace(a.e_posta) ? "(Belirtilmemiş)" : a.e_posta,
                 AboneTipi = a.abone_tipi,
                 Durum = a.Durum
             }).ToList();
