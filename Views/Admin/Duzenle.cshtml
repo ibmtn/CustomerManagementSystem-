@@ -42,14 +42,14 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Durum <span class="text-danger">*</span></label>
-                            <select class="form-select" name="durum" required>
+                            <select data-control="select2" class="form-select" name="durum" required>
                                 <option value="Aktif" selected="@(Model.durum == KcetasWeb.Models.Enums.KullaniciDurumu.Aktif)">Aktif (Sisteme Girebilir)</option>
                                 <option value="Pasif" selected="@(Model.durum == KcetasWeb.Models.Enums.KullaniciDurumu.Pasif)">Pasif (Erişimi Engellendi)</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-4">
                             <label class="form-label fw-bold">Sistem Rolü <span class="text-danger">*</span></label>
-                            <select class="form-select" name="rol_id" required>
+                            <select data-control="select2" class="form-select" name="rol_id" required>
                                 @if (roller != null)
                                 {
                                     foreach (var rol in roller)

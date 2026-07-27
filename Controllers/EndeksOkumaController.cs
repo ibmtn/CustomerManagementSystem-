@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using KcetasWeb.Models;
 using Microsoft.AspNetCore.Authorization;
 using KcetasWeb.Services.Interfaces;
@@ -56,14 +56,24 @@ namespace KcetasWeb.Controllers
             filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
             filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
 
+            okumaListesi = okumaListesi.OrderByDescending(x => x.okuma_id).ToList();
+
             var pagedData = okumaListesi.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
 
-            var sozlesmeler = await _sozlesmeService.GetAllAsync();
-            var aboneler = await _aboneService.GetAllAsync();
-            var isEmirleri = await _isEmriService.GetAllAsync();
-            var tuketimNoktalari = await _tuketimNoktasiService.GetAllAsync();
-            var sayaclar = await _sayacService.GetAllAsync(); 
+            var sozlesmeTask = _sozlesmeService.GetAllAsync();
+            var aboneTask = _aboneService.GetAllAsync();
+            var isEmriTask = _isEmriService.GetAllAsync();
+            var tuketimNoktasiTask = _tuketimNoktasiService.GetAllAsync();
+            var sayacTask = _sayacService.GetAllAsync(); 
             
+            await Task.WhenAll(sozlesmeTask, aboneTask, isEmriTask, tuketimNoktasiTask, sayacTask);
+
+            var sozlesmeler = sozlesmeTask.Result;
+            var aboneler = aboneTask.Result;
+            var isEmirleri = isEmriTask.Result;
+            var tuketimNoktalari = tuketimNoktasiTask.Result;
+            var sayaclar = sayacTask.Result;
+
             var viewModels = pagedData.Select(o => {
                 var sozlesme = sozlesmeler.FirstOrDefault(s => s.sozlesme_id == o.sozlesme_id);
 
@@ -176,9 +186,13 @@ namespace KcetasWeb.Controllers
 
         public async Task<IActionResult> Yeni()
         {
-            ViewBag.TuketimNoktalari = await _tuketimNoktasiService.GetAllAsync();
-            ViewBag.Sayaclar = await _sayacService.GetAllAsync();
-            ViewBag.Sozlesmeler = await _sozlesmeService.GetAllAsync();
+            var tnTask = _tuketimNoktasiService.GetAllAsync();
+            var sycTask = _sayacService.GetAllAsync();
+            var szlTask = _sozlesmeService.GetAllAsync();
+            await Task.WhenAll(tnTask, sycTask, szlTask);
+            ViewBag.TuketimNoktalari = tnTask.Result;
+            ViewBag.Sayaclar = sycTask.Result;
+            ViewBag.Sozlesmeler = szlTask.Result;
             return View();
         }
 
@@ -417,3 +431,4 @@ namespace KcetasWeb.Controllers
         }
     }
 }
+

@@ -3,6 +3,7 @@ using System.Text.Json;
 using KcetasWeb.Helpers;
 using KcetasWeb.Models;
 using KcetasWeb.Services.Interfaces;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace KcetasWeb.Services.Api
 {
@@ -10,39 +11,44 @@ namespace KcetasWeb.Services.Api
     {
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
+        private readonly IMemoryCache _cache;
 
-        public ApiTuketimNoktasiService(HttpClient httpClient)
+        public ApiTuketimNoktasiService(HttpClient httpClient, IMemoryCache cache)
         {
             _httpClient = httpClient;
+            _cache = cache;
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
                 PropertyNameCaseInsensitive = true
             };
-
         }
 
         public async Task<List<TuketimNoktasi>> GetAllAsync()
         {
-            try
+            return await _cache.GetOrCreateAsync("TuketimNoktasi_GetAll", async entry =>
             {
-                var jsonStr = await _httpClient.GetStringAsync("/api/TuketimNoktasi?page=1&pageSize=1000");
-                using var doc = JsonDocument.Parse(jsonStr);
-                if (doc.RootElement.ValueKind == JsonValueKind.Array)
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
+                try
                 {
-                    return JsonSerializer.Deserialize<List<TuketimNoktasi>>(jsonStr, _jsonOptions) ?? new List<TuketimNoktasi>();
+                    var jsonStr = await _httpClient.GetStringAsync("/api/TuketimNoktasi?page=1&pageSize=1000");
+                    using var doc = JsonDocument.Parse(jsonStr);
+                    if (doc.RootElement.ValueKind == JsonValueKind.Array)
+                    {
+                        return JsonSerializer.Deserialize<List<TuketimNoktasi>>(jsonStr, _jsonOptions) ?? new List<TuketimNoktasi>();
+                    }
+                    else if (doc.RootElement.TryGetProperty("data", out var dataProp))
+                    {
+                        return JsonSerializer.Deserialize<List<TuketimNoktasi>>(dataProp.GetRawText(), _jsonOptions) ?? new List<TuketimNoktasi>();
+                    }
+                    return new List<TuketimNoktasi>();
                 }
-                else if (doc.RootElement.TryGetProperty("data", out var dataProp))
+                catch (Exception ex)
                 {
-                    return JsonSerializer.Deserialize<List<TuketimNoktasi>>(dataProp.GetRawText(), _jsonOptions) ?? new List<TuketimNoktasi>();
+                    System.IO.File.WriteAllText("tuketim_err.txt", ex.ToString());
+                    return new List<TuketimNoktasi>();
                 }
-                return new List<TuketimNoktasi>();
-            }
-            catch (Exception ex)
-            {
-                System.IO.File.WriteAllText("tuketim_err.txt", ex.ToString());
-                return new List<TuketimNoktasi>();
-            }
+            });
         }
 
         public async Task<TuketimNoktasi?> GetByIdAsync(string tekilKod)
@@ -98,4 +104,5 @@ namespace KcetasWeb.Services.Api
         }
     }
 }
+
 

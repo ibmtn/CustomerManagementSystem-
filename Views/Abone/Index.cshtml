@@ -38,7 +38,7 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-bold">Abone Tipi</label>
-                <select name="FiltreAboneTipi" class="form-select">
+                <select data-control="select2" name="FiltreAboneTipi" class="form-select">
                     <option value="">Tümü</option>
                     <option value="BIREYSEL" selected="@(Model.FiltreAboneTipi == "BIREYSEL" ? "selected" : null)">Bireysel</option>
                     <option value="KURUMSAL" selected="@(Model.FiltreAboneTipi == "KURUMSAL" ? "selected" : null)">Kurumsal</option>
@@ -149,3 +149,4 @@
         </ul>
     </nav>
 </div>
+

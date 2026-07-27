@@ -18,7 +18,8 @@
         <div class="container-fluid">
             <div class="card shadow-sm border-0 mb-4 bg-light">
                 <div class="card-body">
-                    <form asp-action="Index" method="get" class="row g-3 align-items-end">
+                    <form asp-action="Index" method="get" class="row g-3 align-items-end" id="mainFilterForm">
+                        <input type="hidden" name="AktifSekme" id="topAktifSekme" value="@Model.AktifSekme" />
                         <div class="col-md-3">
                             <label class="form-label fw-bold">Belge Tarihi</label>
                             <input name="FiltreBelgeTarihi" value="@(Model.FiltreBelgeTarihi?.ToString("yyyy-MM-dd"))" type="date" class="form-control" />
@@ -52,17 +53,17 @@
                     
                     <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6 w-100 border-0" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <a class="nav-link active text-primary fw-bolder" data-bs-toggle="tab" href="#tab_faturalar" aria-selected="true" role="tab">
+                            <a class="nav-link @(Model.AktifSekme == "Fatura" ? "active text-primary fw-bolder" : "text-muted")" href="#" onclick="document.getElementById('topAktifSekme').value='Fatura'; document.getElementById('mainFilterForm').submit(); return false;">
                                 <i class="bi bi-receipt-cutoff me-2"></i>Faturalar
                             </a>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <a class="nav-link text-success fw-bolder" data-bs-toggle="tab" href="#tab_sozlesmeler" aria-selected="false" tabindex="-1" role="tab">
+                            <a class="nav-link @(Model.AktifSekme == "Sozlesme" ? "active text-success fw-bolder" : "text-muted")" href="#" onclick="document.getElementById('topAktifSekme').value='Sozlesme'; document.getElementById('mainFilterForm').submit(); return false;">
                                 <i class="bi bi-file-earmark-check-fill me-2"></i>Sözleşmeler
                             </a>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <a class="nav-link text-warning fw-bolder" data-bs-toggle="tab" href="#tab_tutanaklar" aria-selected="false" tabindex="-1" role="tab">
+                            <a class="nav-link @(Model.AktifSekme == "Tutanak" ? "active text-warning fw-bolder" : "text-muted")" href="#" onclick="document.getElementById('topAktifSekme').value='Tutanak'; document.getElementById('mainFilterForm').submit(); return false;">
                                 <i class="bi bi-clipboard-check me-2"></i>Tutanaklar
                             </a>
                         </li>
@@ -73,7 +74,7 @@
                     <div class="tab-content" id="belgelerTabContent">
                         
                         <!-- FATURALAR SEKME İÇERİĞİ -->
-                        <div class="tab-pane fade show active" id="tab_faturalar" role="tabpanel">
+                        <div class="tab-pane fade @(Model.AktifSekme == "Fatura" ? "show active" : "")" id="tab_faturalar" role="tabpanel">
                             <div class="table-responsive">
                                 <table class="table align-middle table-row-dashed fs-6 gy-5">
                                     <thead>
@@ -112,7 +113,7 @@
                         </div>
 
                         <!-- SÖZLEŞMELER SEKME İÇERİĞİ -->
-                        <div class="tab-pane fade" id="tab_sozlesmeler" role="tabpanel">
+                        <div class="tab-pane fade @(Model.AktifSekme == "Sozlesme" ? "show active" : "")" id="tab_sozlesmeler" role="tabpanel">
                             <div class="table-responsive">
                                 <table class="table align-middle table-row-dashed fs-6 gy-5">
                                     <thead>
@@ -149,7 +150,7 @@
                         </div>
 
                         <!-- TUTANAKLAR SEKME İÇERİĞİ -->
-                        <div class="tab-pane fade" id="tab_tutanaklar" role="tabpanel">
+                        <div class="tab-pane fade @(Model.AktifSekme == "Tutanak" ? "show active" : "")" id="tab_tutanaklar" role="tabpanel">
                             <div class="table-responsive">
                                 <table class="table align-middle table-row-dashed fs-6 gy-5">
                                     <thead>
@@ -192,6 +193,7 @@
                         <div class="d-flex justify-content-center mt-4 mb-3">
                             <form id="filterForm" method="get" action="/Belgeler/Index">
                                 <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
+                                <input type="hidden" name="AktifSekme" value="@Model.AktifSekme" />
                                 <input type="hidden" name="FiltreBelgeTarihi" value="@(Model.FiltreBelgeTarihi?.ToString("yyyy-MM-dd"))" />
                                 <input type="hidden" name="FiltreBelgeNo" value="@Model.FiltreBelgeNo" />
                                 <input type="hidden" name="FiltreTekilKod" value="@Model.FiltreTekilKod" />

@@ -31,7 +31,7 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-bold">İlçe</label>
-                <select name="FiltreIlceId" class="form-select">
+                <select data-control="select2" name="FiltreIlceId" class="form-select">
                     <option value="">Tümü</option>
                     <option value="1" selected="@(Model.FiltreIlceId == 1 ? "selected" : null)">Melikgazi</option>
                     <option value="2" selected="@(Model.FiltreIlceId == 2 ? "selected" : null)">Kocasinan</option>
@@ -54,7 +54,7 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-bold">Tüketici Grubu</label>
-                <select name="FiltreTuketiciGrubu" class="form-select">
+                <select data-control="select2" name="FiltreTuketiciGrubu" class="form-select">
                     <option value="">Tümü</option>
                     <option value="Mesken" selected="@(Model.FiltreTuketiciGrubu == "Mesken" ? "selected" : null)">Mesken</option>
                     <option value="Ticarethane" selected="@(Model.FiltreTuketiciGrubu == "Ticarethane" ? "selected" : null)">Ticarethane</option>
@@ -106,7 +106,7 @@
                         {
                             <tr>
                                 <td class="ps-4 fw-bold text-dark">@item.tekil_kod</td>
-                                <td>@item.baglanti_gucu_kw</td>
+                                <td>@item.baglanti_gucu_kw.ToString("N2")</td>
                                 <td>@item.ilce_adi</td>
                                 
                                 <td>@item.bina_no / @item.bagimsiz_bolum_no</td>
@@ -168,3 +168,4 @@
         </nav>
     </div>
 }
+

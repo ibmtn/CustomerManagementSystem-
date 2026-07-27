@@ -22,7 +22,7 @@
                 </div>
                 <div class="col-md-6">
                     <label asp-for="TuketimNoktasiId" class="form-label fw-bold">Tüketim Noktası (Abone) <span class="text-danger">*</span></label>
-                    <select asp-for="TuketimNoktasiId" asp-items="ViewBag.TuketimNoktalari" class="form-select">
+                    <select data-control="select2" asp-for="TuketimNoktasiId" asp-items="ViewBag.TuketimNoktalari" class="form-select">
                         <option value="">-- Tüketim Noktası Seçiniz --</option>
                     </select>
                     <span asp-validation-for="TuketimNoktasiId" class="text-danger small"></span>
@@ -32,13 +32,13 @@
             <div class="row mb-4">
                 <div class="col-md-6">
                     <label asp-for="SozlesmeId" class="form-label fw-bold">Sözleşme Bilgisi</label>
-                    <select asp-for="SozlesmeId" asp-items="ViewBag.Sozlesmeler" class="form-select">
+                    <select data-control="select2" asp-for="SozlesmeId" asp-items="ViewBag.Sozlesmeler" class="form-select">
                         <option value="">-- İsteğe Bağlı Seçiniz --</option>
                     </select>
                 </div>
                 <div class="col-md-6">
                     <label asp-for="SayacId" class="form-label fw-bold">Sayaç Bilgisi</label>
-                    <select asp-for="SayacId" asp-items="ViewBag.Sayaclar" class="form-select">
+                    <select data-control="select2" asp-for="SayacId" asp-items="ViewBag.Sayaclar" class="form-select">
                         <option value="">-- İsteğe Bağlı Seçiniz --</option>
                     </select>
                 </div>
@@ -47,7 +47,7 @@
             <div class="row mb-4">
                 <div class="col-md-6">
                     <label asp-for="Tip" class="form-label fw-bold">İş Emri Tipi <span class="text-danger">*</span></label>
-                    <select asp-for="Tip" class="form-select">
+                    <select data-control="select2" asp-for="Tip" class="form-select">
                         <option value="">-- Tip Seçiniz --</option>
 
                         <option value="DEGISTIRME">Sayaç Değiştirme (DEGISTIRME)</option>
@@ -64,7 +64,7 @@
                 </div>
                 <div class="col-md-6">
                     <label asp-for="Oncelik" class="form-label fw-bold">Öncelik Durumu <span class="text-danger">*</span></label>
-                    <select asp-for="Oncelik" class="form-select">
+                    <select data-control="select2" asp-for="Oncelik" class="form-select">
                         <option value="Düşük">Düşük</option>
                         <option value="Normal" selected>Normal</option>
                         <option value="Yüksek">Yüksek</option>
@@ -82,7 +82,7 @@
                 </div>
                 <div class="col-md-6">
                     <label asp-for="AtananKullaniciId" class="form-label fw-bold">Saha Personeli Ata</label>
-                    <select asp-for="AtananKullaniciId" asp-items="ViewBag.Personeller" class="form-select">
+                    <select data-control="select2" asp-for="AtananKullaniciId" asp-items="ViewBag.Personeller" class="form-select">
                         <option value="">-- Sonradan Atanacak --</option>
                     </select>
                 </div>
@@ -153,3 +153,4 @@
         });
     </script>
 }
+

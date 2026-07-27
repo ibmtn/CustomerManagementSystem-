@@ -24,12 +24,21 @@ namespace KcetasWeb.Services.Api
 
 
 
-        public async System.Threading.Tasks.Task<PaginatedResponse<Abone>> GetPagedAsync(int page, int pageSize)
+                public async System.Threading.Tasks.Task<PaginatedResponse<Abone>> GetPagedAsync(int page, int pageSize)
         {
             try
             {
-                var response = await _httpClient.GetFromJsonAsync<PaginatedResponse<Abone>>($"/api/Aboneler?page={page}&pageSize={pageSize}", _jsonOptions);
-                return response ?? new PaginatedResponse<Abone> { CurrentPage = page, PageSize = pageSize };
+                var allData = await GetAllAsync();
+                var count = allData.Count;
+                var pagedData = allData.OrderByDescending(x => x.abone_id).Skip((page - 1) * pageSize).Take(pageSize).ToList();
+                return new PaginatedResponse<Abone>
+                {
+                    Data = pagedData,
+                    TotalCount = count,
+                    CurrentPage = page,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling(count / (double)pageSize)
+                };
             }
             catch
             {
@@ -144,3 +153,4 @@ namespace KcetasWeb.Services.Api
         }
     }
 }
+

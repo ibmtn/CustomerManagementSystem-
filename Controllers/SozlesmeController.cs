@@ -83,10 +83,14 @@ namespace KcetasWeb.Controllers
 
             var aboneIds = pagedData.Where(x => x.abone_id.HasValue).Select(x => x.abone_id.Value).Distinct();
             var aboneTasks = aboneIds.Select(id => _aboneService.GetByIdAsync(id));
-            var aboneSonuclar = await Task.WhenAll(aboneTasks);
-            var aboneler = aboneSonuclar.Where(a => a != null).GroupBy(a => a.abone_id).ToDictionary(g => g.Key, g => g.First());
 
-            var tuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync()).GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
+            var tuketimNoktasiTask = _tuketimNoktasiService.GetAllAsync();
+            var aboneSonuclarTask = Task.WhenAll(aboneTasks);
+            
+            await Task.WhenAll(tuketimNoktasiTask, aboneSonuclarTask);
+
+            var aboneler = aboneSonuclarTask.Result.Where(a => a != null).GroupBy(a => a.abone_id).ToDictionary(g => g.Key, g => g.First());
+            var tuketimNoktalari = tuketimNoktasiTask.Result.GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
 
             var viewModels = pagedData.Select(s => {
                 var abone = aboneler.ContainsKey(s.abone_id ?? 0) ? aboneler[s.abone_id ?? 0] : null;

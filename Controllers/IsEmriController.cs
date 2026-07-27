@@ -48,13 +48,19 @@ public class IsEmriController : Controller
     {
         // Önce temel tarih ve durum/arama filtrelerini API üzerinden çekiyoruz.
         // Tip filtresini burada göndermiyoruz çünkü DB'deki değer (BAGLAMA) ile UI'daki (Sayaç Bağlama) farklı olabiliyor.
-        var isEmirleri = await _isEmriService.FiltreleAsync(null, filtre.FiltreDurum, filtre.BaslangicTarih, filtre.BitisTarih, filtre.AramaMetni);
+        var isEmirleriTask = _isEmriService.FiltreleAsync(null, filtre.FiltreDurum, filtre.BaslangicTarih, filtre.BitisTarih, filtre.AramaMetni);
 
         // OPTİMİZASYON: N+1 Sorgu Problemini (Yavaşlık) Çözmek İçin
         // Tüm Tüketim Noktalarını ve Kullanıcıları (Personelleri) API'den 1 kez çekip Dictionary (Sözlük) yapıyoruz.
         // Böylece aşağıdaki Select döngüsü içinde binlerce kez API'ye istek atmaktan kurtuluyoruz.
-        var tumKullanicilar = (await _kullaniciDeposu.ListeleAsync()).GroupBy(k => k.kullanici_id).ToDictionary(g => g.Key, g => g.First());
-        var tumTuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync()).GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
+        var kullaniciTask = _kullaniciDeposu.ListeleAsync();
+        var tuketimNoktasiTask = _tuketimNoktasiService.GetAllAsync();
+
+        await Task.WhenAll(isEmirleriTask, kullaniciTask, tuketimNoktasiTask);
+
+        var isEmirleri = isEmirleriTask.Result.OrderByDescending(x => x.created_at).ToList();
+        var tumKullanicilar = kullaniciTask.Result.GroupBy(k => k.kullanici_id).ToDictionary(g => g.Key, g => g.First());
+        var tumTuketimNoktalari = tuketimNoktasiTask.Result.GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
 
         filtre.IsEmirleri = isEmirleri.Select(ie => {
             var kullanici = ie.atanan_kullanici_id.HasValue && tumKullanicilar.ContainsKey((int)ie.atanan_kullanici_id.Value) 
@@ -84,6 +90,12 @@ public class IsEmriController : Controller
                 Adres = tn != null ? tn.acik_adres : "Adres bilgisi alınamadı"
             };
         }).ToList();
+
+        // Benzersiz değerleri Select2 dropdown'ları için ViewBag'e ekle
+        ViewBag.IsEmriNolar = filtre.IsEmirleri.Select(x => x.IsEmriNo).Where(x => !string.IsNullOrEmpty(x)).Distinct().OrderBy(x => x).ToList();
+        ViewBag.TekilKodlar = filtre.IsEmirleri.Select(x => x.tekil_kod).Where(x => !string.IsNullOrEmpty(x)).Distinct().OrderBy(x => x).ToList();
+        ViewBag.AboneAdlari = filtre.IsEmirleri.Select(x => x.musteriDurum).Where(x => !string.IsNullOrEmpty(x)).Distinct().OrderBy(x => x).ToList();
+        ViewBag.Personeller = filtre.IsEmirleri.Select(x => x.AtananKullaniciAdi).Where(x => !string.IsNullOrEmpty(x)).Distinct().OrderBy(x => x).ToList();
 
         // Şimdi UI uyumlu hale gelmiş nesneler üzerinde detaylı string filtrelerini uyguluyoruz
         if (!string.IsNullOrEmpty(filtre.FiltreTip))

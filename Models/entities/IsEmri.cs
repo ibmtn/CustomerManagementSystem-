@@ -14,7 +14,7 @@ namespace KcetasWeb.Models
         public int tuketim_noktasi_id { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("tuketimNoktasi")]
-        public object TuketimNoktasi { get; set; } = new { };
+        public KcetasWeb.Models.TuketimNoktasi? TuketimNoktasi { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sayacId")]
         public int? sayac_id { get; set; }

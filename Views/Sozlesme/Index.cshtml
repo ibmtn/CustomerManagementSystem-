@@ -31,7 +31,7 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-bold">Tüketici Grubu</label>
-                <select name="FiltreTuketiciGrubu" class="form-select">
+                <select data-control="select2" name="FiltreTuketiciGrubu" class="form-select">
                     <option value="">Tümü</option>
                     <option value="Mesken" selected="@(Model.FiltreTuketiciGrubu == "Mesken" ? "selected" : null)">Mesken</option>
                     <option value="Ticarethane" selected="@(Model.FiltreTuketiciGrubu == "Ticarethane" ? "selected" : null)">Ticarethane</option>
@@ -42,7 +42,7 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-bold">Durum</label>
-                <select name="FiltreDurum" class="form-select">
+                <select data-control="select2" name="FiltreDurum" class="form-select">
                     <option value="">Tümü</option>
                     <option value="Aktif" selected="@(Model.FiltreDurum == "Aktif" ? "selected" : null)">Aktif</option>
                     <option value="Güvence Bekliyor" selected="@(Model.FiltreDurum == "Güvence Bekliyor" ? "selected" : null)">Güvence Bekliyor</option>
@@ -156,3 +156,4 @@
         </nav>
     </div>
 }
+

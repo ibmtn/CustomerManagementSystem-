@@ -36,6 +36,21 @@ namespace KcetasWeb.ViewModels
             KcetasWeb.Models.Enums.IsEmriDurumu.Basarisiz => "danger",
             _ => "secondary"
         };
+
+        public static string GetTipAd(KcetasWeb.Models.Enums.IsEmriTipi tip) => tip switch
+        {
+            KcetasWeb.Models.Enums.IsEmriTipi.Degistirme => "Sayaç Değiştirme",
+            KcetasWeb.Models.Enums.IsEmriTipi.Sokme => "Sayaç Sökme",
+            KcetasWeb.Models.Enums.IsEmriTipi.Kesme => "Enerji Kesme",
+            KcetasWeb.Models.Enums.IsEmriTipi.Acma => "Enerji Açma",
+            KcetasWeb.Models.Enums.IsEmriTipi.EndeksOkuma => "Endeks Okuma",
+            KcetasWeb.Models.Enums.IsEmriTipi.SayacAriza => "Sayaç Arıza",
+            KcetasWeb.Models.Enums.IsEmriTipi.Muhurleme => "Mühürleme",
+            KcetasWeb.Models.Enums.IsEmriTipi.KesifInceleme => "Keşif İnceleme",
+            KcetasWeb.Models.Enums.IsEmriTipi.YeniBaglanti => "Yeni Bağlantı",
+            (KcetasWeb.Models.Enums.IsEmriTipi)1 => "Yeni Bağlama", // Handle legacy/missing 1 value
+            _ => tip.ToString()
+        };
     }
 
     public class IsEmriSatirViewModel

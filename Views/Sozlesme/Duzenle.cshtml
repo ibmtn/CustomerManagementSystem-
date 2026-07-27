@@ -23,14 +23,14 @@
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Sözleşme Tipi <span class="text-danger">*</span></label>
-                            <select class="form-select" name="sozlesme_tipi" required>
+                            <select data-control="select2" class="form-select" name="sozlesme_tipi" required>
                                 <option value="Bireysel" selected="@(Model.sozlesme_tipi == "Bireysel")">Bireysel</option>
                                 <option value="Kurumsal" selected="@(Model.sozlesme_tipi == "Kurumsal")">Kurumsal</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Tarife Grubu <span class="text-danger">*</span></label>
-                            <select class="form-select" name="tarife_id" required>
+                            <select data-control="select2" class="form-select" name="tarife_id" required>
                                 <option value="1" selected="@(Model.tarife_id == 1)">1 - Mesken</option>
                                 <option value="3" selected="@(Model.tarife_id == 3)">3 - Ticarethane</option>
                                 <option value="2" selected="@(Model.tarife_id == 2)">2 - Sanayi</option>
@@ -41,7 +41,7 @@
 
                         <div class="col-md-12 mb-3">
                             <label class="form-label fw-bold">Durum</label>
-                            <select class="form-select" name="statu">
+                            <select data-control="select2" class="form-select" name="statu">
                                 <option value="Aktif" selected="@(Model.statu == "Aktif")">Aktif</option>
                                 <option value="Güvence Bekliyor" selected="@(Model.statu == "Güvence Bekliyor")">Güvence Bekliyor</option>
                                 <option value="Feshedildi" selected="@(Model.statu == "Feshedildi")">Feshedildi</option>
@@ -83,7 +83,7 @@
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label fw-bold">İletişim Tercihi</label>
-                            <select class="form-select" name="iletisim_tercihi">
+                            <select data-control="select2" class="form-select" name="iletisim_tercihi">
                                 <option value="SMS" selected="@(Model.iletisim_tercihi == "SMS")">SMS</option>
                                 <option value="Email" selected="@(Model.iletisim_tercihi == "Email")">E-Posta</option>
                             </select>
@@ -101,3 +101,4 @@
         </div>
     </div>
 </div>
+

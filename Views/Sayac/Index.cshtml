@@ -34,7 +34,7 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-bold">Marka</label>
-                <select name="FiltreMarka" class="form-select">
+                <select data-control="select2" name="FiltreMarka" class="form-select">
                     <option value="">Tümü</option>
                     <option value="Makel" selected="@(Model.FiltreMarka == "Makel" ? "selected" : null)">Makel</option>
                     <option value="Luna" selected="@(Model.FiltreMarka == "Luna" ? "selected" : null)">Luna</option>
@@ -44,7 +44,7 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-bold">Durum</label>
-                <select name="FiltreDurum" class="form-select">
+                <select data-control="select2" name="FiltreDurum" class="form-select">
                     <option value="">Tümü</option>
                     <option value="Depoda" selected="@(Model.FiltreDurum == "Depoda" ? "selected" : null)">Depoda</option>
                     <option value="Bağlı" selected="@(Model.FiltreDurum == "Bağlı" ? "selected" : null)">Bağlı</option>

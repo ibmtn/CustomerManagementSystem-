@@ -19,6 +19,7 @@ namespace KcetasWeb.ViewModels
         public DateTime? FiltreBelgeTarihi { get; set; }
         public string? FiltreBelgeNo { get; set; }
         public string? FiltreTekilKod { get; set; }
+        public string AktifSekme { get; set; } = "Fatura";
 
         public List<BelgeSatirViewModel> Belgeler { get; set; } = new List<BelgeSatirViewModel>();
     }

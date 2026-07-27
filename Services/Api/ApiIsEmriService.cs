@@ -146,8 +146,27 @@ namespace KcetasWeb.Services.Api
             isEmri.updated_at = DateTime.Now;
             
             // Backend validation hatasını önlemek için eksik olan required navigation nesnelerini dolduruyoruz
-            if (isEmri.TuketimNoktasi == null) {
-                isEmri.TuketimNoktasi = new { };
+            if (isEmri.TuketimNoktasi == null || isEmri.TuketimNoktasi.ToString() == "{ }") {
+                try {
+                    var tnResponse = await _httpClient.GetAsync("/api/TuketimNoktasi?page=1&pageSize=5000");
+                    if (tnResponse.IsSuccessStatusCode) {
+                        var tnList = await tnResponse.Content.ReadFromJsonAsync<List<KcetasWeb.Models.TuketimNoktasi>>(_jsonOptions);
+                        isEmri.TuketimNoktasi = tnList?.FirstOrDefault(x => x.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
+                    }
+                } catch { }
+                
+                if (isEmri.TuketimNoktasi == null) {
+                    isEmri.TuketimNoktasi = new KcetasWeb.Models.TuketimNoktasi { 
+                        tuketim_noktasi_id = isEmri.tuketim_noktasi_id, 
+                        tekil_kod = "GEÇİCİ",
+                        ilce_id = 1,
+                        tuketici_grubu = "MESKEN",
+                        baglanti_gucu_kw = 1
+                    };
+                }
+            }
+            if (string.IsNullOrEmpty(isEmri.oncelik)) {
+                isEmri.oncelik = "NORMAL";
             }
 
             var response = await _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{isEmriId}", isEmri, _jsonOptions);
@@ -176,9 +195,31 @@ namespace KcetasWeb.Services.Api
             isEmri.updated_at = DateTime.Now;
             
             // Backend validation hatasını önlemek için eksik olan required navigation nesnelerini dolduruyoruz
-            if (isEmri.TuketimNoktasi == null) {
-                isEmri.TuketimNoktasi = new { };
+            if (isEmri.TuketimNoktasi == null || isEmri.TuketimNoktasi.ToString() == "{ }") {
+                try {
+                    var tnResponse = await _httpClient.GetAsync("/api/TuketimNoktasi?page=1&pageSize=5000");
+                    if (tnResponse.IsSuccessStatusCode) {
+                        var tnList = await tnResponse.Content.ReadFromJsonAsync<List<KcetasWeb.Models.TuketimNoktasi>>(_jsonOptions);
+                        isEmri.TuketimNoktasi = tnList?.FirstOrDefault(x => x.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
+                    }
+                } catch { }
+                
+                if (isEmri.TuketimNoktasi == null) {
+                    isEmri.TuketimNoktasi = new KcetasWeb.Models.TuketimNoktasi { 
+                        tuketim_noktasi_id = isEmri.tuketim_noktasi_id, 
+                        tekil_kod = "GEÇİCİ",
+                        ilce_id = 1,
+                        tuketici_grubu = "MESKEN",
+                        baglanti_gucu_kw = 1
+                    };
+                }
             }
+            if (string.IsNullOrEmpty(isEmri.oncelik)) {
+                isEmri.oncelik = "NORMAL";
+            }
+
+            var jsonStr = System.Text.Json.JsonSerializer.Serialize(isEmri, _jsonOptions);
+            Console.WriteLine("PUT PAYLOAD: " + jsonStr);
 
             var response = await _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{id}", isEmri, _jsonOptions);
             if (!response.IsSuccessStatusCode)

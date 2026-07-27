@@ -28,7 +28,7 @@
 
                     <div class="mb-4">
                         <label class="form-label fw-bold">Tüketim Noktası (Bağlanacak Yer) <span class="text-danger">*</span></label>
-                        <select class="form-select" name="tuketim_noktasi_id" required>
+                        <select data-control="select2" class="form-select" name="tuketim_noktasi_id" required>
                             <option value="0">-- Boşa Al (Depoya Kaldır / Sök) --</option>
                             @if (tuketimNoktalari != null)
                             {

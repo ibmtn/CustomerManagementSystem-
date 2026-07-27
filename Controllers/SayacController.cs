@@ -42,7 +42,7 @@ namespace KcetasWeb.Controllers
             if (!string.IsNullOrEmpty(filtre.FiltreDurum) && Enum.TryParse<KcetasWeb.Models.Enums.SayacDurumu>(filtre.FiltreDurum, out var seciliDurum))
                 sayaclar = sayaclar.Where(x => x.durum == seciliDurum);
 
-            var sayacList = sayaclar.ToList();
+            var sayacList = sayaclar.OrderByDescending(x => x.sayac_id).ToList();
             int totalItems = sayacList.Count;
 
             filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;

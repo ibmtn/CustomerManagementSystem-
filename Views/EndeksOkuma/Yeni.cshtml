@@ -27,7 +27,7 @@
                     <div class="row mb-4">
                         <div class="col-md-12 mb-3">
                             <label class="form-label fw-bold">Sözleşme Seçimi <span class="text-danger">*</span></label>
-                            <select class="form-select form-select-lg border-primary" id="sozlesmeSelect" required>
+                            <select data-control="select2" class="form-select form-select-lg border-primary" id="sozlesmeSelect" required>
                                 <option value="">Önce Sözleşme Seçin...</option>
                                 @if (ViewBag.Sozlesmeler != null && ViewBag.TuketimNoktalari != null)
                                 {
@@ -54,7 +54,7 @@
                     <div class="row mb-4">
                         <div class="col-md-6 mb-3 mb-md-0">
                             <label class="form-label fw-bold">Tüketim Noktası (Abone) <span class="text-danger">*</span></label>
-                            <select class="form-select form-select-lg text-muted" name="TuketimNoktasiId" required style="pointer-events: none; background-color: #e9ecef;" tabindex="-1">
+                            <select data-control="select2" class="form-select form-select-lg text-muted" name="TuketimNoktasiId" required style="pointer-events: none; background-color: #e9ecef;" tabindex="-1">
                                 <option value="">Sözleşme seçildiğinde otomatik dolar...</option>
                                 @if (ViewBag.TuketimNoktalari != null)
                                 {
@@ -67,7 +67,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Sayaç Seri No <span class="text-danger">*</span></label>
-                            <select class="form-select form-select-lg text-muted" name="SayacId" required style="pointer-events: none; background-color: #e9ecef;" tabindex="-1">
+                            <select data-control="select2" class="form-select form-select-lg text-muted" name="SayacId" required style="pointer-events: none; background-color: #e9ecef;" tabindex="-1">
                                 <option value="">Sözleşme seçildiğinde otomatik dolar...</option>
                                 @if (ViewBag.Sayaclar != null)
                                 {
@@ -83,12 +83,12 @@
                     <div class="row mb-4">
                         <div class="col-md-6 mb-3 mb-md-0">
                             <label class="form-label fw-bold">Okuma Tipi <span class="text-danger">*</span></label>
-                            <select class="form-select form-select-lg" name="okuma_tipi" asp-items="Html.GetEnumSelectList<KcetasWeb.Models.Enums.OkumaTipi>()">
+                            <select data-control="select2" class="form-select form-select-lg" name="okuma_tipi" asp-items="Html.GetEnumSelectList<KcetasWeb.Models.Enums.OkumaTipi>()">
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Okuma Kaynağı <span class="text-danger">*</span></label>
-                            <select class="form-select form-select-lg" name="okuma_kaynagi" asp-items="Html.GetEnumSelectList<KcetasWeb.Models.Enums.OkumaKaynagi>()">
+                            <select data-control="select2" class="form-select form-select-lg" name="okuma_kaynagi" asp-items="Html.GetEnumSelectList<KcetasWeb.Models.Enums.OkumaKaynagi>()">
                             </select>
                         </div>
                     </div>
@@ -130,25 +130,8 @@
 </div>
 
 @section Scripts {
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
-    
-    <!-- jQuery is required for Select2 if not already included -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/tr.js"></script>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Initialize Select2
-            $('#sozlesmeSelect').select2({
-                theme: 'bootstrap-5',
-                language: 'tr',
-                placeholder: 'Önce Sözleşme Seçin veya Arayın...',
-                width: '100%'
-            });
-
-            const sayacSelect = document.querySelector('select[name="SayacId"]');
+        document.addEventListener('DOMContentLoaded', function () {const sayacSelect = document.querySelector('select[name="SayacId"]');
             const oncekiEndeksInput = document.getElementById('onceki_endeks');
             const endeksMesaj = document.getElementById('endeks_mesaj');
 
@@ -217,3 +200,6 @@
         });
     </script>
 }
+
+
+

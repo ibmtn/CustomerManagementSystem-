@@ -30,13 +30,13 @@
                         
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">İl Seçiniz <span class="text-danger">*</span></label>
-                            <select class="form-select bg-light" name="il_adi" id="ilSelect" required readonly>
+                            <select data-control="select2" class="form-select bg-light" name="il_adi" id="ilSelect" required readonly>
                                 <option value="Kayseri" selected>Kayseri</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">İlçe Seçiniz <span class="text-danger">*</span></label>
-                            <select class="form-select" name="ilce_id" id="ilceSelect" required>
+                            <select data-control="select2" class="form-select" name="ilce_id" id="ilceSelect" required>
                                 <option value="">Önce İl Seçin</option>
                             </select>
                         </div>
@@ -56,7 +56,7 @@
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Tüketici Grubu <span class="text-danger">*</span></label>
-                            <select class="form-select" name="tuketici_grubu" required>
+                            <select data-control="select2" class="form-select" name="tuketici_grubu" required>
                                 <option value="Mesken">MESKEN</option>
                                 <option value="Ticarethane">TİCARETHANE</option>
                                 <option value="Sanayi">SANAYİ</option>

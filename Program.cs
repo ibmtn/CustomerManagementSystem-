@@ -3,6 +3,9 @@ using KcetasWeb.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Sisteme MemoryCache ekliyoruz (Tüketim noktaları gibi büyük tabloları önbelleğe almak için)
+builder.Services.AddMemoryCache();
+
 // Sisteme MVC Controller yapılarını ekliyoruz
 builder.Services.AddControllersWithViews();
 
@@ -16,7 +19,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 // 2. API SERVİSLERİNİN DI CONTAINER'A KAYDI
-var baseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://172.10.38.27:5050";
+var baseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://172.10.38.28:5050";
 Action<HttpClient> configureClient = client => 
 {
     client.BaseAddress = new Uri(baseUrl);

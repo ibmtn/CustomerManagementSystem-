@@ -1,4 +1,0 @@
-System.Net.Http.HttpRequestException: Response status code does not indicate success: 503 (Server has been shutdown).
-   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
-   at System.Net.Http.HttpClient.GetStringAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken)
-   at KcetasWeb.Services.Api.ApiAboneService.GetAll() in C:\Users\İbrahim\Desktop\ŞUAN\KcetasProje\Services\Api\ApiAboneService.cs:line 29

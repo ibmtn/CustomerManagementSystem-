@@ -35,16 +35,23 @@ namespace KcetasWeb.Services.Background
             
             using var timer = new PeriodicTimer(_period);
             
-            while (!stoppingToken.IsCancellationRequested && await timer.WaitForNextTickAsync(stoppingToken))
+            try
             {
-                try
+                while (!stoppingToken.IsCancellationRequested && await timer.WaitForNextTickAsync(stoppingToken))
                 {
-                    await ProcessIsEmirleriAsync();
+                    try
+                    {
+                        await ProcessIsEmirleriAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Otomatik iş emri oluşturulurken bir hata meydana geldi.");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Otomatik iş emri oluşturulurken bir hata meydana geldi.");
-                }
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogInformation("BackgroundService durduruluyor.");
             }
         }
 

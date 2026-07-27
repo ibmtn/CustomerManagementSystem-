@@ -98,7 +98,7 @@ namespace KcetasWeb.Controllers
                     }
                 }
 
-                if (sonuc == PasswordVerificationResult.Success)
+                if (sonuc == PasswordVerificationResult.Success || sonuc == PasswordVerificationResult.SuccessRehashNeeded)
                 {
                     var rol = RolListesi.BulRolId(kayitliKullanici.rol_id ?? 0);
                     var rolAdi = rol?.rol_adi ?? AppRoles.MusteriTemsilcisi;

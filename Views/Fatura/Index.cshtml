@@ -44,7 +44,7 @@
             </div>
             <div class="col-md-2">
                 <label class="form-label fw-bold">Durum</label>
-                <select name="FiltreDurum" class="form-select">
+                <select data-control="select2" name="FiltreDurum" class="form-select">
                     <option value="">Tümü</option>
                     <option value="TASLAK" selected="@(Model.FiltreDurum == "TASLAK" ? "selected" : null)">Taslak</option>
                     <option value="HESAPLANDI" selected="@(Model.FiltreDurum == "HESAPLANDI" ? "selected" : null)">Hesaplandı</option>

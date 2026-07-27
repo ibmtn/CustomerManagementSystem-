@@ -58,12 +58,21 @@ namespace KcetasWeb.Services.Api
             return (birimFiyat, enerjiBedeli, dagitimBedeli, trtPayi, enerjiFonu, kdvTutari, toplamTutar, kalemler);
         }
 
-        public async Task<PaginatedResponse<Fatura>> GetPagedAsync(int page, int pageSize)
+                public async Task<PaginatedResponse<Fatura>> GetPagedAsync(int page, int pageSize)
         {
             try
             {
-                var response = await _httpClient.GetFromJsonAsync<PaginatedResponse<Fatura>>($"/api/Fatura?page={page}&pageSize={pageSize}", _jsonOptions);
-                return response ?? new PaginatedResponse<Fatura> { CurrentPage = page, PageSize = pageSize };
+                var allData = await GetAllAsync();
+                var count = allData.Count;
+                var pagedData = allData.OrderByDescending(x => x.fatura_id).Skip((page - 1) * pageSize).Take(pageSize).ToList();
+                return new PaginatedResponse<Fatura>
+                {
+                    Data = pagedData,
+                    TotalCount = count,
+                    CurrentPage = page,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling(count / (double)pageSize)
+                };
             }
             catch
             {
@@ -153,3 +162,4 @@ namespace KcetasWeb.Services.Api
 
     }
 }
+

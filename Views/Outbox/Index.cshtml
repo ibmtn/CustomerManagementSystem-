@@ -79,7 +79,7 @@
         <form asp-action="Index" method="get" class="row g-3 align-items-end">
             <div class="col-md-3">
                 <label class="form-label fw-bold">Durum</label>
-                <select name="durum" class="form-select">
+                <select data-control="select2" name="durum" class="form-select">
                     <option value="">Tümü</option>
                     <option value="BEKLIYOR" selected="@(Model.FiltreDurum == "BEKLIYOR" ? "selected" : null)">Bekliyor</option>
                     <option value="GONDERILDI" selected="@(Model.FiltreDurum == "GONDERILDI" ? "selected" : null)">Gönderildi</option>
@@ -340,3 +340,4 @@
         }
     </script>
 }
+

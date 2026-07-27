@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using KcetasWeb.Models;
 using System;
@@ -52,7 +52,7 @@ namespace KcetasWeb.Controllers
             if (!string.IsNullOrEmpty(filtre.FiltreTuketiciGrubu))
                 data = data.Where(x => x.tuketici_grubu != null && x.tuketici_grubu.Equals(filtre.FiltreTuketiciGrubu, StringComparison.OrdinalIgnoreCase));
 
-            var dataList = data.ToList();
+            var dataList = data.OrderByDescending(x => x.tuketim_noktasi_id).ToList();
             int totalItems = dataList.Count;
             
             filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;

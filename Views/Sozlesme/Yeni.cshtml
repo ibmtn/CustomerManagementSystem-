@@ -36,7 +36,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Tüketim Noktası (Tesisat) <span class="text-danger">*</span></label>
-                            <select class="form-select select2" name="tuketim_noktasi_id" required>
+                            <select data-control="select2" class="form-select" name="tuketim_noktasi_id" data-placeholder="Tesisat Se�iniz..." required>
                                 <option value="" disabled selected>Tesisat Seçiniz...</option>
                                 @if(ViewBag.TuketimNoktalari != null)
                                 {
@@ -49,7 +49,7 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Abone (Müşteri) <span class="text-danger">*</span></label>
-                            <select class="form-select select2" name="abone_id" required>
+                            <select data-control="select2" class="form-select" name="abone_id" data-placeholder="M��teri Se�iniz..." required>
                                 <option value="" disabled selected>Müşteri Seçiniz...</option>
                                 @if(ViewBag.Aboneler != null)
                                 {
@@ -66,14 +66,14 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Sözleşme Tipi <span class="text-danger">*</span></label>
-                            <select class="form-select" name="sozlesme_tipi" required>
+                            <select data-control="select2" class="form-select" name="sozlesme_tipi" required>
                                 <option value="Bireysel">Bireysel</option>
                                 <option value="Kurumsal">Kurumsal</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Tarife Grubu <span class="text-danger">*</span></label>
-                            <select class="form-select" name="tarife_id" required>
+                            <select data-control="select2" class="form-select" name="tarife_id" required>
                                 <option value="" disabled selected>Seçiniz</option>
                                 <option value="1">1 - Mesken</option>
                                 <option value="3">3 - Ticarethane</option>
@@ -89,7 +89,7 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Ödeme Şekli <span class="text-danger">*</span></label>
-                            <select class="form-select" name="odeme_sekli" required>
+                            <select data-control="select2" class="form-select" name="odeme_sekli" required>
                                 <option value="Nakit">Nakit</option>
                                 <option value="Kredi Kartı">Kredi Kartı</option>
                                 <option value="Havale/EFT">Havale/EFT</option>
@@ -110,3 +110,5 @@
         </div>
     </div>
 </div>
+
+

@@ -21,7 +21,7 @@
             <div>
                 <h3 class="fw-bold text-dark mb-1">@Model.IsEmriNo</h3>
                 <p class="fs-6 fw-bold text-dark mb-0">@(Model.PlanlananTarih.HasValue ? Model.PlanlananTarih.Value.ToString("dd.MM.yyyy") : "Planlanmadı")</p>
-                <span class="badge bg-info bg-opacity-10 text-info border border-info me-1">@Model.Tip</span>
+                <span class="badge bg-info bg-opacity-10 text-info border border-info me-1">@KcetasWeb.ViewModels.IsEmriListeViewModel.GetTipAd(Model.Tip)</span>
                 <span class="badge bg-@Model.DurumRenk me-1">@Model.Durum</span>
                 <span class="badge bg-secondary bg-opacity-10 text-secondary border">@Model.Oncelik</span>
             </div>
@@ -32,7 +32,7 @@
                     <form action="/IsEmri/PersonelAta" method="post" class="d-inline">
                         <input type="hidden" name="id" value="@Model.IsEmriId" />
                         <div class="input-group">
-                            <select name="personelId" class="form-select form-select-sm" required asp-items="ViewBag.Personeller">
+                            <select data-control="select2" name="personelId" class="form-select form-select-sm" required asp-items="ViewBag.Personeller">
                                 <option value="">Personel Ata/Değiştir</option>
                             </select>
                             <button type="submit" class="btn btn-sm btn-outline-success">Ata</button>
@@ -44,7 +44,7 @@
                 <form action="/IsEmri/DurumGuncelle" method="post" class="d-inline">
                     <input type="hidden" name="id" value="@Model.IsEmriId" />
                     <div class="input-group">
-                        <select name="yeniDurum" class="form-select form-select-sm" required>
+                        <select data-control="select2" name="yeniDurum" class="form-select form-select-sm" required>
                             <option value="">Durum Güncelle</option>
                             <option value="Atandi">Ekibe Ata</option>
                             <option value="Yolda">Yolda</option>
@@ -82,7 +82,7 @@
             <div class="card-body">
                 <table class="table table-borderless mb-0">
                     <tr><td class="text-muted fw-semibold" style="width:40%">İş Emri No</td><td><strong>@(Model.IsEmriNo ?? "-")</strong></td></tr>
-                    <tr><td class="text-muted fw-semibold">Tip</td><td>@Model.Tip</td></tr>
+                    <tr><td class="text-muted fw-semibold">Tip</td><td>@KcetasWeb.ViewModels.IsEmriListeViewModel.GetTipAd(Model.Tip)</td></tr>
                     <tr><td class="text-muted fw-semibold">Durum</td><td>@Model.Durum</td></tr>
                     <tr><td class="text-muted fw-semibold">Öncelik</td><td>@(Model.Oncelik ?? "-")</td></tr>
                     <tr><td class="text-muted fw-semibold">Açıklama / Not</td><td>@(string.IsNullOrEmpty(Model.Gerekce) ? "-" : Model.Gerekce)</td></tr>
@@ -147,35 +147,7 @@
     </div>
 </div>
 
-<div class="row">
-    <!-- Durum Geçmişi (Timeline) -->
-    <div class="col-md-12 mb-4">
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-light border-0"><h6 class="fw-bold mb-0">Durum Geçmişi (Audit Log)</h6></div>
-            <div class="card-body">
-                @if (ViewBag.AuditLogs != null && ((IEnumerable<KcetasWeb.Models.AuditLog>)ViewBag.AuditLogs).Any())
-                {
-                    <ul class="list-group list-group-flush">
-                        @foreach (var log in (IEnumerable<KcetasWeb.Models.AuditLog>)ViewBag.AuditLogs)
-                        {
-                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 border-bottom">
-                                <div>
-                                    <span class="badge bg-secondary me-2">@log.islem_zamani.ToString("dd.MM.yyyy HH:mm")</span>
-                                    <strong class="text-dark">@log.eski_deger</strong> <i class="bi bi-arrow-right mx-1 text-muted"></i> <strong class="text-primary">@log.yeni_deger</strong>
-                                </div>
-                                <small class="text-muted">Kullanıcı: @log.kullanici_id</small>
-                            </li>
-                        }
-                    </ul>
-                }
-                else
-                {
-                    <p class="text-muted mb-0">Henüz durum güncellemesi yapılmamış.</p>
-                }
-            </div>
-        </div>
-    </div>
-</div>
+
 
 @if (Model.TutanakGirildiMi)
 {
@@ -215,3 +187,4 @@ else if (Model.Durum != KcetasWeb.Models.Enums.IsEmriDurumu.Tamamlandi && Model.
         </div>
     </div>
 }
+

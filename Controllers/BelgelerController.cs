@@ -43,13 +43,25 @@ namespace KcetasWeb.Controllers
 
             // 1. Faturaları Çek
             var faturalar = faturaTask.Result;
+            var sozlesmelerD = sozlesmeTask.Result.GroupBy(s => s.sozlesme_id).ToDictionary(g => g.Key, g => g.First());
+
             foreach (var f in faturalar)
             {
+                string gercekTekilKod = f.tekil_kod ?? "";
+                if (sozlesmelerD.ContainsKey(f.sozlesme_id))
+                {
+                    var sozlesme = sozlesmelerD[f.sozlesme_id];
+                    if (sozlesme.tuketim_noktasi_id > 0 && tnMap.ContainsKey(sozlesme.tuketim_noktasi_id))
+                    {
+                        gercekTekilKod = tnMap[sozlesme.tuketim_noktasi_id].tekil_kod;
+                    }
+                }
+
                 tumBelgeler.Add(new BelgeSatirViewModel
                 {
                     BelgeTipi = "Fatura",
-                    BelgeNo = f.fatura_no,
-                    TuketimNoktasiKodu = f.tekil_kod,
+                    BelgeNo = !string.IsNullOrEmpty(f.fatura_no) ? f.fatura_no : $"FAT-{f.fatura_id}",
+                    TuketimNoktasiKodu = gercekTekilKod,
                     Tarih = f.fatura_tarihi.HasValue ? f.fatura_tarihi.Value.ToDateTime(TimeOnly.MinValue) : (f.created_at ?? DateTime.Now),
                     Tutar = f.toplam_tutar,
                     Aciklama = "Dönem Faturası",
@@ -57,16 +69,16 @@ namespace KcetasWeb.Controllers
                 });
             }
 
-            // 2. Tutanakları Çek (İş Emri tablosunda tutanak_no dolu olanlar)
+            // 2. Tutanakları Çek (İş Emri tablosunda durumu Tamamlandi olanlar)
             var tumIsEmirleri = isEmriTask.Result;
-            var isEmirleri = tumIsEmirleri.Where(ie => !string.IsNullOrEmpty(ie.tutanak_no));
+            var isEmirleri = tumIsEmirleri.Where(ie => ie.durum == KcetasWeb.Models.Enums.IsEmriDurumu.Tamamlandi);
             foreach (var ie in isEmirleri)
             {
                 var tn = tnMap.ContainsKey(ie.tuketim_noktasi_id) ? tnMap[ie.tuketim_noktasi_id] : null;
                 tumBelgeler.Add(new BelgeSatirViewModel
                 {
                     BelgeTipi = "Tutanak",
-                    BelgeNo = ie.tutanak_no,
+                    BelgeNo = !string.IsNullOrEmpty(ie.tutanak_no) ? ie.tutanak_no : $"TUT-{ie.is_emri_id}",
                     TuketimNoktasiKodu = tn != null ? tn.tekil_kod : $"TK-ID-{ie.tuketim_noktasi_id}",
                     Tarih = ie.updated_at ?? ie.created_at,
                     Tutar = null,
@@ -76,7 +88,7 @@ namespace KcetasWeb.Controllers
                         KcetasWeb.Models.Enums.IsEmriTipi.Sokme => "Sayaç Sökme Tutanağı",
                         KcetasWeb.Models.Enums.IsEmriTipi.Degistirme => "Sayaç Değişim Tutanağı",
                         KcetasWeb.Models.Enums.IsEmriTipi.Kesme => "Enerji Kesme Tutanağı",
-                        KcetasWeb.Models.Enums.IsEmriTipi.EnerjiAcma => "Enerji Açma Tutanağı",
+                        KcetasWeb.Models.Enums.IsEmriTipi.Acma => "Enerji Açma Tutanağı",
                         _ => "Saha Operasyon Tutanağı"
                     },
                     Url = $"/Belgeler/Goruntule?tip=Tutanak&id={ie.is_emri_id}"
@@ -109,6 +121,14 @@ namespace KcetasWeb.Controllers
 
             if (!string.IsNullOrEmpty(viewModel.FiltreTekilKod))
                 tumBelgeler = tumBelgeler.Where(b => b.TuketimNoktasiKodu != null && b.TuketimNoktasiKodu.Contains(viewModel.FiltreTekilKod, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            // Aktif Sekme Filtresi (Böylece her sekme kendi içinde sayfalanır)
+            if (viewModel.AktifSekme == "Fatura")
+                tumBelgeler = tumBelgeler.Where(b => b.BelgeTipi == "Fatura").ToList();
+            else if (viewModel.AktifSekme == "Sozlesme")
+                tumBelgeler = tumBelgeler.Where(b => b.BelgeTipi == "Sözleşme").ToList();
+            else if (viewModel.AktifSekme == "Tutanak")
+                tumBelgeler = tumBelgeler.Where(b => b.BelgeTipi == "Tutanak").ToList();
 
             // Sıralama (En yeni en üstte)
             tumBelgeler = tumBelgeler.OrderByDescending(b => b.Tarih).ToList();

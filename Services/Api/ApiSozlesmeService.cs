@@ -27,7 +27,7 @@ namespace KcetasWeb.Services.Api
             {
                 var allData = await GetAllAsync();
                 var count = allData.Count;
-                var pagedData = allData.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+                var pagedData = allData.OrderByDescending(x => x.sozlesme_id).Skip((page - 1) * pageSize).Take(pageSize).ToList();
                 return new PaginatedResponse<Sozlesme>
                 {
                     Data = pagedData,
