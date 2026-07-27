@@ -37,7 +37,7 @@ namespace KcetasWeb.Controllers
         {
             var kullaniciTask = _kullaniciDeposu.ListeleAsync();
             var tuketimNoktasiTask = _tuketimNoktasiService.GetAllAsync();
-            var aboneTask = _aboneService.GetAllAsync();
+            var aboneTask = _aboneService.GetPagedAsync(1, 1);
             var sozlesmeTask = _sozlesmeService.GetAllAsync();
             var isEmriTask = _isEmriService.GetAllAsync();
             var faturaTask = _faturaService.GetAllAsync();
@@ -57,7 +57,7 @@ namespace KcetasWeb.Controllers
             var aktifIsEmriCount = 0;
             var bekleyenFaturaCount = 0;
 
-            try { aboneCount = aboneTask.Result.Count(); } catch { }
+            try { aboneCount = aboneTask.Result.TotalCount; } catch { }
             try { sozlesmeCount = sozlesmeTask.Result.Count(s => s.durum == KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif); } catch { }
             try { 
                 var isEmirleri = isEmriTask.Result;
