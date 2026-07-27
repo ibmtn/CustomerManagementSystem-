@@ -400,10 +400,14 @@ a {
 }
 
 .kc-hero-metric {
-    padding: 0.9rem;
+    padding: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.3rem;
 }
 
 .kc-hero-metric strong,
@@ -414,12 +418,14 @@ a {
 .kc-hero-metric strong {
     color: #fff;
     font-size: 1.35rem;
+    line-height: 1.2;
 }
 
 .kc-hero-metric span {
     color: #dbeafe;
-    font-size: 0.78rem;
+    font-size: 0.85rem;
     font-weight: 700;
+    line-height: 1.4;
 }
 
 .kc-hero-panel {
