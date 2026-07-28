@@ -70,29 +70,17 @@ namespace KcetasWeb.Controllers
             if (kayitliKullanici != null)
             {
                 PasswordVerificationResult sonuc = PasswordVerificationResult.Failed;
-                var hash = kayitliKullanici.sifre_hash ?? "";
-
-                if (hash.StartsWith("$2a$") || hash.StartsWith("$2b$") || hash.StartsWith("$2y$"))
+                
+                bool apiGirisBasarili = await _kullaniciDeposu.GirisKontrolAsync(kullaniciAdi, sifre);
+                
+                if (apiGirisBasarili)
                 {
-                    try
-                    {
-                        if (global::BCrypt.Net.BCrypt.Verify(sifre, hash))
-                            sonuc = PasswordVerificationResult.Success;
-                    }
-                    catch { }
-                }
-                else if (hash.StartsWith("AQAAAA"))
-                {
-                    try
-                    {
-                        sonuc = _sifreHasher.VerifyHashedPassword(kayitliKullanici, hash, sifre);
-                    }
-                    catch { }
+                    sonuc = PasswordVerificationResult.Success;
                 }
                 else
                 {
-                    // Düz metin kontrolü (Eski veya manuel kayıtlı kullanıcılar)
-                    if (hash == sifre || kayitliKullanici.Sifre == sifre)
+                    // Yedek Düz metin kontrolü (API'de henüz şifresi güncellenmemiş test kullanıcıları için)
+                    if (kayitliKullanici.Sifre == sifre || kayitliKullanici.sifre_hash == sifre)
                     {
                         sonuc = PasswordVerificationResult.Success;
                     }
@@ -170,10 +158,9 @@ namespace KcetasWeb.Controllers
                 kullanici_adi = model.KullaniciAdi,
                 rol_id = model.RolId,
                 durum = KcetasWeb.Models.Enums.KullaniciDurumu.Aktif,
-                created_at = DateTime.Now
+                created_at = DateTime.Now,
+                Sifre = model.Sifre
             };
-
-            yeniKullanici.sifre_hash = _sifreHasher.HashPassword(yeniKullanici, model.Sifre);
 
             await _kullaniciDeposu.EkleAsync(yeniKullanici);
 

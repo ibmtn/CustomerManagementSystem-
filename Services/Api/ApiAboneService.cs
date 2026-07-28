@@ -53,15 +53,6 @@ namespace KcetasWeb.Services.Api
 
         public async System.Threading.Tasks.Task<List<Abone>> GetAllAsync()
         {
-            try
-            {
-                var allResponse = await _httpClient.GetFromJsonAsync<List<Abone>>("/api/Aboneler/All", _jsonOptions);
-                if (allResponse != null && allResponse.Count > 0)
-                {
-                    return allResponse;
-                }
-            }
-            catch { }
 
             try
             {

@@ -42,6 +42,14 @@ namespace KcetasWeb.Services.Interfaces
             }
         }
 
+        public Task<bool> GirisKontrolAsync(string kullaniciAdi, string sifre)
+        {
+            var kullanici = _kullanicilar.FirstOrDefault(k => string.Equals(k.kullanici_adi, kullaniciAdi, StringComparison.OrdinalIgnoreCase));
+            if (kullanici == null) return Task.FromResult(false);
+            
+            return Task.FromResult(kullanici.Sifre == sifre || kullanici.sifre_hash == sifre);
+        }
+
         public Task<Kullanici> EkleAsync(Kullanici kullanici)
         {
             lock (_kilit)

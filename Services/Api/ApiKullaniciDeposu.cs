@@ -28,6 +28,13 @@ namespace KcetasWeb.Services.Api
             return liste.FirstOrDefault(k => k.kullanici_id == id);
         }
 
+        public async Task<bool> GirisKontrolAsync(string kullaniciAdi, string sifre)
+        {
+            var body = new { kullaniciAdi = kullaniciAdi, sifre = sifre };
+            var response = await _httpClient.PostAsJsonAsync("/api/Auth/Login", body);
+            return response.IsSuccessStatusCode;
+        }
+
         public async Task<Kullanici?> BulKullaniciAdiIleAsync(string kullaniciAdi)
         {
             // Kullanicilar listesini çekip filtreliyoruz (API'de özel bir endpoint yoksa)

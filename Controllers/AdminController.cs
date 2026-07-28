@@ -72,8 +72,7 @@ namespace KcetasWeb.Controllers
                 Sifre = Sifre
             };
 
-            var hasher = new PasswordHasher<Kullanici>();
-            yeniKullanici.sifre_hash = hasher.HashPassword(yeniKullanici, Sifre);
+            yeniKullanici.Sifre = Sifre;
 
             await _kullaniciDeposu.EkleAsync(yeniKullanici);
 

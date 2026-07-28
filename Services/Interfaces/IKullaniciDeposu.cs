@@ -6,6 +6,7 @@ namespace KcetasWeb.Services.Interfaces
     {
         Task<bool> KullaniciAdiVarMiAsync(string kullaniciAdi);
         Task<Kullanici> EkleAsync(Kullanici kullanici);
+        Task<bool> GirisKontrolAsync(string kullaniciAdi, string sifre);
         Task<Kullanici?> BulKullaniciAdiIleAsync(string kullaniciAdi);
         Task<List<Kullanici>> ListeleAsync();
         Task<Kullanici?> BulIdAsync(long id);
