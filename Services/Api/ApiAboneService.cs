@@ -3,6 +3,7 @@ using System.Text.Json;
 using KcetasWeb.Helpers;
 using KcetasWeb.Models;
 using KcetasWeb.Services.Interfaces;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace KcetasWeb.Services.Api
 {
@@ -10,16 +11,17 @@ namespace KcetasWeb.Services.Api
     {
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
+        private readonly Microsoft.Extensions.Caching.Memory.IMemoryCache _cache;
 
-        public ApiAboneService(HttpClient httpClient)
+        public ApiAboneService(HttpClient httpClient, Microsoft.Extensions.Caching.Memory.IMemoryCache cache)
         {
             _httpClient = httpClient;
+            _cache = cache;
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
                 PropertyNameCaseInsensitive = true
             };
-
         }
 
 
@@ -53,62 +55,83 @@ namespace KcetasWeb.Services.Api
 
         public async System.Threading.Tasks.Task<List<Abone>> GetAllAsync()
         {
-
-            try
+            return await _cache.GetOrCreateAsync("Abone_GetAll_2", async entry =>
             {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
                 var list = new List<Abone>();
-                int currentPage = 1;
-                int totalPages = 1;
-
-                do
+                try
                 {
-                    try
+                    // Fetch first page to get totalCount
+                    var response = await _httpClient.GetAsync("/api/Aboneler/arama?page=1&pageSize=100");
+                    if (!response.IsSuccessStatusCode) return list;
+                    
+                    var jsonStr = await response.Content.ReadAsStringAsync();
+                    using var doc = System.Text.Json.JsonDocument.Parse(jsonStr);
+                    
+                    int totalPages = 1;
+                    if (doc.RootElement.TryGetProperty("totalCount", out var tc) && tc.ValueKind != System.Text.Json.JsonValueKind.Null)
                     {
-                        var response = await _httpClient.GetAsync($"/api/Aboneler/arama?page={currentPage}&pageSize=100");
-                        if (!response.IsSuccessStatusCode) break;
-                        var jsonStr = await response.Content.ReadAsStringAsync();
-                        using var doc = System.Text.Json.JsonDocument.Parse(jsonStr);
-
-                        if (doc.RootElement.TryGetProperty("totalPages", out var tp) && tp.ValueKind == System.Text.Json.JsonValueKind.Number)
+                        if (tc.TryGetInt32(out int totalCount) && totalCount > 0)
                         {
-                            totalPages = tp.GetInt32();
-                            if (totalPages > 50) totalPages = 50;
-                        }
-                        else if (doc.RootElement.TryGetProperty("totalCount", out var tc) && tc.ValueKind != System.Text.Json.JsonValueKind.Null)
-                        {
-                            if (tc.TryGetInt32(out int totalCount) && totalCount > 0)
-                            {
-                                int ps = 100;
-                                if (doc.RootElement.TryGetProperty("pageSize", out var psProp) && psProp.TryGetInt32(out int psVal) && psVal > 0)
-                                {
-                                    ps = psVal;
-                                }
-                                totalPages = (int)Math.Ceiling((double)totalCount / ps);
-                                if (totalPages > 50) totalPages = 50;
-                            }
-                        }
-
-                        if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Array)
-                        {
-                            var items = System.Text.Json.JsonSerializer.Deserialize<List<Abone>>(jsonStr, _jsonOptions);
-                            if (items != null) list.AddRange(items);
-                        }
-                        else if (doc.RootElement.TryGetProperty("data", out var dataProp))
-                        {
-                            var items = System.Text.Json.JsonSerializer.Deserialize<List<Abone>>(dataProp.GetRawText(), _jsonOptions);
-                            if (items != null) list.AddRange(items);
+                            totalPages = (int)Math.Ceiling((double)totalCount / 100.0);
                         }
                     }
-                    catch { break; }
-                    currentPage++;
-                } while (currentPage <= totalPages);
-
-                return list;
-            }
-            catch (Exception)
-            {
-                return new List<Abone>();
-            }
+                    
+                    if (doc.RootElement.TryGetProperty("data", out var dataProp))
+                    {
+                        var items = System.Text.Json.JsonSerializer.Deserialize<List<Abone>>(dataProp.GetRawText(), _jsonOptions);
+                        if (items != null) list.AddRange(items);
+                    }
+                    
+                    if (totalPages > 1)
+                    {
+                        var tasks = new List<Task<List<Abone>>>();
+                        using var semaphore = new SemaphoreSlim(15); // Limit concurrent requests to 15
+                        
+                        for (int i = 2; i <= totalPages; i++)
+                        {
+                            int currentPage = i;
+                            tasks.Add(Task.Run(async () =>
+                            {
+                                await semaphore.WaitAsync();
+                                try
+                                {
+                                    var pageResp = await _httpClient.GetAsync($"/api/Aboneler/arama?page={currentPage}&pageSize=100");
+                                    if (pageResp.IsSuccessStatusCode)
+                                    {
+                                        var pJson = await pageResp.Content.ReadAsStringAsync();
+                                        using var pDoc = System.Text.Json.JsonDocument.Parse(pJson);
+                                        if (pDoc.RootElement.TryGetProperty("data", out var pData))
+                                        {
+                                            var pItems = System.Text.Json.JsonSerializer.Deserialize<List<Abone>>(pData.GetRawText(), _jsonOptions);
+                                            if (pItems != null) return pItems;
+                                        }
+                                    }
+                                }
+                                catch { }
+                                finally
+                                {
+                                    semaphore.Release();
+                                }
+                                return new List<Abone>();
+                            }));
+                        }
+                        
+                        var results = await Task.WhenAll(tasks);
+                        foreach(var r in results)
+                        {
+                            list.AddRange(r);
+                        }
+                    }
+                    
+                    // Order list by abone_id just in case concurrent fetch messed up the order
+                    return list.OrderBy(x => x.abone_id).ToList();
+                }
+                catch
+                {
+                    return list;
+                }
+            });
         }
 
         public async System.Threading.Tasks.Task<Abone?> GetByIdAsync(int id)

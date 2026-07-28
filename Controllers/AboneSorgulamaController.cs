@@ -23,33 +23,42 @@ namespace KcetasWeb.Controllers
             _aboneService = aboneService;
         }
 
-        public async Task<IActionResult> Index(string q)
+        public IActionResult Index(string q)
         {
             ViewBag.Query = q;
-            if (string.IsNullOrEmpty(q))
-            {
-                return View(null);
-            }
+            return View(null);
+        }
 
+        [HttpGet]
+        public async Task<IActionResult> SearchData(string q, int page = 1, int pageSize = 50)
+        {
             var tumAboneler = await _aboneService.GetAllAsync();
-
-            if (q.Equals("All", StringComparison.OrdinalIgnoreCase))
+            
+            IEnumerable<Abone> query = tumAboneler;
+            
+            if (!string.IsNullOrEmpty(q) && !q.Equals("All", StringComparison.OrdinalIgnoreCase))
             {
-                return View(tumAboneler);
+                query = tumAboneler.Where(a =>
+                {
+                    string adSoyad = $"{a.Ad} {a.Soyad}".Trim();
+                    return (a.abone_no != null && a.abone_no.Contains(q, StringComparison.CurrentCultureIgnoreCase)) ||
+                           (adSoyad.Contains(q, StringComparison.CurrentCultureIgnoreCase)) ||
+                           (a.tckn != null && a.tckn.Contains(q, StringComparison.CurrentCultureIgnoreCase)) ||
+                           (a.vkn != null && a.vkn.Contains(q, StringComparison.CurrentCultureIgnoreCase)) ||
+                           (a.Unvan != null && a.Unvan.Contains(q, StringComparison.CurrentCultureIgnoreCase));
+                });
             }
 
-            var results = tumAboneler.Where(a =>
-            {
-                string adSoyad = $"{a.Ad} {a.Soyad}".Trim();
-                
-                return (a.abone_no != null && a.abone_no.Contains(q, StringComparison.CurrentCultureIgnoreCase)) ||
-                       (adSoyad.Contains(q, StringComparison.CurrentCultureIgnoreCase)) ||
-                       (a.tckn != null && a.tckn.Contains(q, StringComparison.CurrentCultureIgnoreCase)) ||
-                       (a.vkn != null && a.vkn.Contains(q, StringComparison.CurrentCultureIgnoreCase)) ||
-                       (a.Unvan != null && a.Unvan.Contains(q, StringComparison.CurrentCultureIgnoreCase));
-            }).ToList();
+            int totalItems = query.Count();
+            var results = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-            return View(results);
+            return Json(new {
+                TotalItems = totalItems,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalPages = (int)Math.Ceiling((double)totalItems / pageSize),
+                Data = results
+            });
         }
 
         public async Task<IActionResult> Detay(long id)
