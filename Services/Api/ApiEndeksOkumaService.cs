@@ -70,18 +70,75 @@ namespace KcetasWeb.Services.Api
             return query.ToList();
         }
 
-        public async System.Threading.Tasks.Task<(int Toplam, int Manuel, int OSOS, int Anomali, decimal OrtalamaTuketim)> GetIstatistiklerAsync()
+        public async System.Threading.Tasks.Task<PagedResponse<EndeksOkuma>> GetPagedAsync(
+            int page, 
+            int pageSize,
+            string? okumaTipi,
+            string? durum,
+            DateTime? baslangic,
+            DateTime? bitis,
+            string? aramaMetni,
+            string? sayacId,
+            string? donem,
+            string? dogrulamaDurumu)
         {
-            var data = await GetAllAsync();
-            
-            int toplam = data.Count;
-            int manuel = data.Count(x => x.okuma_kaynagi == KcetasWeb.Models.Enums.OkumaKaynagi.Manuel);
-            int osos = data.Count(x => x.okuma_kaynagi == KcetasWeb.Models.Enums.OkumaKaynagi.Osos);
-            int anomali = data.Count(x => x.anomali_mi == true);
-            
-            decimal ortalama = toplam > 0 ? data.Average(x => (x.yeni_endeks ?? 0) - (x.onceki_endeks ?? 0)) : 0;
-            
-            return (toplam, manuel, osos, anomali, ortalama);
+            try
+            {
+                var queryParams = new List<string>
+                {
+                    $"page={page}",
+                    $"pageSize={pageSize}"
+                };
+
+                if (!string.IsNullOrEmpty(okumaTipi)) queryParams.Add($"okumaTipi={Uri.EscapeDataString(okumaTipi)}");
+                if (!string.IsNullOrEmpty(durum)) queryParams.Add($"durum={Uri.EscapeDataString(durum)}");
+                if (baslangic.HasValue) queryParams.Add($"baslangic={baslangic.Value.ToString("yyyy-MM-ddTHH:mm:ss")}");
+                if (bitis.HasValue) queryParams.Add($"bitis={bitis.Value.ToString("yyyy-MM-ddTHH:mm:ss")}");
+                if (!string.IsNullOrEmpty(aramaMetni)) queryParams.Add($"arama={Uri.EscapeDataString(aramaMetni)}");
+                if (!string.IsNullOrEmpty(sayacId)) queryParams.Add($"sayacId={Uri.EscapeDataString(sayacId)}");
+                if (!string.IsNullOrEmpty(donem)) queryParams.Add($"donem={Uri.EscapeDataString(donem)}");
+                if (!string.IsNullOrEmpty(dogrulamaDurumu)) queryParams.Add($"dogrulamaDurumu={Uri.EscapeDataString(dogrulamaDurumu)}");
+
+                string url = $"/api/EndeksOkuma/Paged?{string.Join("&", queryParams)}";
+                
+                var result = await _httpClient.GetFromJsonAsync<PagedResponse<EndeksOkuma>>(url, _jsonOptions);
+                return result ?? new PagedResponse<EndeksOkuma>();
+            }
+            catch
+            {
+                return new PagedResponse<EndeksOkuma>();
+            }
+        }
+
+        private class EndeksOkumaStatsResponse
+        {
+            public int ToplamOkuma { get; set; }
+            public int OsosOkuma { get; set; }
+            public int ManuelOkuma { get; set; }
+            public int Duzeltme { get; set; }
+        }
+
+        public async System.Threading.Tasks.Task<(int Toplam, int Manuel, int OSOS, int Anomali, decimal OrtalamaTuketim)> GetIstatistiklerAsync(string? donem = null)
+        {
+            try
+            {
+                string url = "/api/EndeksOkuma/Stats";
+                if (!string.IsNullOrEmpty(donem))
+                {
+                    url += $"?donem={Uri.EscapeDataString(donem)}";
+                }
+
+                var stats = await _httpClient.GetFromJsonAsync<EndeksOkumaStatsResponse>(url, _jsonOptions);
+                if (stats != null)
+                {
+                    return (stats.ToplamOkuma, stats.ManuelOkuma, stats.OsosOkuma, stats.Duzeltme, 0m);
+                }
+            }
+            catch
+            {
+                // Fallback on error
+            }
+            return (0, 0, 0, 0, 0m);
         }
 
         public async System.Threading.Tasks.Task CreateAsync(EndeksOkuma model)

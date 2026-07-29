@@ -52,7 +52,21 @@ namespace KcetasWeb.Controllers
             filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
             filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
 
-            var faturaTask = _faturaService.GetPagedAsync(filtre.CurrentPage, filtre.PageSize);
+            int? durumParam = null;
+            if (!string.IsNullOrEmpty(filtre.FiltreDurum) && Enum.TryParse<KcetasWeb.Models.enums.FaturaDurumu>(filtre.FiltreDurum, true, out var seciliDurum))
+            {
+                durumParam = (int)seciliDurum;
+            }
+
+            // Not: SozlesmeNo üzerinden SozlesmeId'yi bulup API'ye parametre olarak geçebiliriz,
+            // ancak şimdilik FaturaNo ve Durum API tarafında filtrelenecek, diğerleri client tarafında.
+            var faturaTask = _faturaService.GetPagedAsync(
+                filtre.CurrentPage, 
+                filtre.PageSize, 
+                filtre.FiltreFaturaNo, 
+                durumParam, 
+                null);
+
             var sozlesmeTask = _sozlesmeService.GetAllAsync();
             var tuketimNoktasiTask = _tuketimNoktasiService.GetAllAsync();
             
@@ -104,8 +118,7 @@ namespace KcetasWeb.Controllers
                 };
             }).ToList();
 
-            if (!string.IsNullOrEmpty(filtre.FiltreFaturaNo))
-                viewModels = viewModels.Where(x => x.fatura_no != null && x.fatura_no.Contains(filtre.FiltreFaturaNo, StringComparison.OrdinalIgnoreCase)).ToList();
+            // FiltreFaturaNo ve FiltreDurum API tarafında Server-Side olarak filtrelendiği için burada tekrar filtrelemeye gerek yoktur.
             
             if (!string.IsNullOrEmpty(filtre.FiltreTekilKod))
                 viewModels = viewModels.Where(x => x.tekil_kod != null && x.tekil_kod.Contains(filtre.FiltreTekilKod, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -115,9 +128,6 @@ namespace KcetasWeb.Controllers
 
             if (!string.IsNullOrEmpty(filtre.FiltreSozlesmeNo))
                 viewModels = viewModels.Where(x => x.sozlesme_no != null && x.sozlesme_no.Contains(filtre.FiltreSozlesmeNo, StringComparison.OrdinalIgnoreCase)).ToList();
-
-            if (!string.IsNullOrEmpty(filtre.FiltreDurum))
-                viewModels = viewModels.Where(x => x.durum != null && x.durum.Equals(filtre.FiltreDurum, StringComparison.OrdinalIgnoreCase)).ToList();
 
             viewModels = viewModels
                 .OrderBy(x => x.durum?.Equals("ONAYLANDI", StringComparison.OrdinalIgnoreCase) == true ? 1 : 0)

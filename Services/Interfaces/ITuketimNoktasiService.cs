@@ -5,6 +5,7 @@ namespace KcetasWeb.Services.Interfaces
 {
     public interface ITuketimNoktasiService
     {
+        Task<int> GetTotalCountAsync();
         Task<List<TuketimNoktasi>> GetAllAsync();
         Task<TuketimNoktasi?> GetByIdAsync(string tekilKod);
         Task CreateAsync(TuketimNoktasi tuketimNoktasi);

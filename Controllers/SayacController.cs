@@ -31,26 +31,30 @@ namespace KcetasWeb.Controllers
 }
         public async Task<IActionResult> Index(KcetasWeb.ViewModels.SayacListeViewModel filtre)
         {
-            var sayaclar = (await _sayacService.GetAllAsync()).AsQueryable();
-
-            if (!string.IsNullOrEmpty(filtre.FiltreSeriNo))
-                sayaclar = sayaclar.Where(x => x.seri_no != null && x.seri_no.Contains(filtre.FiltreSeriNo, StringComparison.OrdinalIgnoreCase));
-
-            if (!string.IsNullOrEmpty(filtre.FiltreMarka))
-                sayaclar = sayaclar.Where(x => x.marka != null && x.marka.Equals(filtre.FiltreMarka, StringComparison.OrdinalIgnoreCase));
-
-            if (!string.IsNullOrEmpty(filtre.FiltreDurum) && Enum.TryParse<KcetasWeb.Models.Enums.SayacDurumu>(filtre.FiltreDurum, out var seciliDurum))
-                sayaclar = sayaclar.Where(x => x.durum == seciliDurum);
-
-            var sayacList = sayaclar.OrderByDescending(x => x.sayac_id).ToList();
-            int totalItems = sayacList.Count;
-
             filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
             filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
 
-            var pagedData = sayacList.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
-            
-            filtre.TotalItems = totalItems;
+            int? durumParam = null;
+            if (!string.IsNullOrEmpty(filtre.FiltreDurum) && Enum.TryParse<KcetasWeb.Models.Enums.SayacDurumu>(filtre.FiltreDurum, out var seciliDurum))
+            {
+                durumParam = (int)seciliDurum;
+            }
+
+            var response = await _sayacService.GetPagedAsync(
+                filtre.CurrentPage, 
+                filtre.PageSize, 
+                filtre.FiltreSeriNo, 
+                durumParam);
+
+            var pagedData = response.Data;
+
+            // Not: Marka filtrelemesi API tarafında desteklenmediği için mecburen o sayfada dönen 50 kayıt üzerinde yapılıyor.
+            if (!string.IsNullOrEmpty(filtre.FiltreMarka))
+            {
+                pagedData = pagedData.Where(x => x.marka != null && x.marka.Equals(filtre.FiltreMarka, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            filtre.TotalItems = response.TotalCount;
             filtre.Sayaclar = pagedData;
 
             ViewBag.TuketimNoktalari = await _tuketimNoktasiService.GetAllAsync();

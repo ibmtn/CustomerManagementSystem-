@@ -58,25 +58,33 @@ namespace KcetasWeb.Services.Api
             return (birimFiyat, enerjiBedeli, dagitimBedeli, trtPayi, enerjiFonu, kdvTutari, toplamTutar, kalemler);
         }
 
-                public async Task<PaginatedResponse<Fatura>> GetPagedAsync(int page, int pageSize)
+        public async Task<PagedResponse<Fatura>> GetPagedAsync(
+            int page, 
+            int pageSize, 
+            string? faturaNo = null, 
+            int? durum = null, 
+            long? sozlesmeId = null)
         {
             try
             {
-                var allData = await GetAllAsync();
-                var count = allData.Count;
-                var pagedData = allData.OrderByDescending(x => x.fatura_id).Skip((page - 1) * pageSize).Take(pageSize).ToList();
-                return new PaginatedResponse<Fatura>
+                var queryParams = new List<string>
                 {
-                    Data = pagedData,
-                    TotalCount = count,
-                    CurrentPage = page,
-                    PageSize = pageSize,
-                    TotalPages = (int)Math.Ceiling(count / (double)pageSize)
+                    $"page={page}",
+                    $"pageSize={pageSize}"
                 };
+
+                if (!string.IsNullOrEmpty(faturaNo)) queryParams.Add($"faturaNo={Uri.EscapeDataString(faturaNo)}");
+                if (durum.HasValue) queryParams.Add($"durum={durum.Value}");
+                if (sozlesmeId.HasValue) queryParams.Add($"sozlesmeId={sozlesmeId.Value}");
+
+                string url = $"/api/Fatura/Paged?{string.Join("&", queryParams)}";
+                
+                var result = await _httpClient.GetFromJsonAsync<PagedResponse<Fatura>>(url, _jsonOptions);
+                return result ?? new PagedResponse<Fatura>();
             }
             catch
             {
-                return new PaginatedResponse<Fatura> { CurrentPage = page, PageSize = pageSize };
+                return new PagedResponse<Fatura>();
             }
         }
 
@@ -98,32 +106,13 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var response = await _httpClient.GetAsync("/api/Fatura?page=1&pageSize=1000");
-                response.EnsureSuccessStatusCode();
-                var jsonStr = await response.Content.ReadAsStringAsync();
-                using var doc = JsonDocument.Parse(jsonStr);
-                if (doc.RootElement.ValueKind == JsonValueKind.Array)
-                {
-                    return JsonSerializer.Deserialize<List<Fatura>>(jsonStr, _jsonOptions) ?? new List<Fatura>();
-                }
-                else if (doc.RootElement.TryGetProperty("data", out var dataProp))
-                {
-                    System.IO.File.WriteAllText("fatura_debug.txt", "Found data property. Length: " + dataProp.GetRawText().Length);
-                    var result = JsonSerializer.Deserialize<List<Fatura>>(dataProp.GetRawText(), _jsonOptions);
-                    System.IO.File.AppendAllText("fatura_debug.txt", "\nDeserialized count: " + (result?.Count ?? -1));
-                    return result ?? new List<Fatura>();
-                }
-                else if (doc.RootElement.TryGetProperty("Data", out var capitalDataProp))
-                {
-                    return JsonSerializer.Deserialize<List<Fatura>>(capitalDataProp.GetRawText(), _jsonOptions) ?? new List<Fatura>();
-                }
-                return new List<Fatura>();
+                var pagedResponse = await GetPagedAsync(1, 1000);
+                return pagedResponse.Data ?? new List<Fatura>();
             }
             catch (Exception ex)
             {
-                System.IO.File.WriteAllText("fatura_err.txt", ex.ToString());
                 System.Diagnostics.Debug.WriteLine($"GetAllAsync Hata: {ex.Message}");
-                throw; // Do not swallow!
+                return new List<Fatura>();
             }
         }
 
@@ -131,12 +120,15 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var all = await GetAllAsync();
-                return all.FirstOrDefault(x => x.fatura_id == id);
+                // API takımının muhtemelen bir GetById endpoint'i vardır.
+                var response = await _httpClient.GetFromJsonAsync<Fatura>($"/api/Fatura/{id}", _jsonOptions);
+                return response;
             }
             catch
             {
-                throw;
+                // Fallback olarak Paged üzerinden arayalım
+                var paged = await GetPagedAsync(1, 100, faturaNo: null, durum: null, sozlesmeId: null);
+                return paged.Data?.FirstOrDefault(x => x.fatura_id == id);
             }
         }
 

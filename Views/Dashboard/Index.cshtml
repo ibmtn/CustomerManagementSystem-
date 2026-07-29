@@ -100,6 +100,26 @@
             <strong>@ViewBag.BekleyenFaturaCount</strong>
         </div>
     </div>
+
+    <div class="kc-stat-card">
+        <div class="kc-stat-icon info">
+            <i class="bi bi-clock-history"></i>
+        </div>
+        <div class="text-dark">
+            <span>Denetim İzleri</span>
+            <strong>@ViewBag.AuditLogCount</strong>
+        </div>
+    </div>
+
+    <div class="kc-stat-card">
+        <div class="kc-stat-icon secondary">
+            <i class="bi bi-send-fill"></i>
+        </div>
+        <div class="text-dark">
+            <span>Giden Kutusu (Outbox)</span>
+            <strong>@ViewBag.OutboxCount</strong>
+        </div>
+    </div>
 </section>
 
 <h3 class="mb-4 text-gray-800">Hızlı Erişim</h3>

@@ -42,6 +42,15 @@ namespace KcetasWeb.Services.Interfaces
             }
         }
 
+        public Task<bool> EPostaVarMiAsync(string ePosta)
+        {
+            lock (_kilit)
+            {
+                return Task.FromResult(_kullanicilar.Any(k =>
+                    k.e_posta != null && k.e_posta.Equals(ePosta, StringComparison.OrdinalIgnoreCase)));
+            }
+        }
+
         public Task<bool> GirisKontrolAsync(string kullaniciAdi, string sifre)
         {
             var kullanici = _kullanicilar.FirstOrDefault(k => string.Equals(k.kullanici_adi, kullaniciAdi, StringComparison.OrdinalIgnoreCase));

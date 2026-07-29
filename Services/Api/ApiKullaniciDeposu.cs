@@ -65,6 +65,12 @@ namespace KcetasWeb.Services.Api
             return result != null;
         }
 
+        public async Task<bool> EPostaVarMiAsync(string ePosta)
+        {
+            var liste = await ListeleAsync();
+            return liste.Any(k => string.Equals(k.e_posta, ePosta, StringComparison.OrdinalIgnoreCase));
+        }
+
         public async Task<List<Kullanici>> ListeleAsync()
         {
             try

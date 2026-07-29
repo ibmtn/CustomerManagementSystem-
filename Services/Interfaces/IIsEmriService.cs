@@ -7,6 +7,7 @@ namespace KcetasWeb.Services.Interfaces;
 
 public interface IIsEmriService
 {
+    Task<int> GetTotalCountAsync();
     Task<List<IsEmri>> GetAllAsync();
     Task<IsEmri?> GetByIdAsync(long id);
     Task<List<IsEmri>> FiltreleAsync(string? tip, string? durum, DateTime? baslangic, DateTime? bitis, string? arama);

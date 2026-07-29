@@ -61,6 +61,12 @@ namespace KcetasWeb.Controllers
                 return RedirectToAction("Yeni");
             }
 
+            if (await _kullaniciDeposu.EPostaVarMiAsync(EPosta))
+            {
+                TempData["PersonelMesaji"] = "Bu e-posta adresi zaten kullanılıyor.";
+                return RedirectToAction("Yeni");
+            }
+
             var yeniKullanici = new Kullanici
             {
                 ad_soyad = AdSoyad,
@@ -74,10 +80,17 @@ namespace KcetasWeb.Controllers
 
             yeniKullanici.Sifre = Sifre;
 
-            await _kullaniciDeposu.EkleAsync(yeniKullanici);
-
-            TempData["PersonelMesaji"] = AdSoyad + " isimli kullanıcı sisteme başarıyla eklendi.";
-            return RedirectToAction("Index");
+            try
+            {
+                await _kullaniciDeposu.EkleAsync(yeniKullanici);
+                TempData["PersonelMesaji"] = AdSoyad + " isimli kullanıcı sisteme başarıyla eklendi.";
+                return RedirectToAction("Index");
+            }
+            catch (Exception)
+            {
+                TempData["PersonelMesaji"] = "Kullanıcı eklenirken bir hata oluştu. Bilgileri kontrol edip tekrar deneyiniz.";
+                return RedirectToAction("Yeni");
+            }
         }
 
         public async Task<IActionResult> Detay(long id)

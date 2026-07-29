@@ -39,26 +39,24 @@ namespace KcetasWeb.Controllers
 
         public async Task<IActionResult> Index(KcetasWeb.ViewModels.EndeksOkumaListeViewModel filtre)
         {
-            var okumalar = (await _endeksOkumaService.FiltreleAsync(filtre.FiltreKaynak, filtre.FiltreDurum, filtre.BaslangicTarih, filtre.BitisTarih, filtre.AramaMetni)).AsQueryable();
-
-            if (!string.IsNullOrEmpty(filtre.FiltreSayacId))
-                okumalar = okumalar.Where(x => x.sayac_id != null && x.sayac_id.ToString().Contains(filtre.FiltreSayacId));
-
-            if (!string.IsNullOrEmpty(filtre.FiltreDonem))
-                okumalar = okumalar.Where(x => x.donem != null && x.donem.Contains(filtre.FiltreDonem));
-
-            if (!string.IsNullOrEmpty(filtre.FiltreDogrulamaDurumu))
-                okumalar = okumalar.Where(x => x.dogrulama_durumu != null && x.dogrulama_durumu.ToString().Equals(filtre.FiltreDogrulamaDurumu, StringComparison.OrdinalIgnoreCase));
-
-            var okumaListesi = okumalar.ToList();
-            int totalItems = okumaListesi.Count;
-
             filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
             filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
 
-            okumaListesi = okumaListesi.OrderByDescending(x => x.okuma_id).ToList();
+            var response = await _endeksOkumaService.GetPagedAsync(
+                filtre.CurrentPage,
+                filtre.PageSize,
+                filtre.FiltreKaynak,
+                filtre.FiltreDurum,
+                filtre.BaslangicTarih,
+                filtre.BitisTarih,
+                filtre.AramaMetni,
+                filtre.FiltreSayacId,
+                filtre.FiltreDonem,
+                filtre.FiltreDogrulamaDurumu
+            );
 
-            var pagedData = okumaListesi.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
+            var pagedData = response.Data;
+            int totalItems = response.TotalCount;
 
             var sozlesmeTask = _sozlesmeService.GetAllAsync();
             var aboneTask = _aboneService.GetAllAsync();
@@ -129,7 +127,7 @@ namespace KcetasWeb.Controllers
                 .ThenByDescending(x => x.OkumaTarihi)
                 .ToList();
 
-            ViewBag.Istatistikler = await _endeksOkumaService.GetIstatistiklerAsync();
+            ViewBag.Istatistikler = await _endeksOkumaService.GetIstatistiklerAsync(filtre.FiltreDonem);
 
             filtre.TotalItems = totalItems;
             filtre.Okumalar = viewModels;

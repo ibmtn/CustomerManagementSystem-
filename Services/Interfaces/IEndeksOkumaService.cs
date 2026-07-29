@@ -4,6 +4,21 @@ using System.Collections.Generic;
 
 namespace KcetasWeb.Services.Interfaces;
 
+public class PagedResponse<T>
+{
+    [System.Text.Json.Serialization.JsonPropertyName("totalCount")]
+    public int TotalCount { get; set; }
+    
+    [System.Text.Json.Serialization.JsonPropertyName("page")]
+    public int Page { get; set; }
+    
+    [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
+    public int PageSize { get; set; }
+    
+    [System.Text.Json.Serialization.JsonPropertyName("data")]
+    public List<T> Data { get; set; } = new();
+}
+
 public interface IEndeksOkumaService
 {
     System.Threading.Tasks.Task<List<EndeksOkuma>> GetAllAsync();
@@ -17,8 +32,20 @@ public interface IEndeksOkumaService
         DateTime? bitis,
         string? arama);
 
+    System.Threading.Tasks.Task<PagedResponse<EndeksOkuma>> GetPagedAsync(
+        int page, 
+        int pageSize,
+        string? okumaTipi,
+        string? durum,
+        DateTime? baslangic,
+        DateTime? bitis,
+        string? aramaMetni,
+        string? sayacId,
+        string? donem,
+        string? dogrulamaDurumu);
+
     System.Threading.Tasks.Task<(int Toplam, int Manuel, int OSOS, int Anomali, decimal OrtalamaTuketim)>
-        GetIstatistiklerAsync();
+        GetIstatistiklerAsync(string? donem = null);
 
     System.Threading.Tasks.Task CreateAsync(EndeksOkuma model);
     

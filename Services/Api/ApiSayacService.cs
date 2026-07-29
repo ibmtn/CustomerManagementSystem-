@@ -35,6 +35,34 @@ namespace KcetasWeb.Services.Api
             }
         }
 
+        public async Task<PagedResponse<Sayac>> GetPagedAsync(
+            int page, 
+            int pageSize, 
+            string? seriNo, 
+            int? durum)
+        {
+            try
+            {
+                var queryParams = new List<string>
+                {
+                    $"page={page}",
+                    $"pageSize={pageSize}"
+                };
+
+                if (!string.IsNullOrEmpty(seriNo)) queryParams.Add($"seriNo={Uri.EscapeDataString(seriNo)}");
+                if (durum.HasValue) queryParams.Add($"durum={durum.Value}");
+
+                string url = $"/api/Sayaclar/Paged?{string.Join("&", queryParams)}";
+                
+                var result = await _httpClient.GetFromJsonAsync<PagedResponse<Sayac>>(url, _jsonOptions);
+                return result ?? new PagedResponse<Sayac>();
+            }
+            catch
+            {
+                return new PagedResponse<Sayac>();
+            }
+        }
+
         public async Task<Sayac?> GetByIdAsync(long id)
         {
             try

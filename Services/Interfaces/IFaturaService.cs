@@ -24,7 +24,14 @@ public interface IFaturaService
      System.Collections.Generic.List<SimulasyonKalemDto> Kalemler)> SimulasyonHesaplaAsync(string tarifeGrubu, decimal tuketimMiktari);
 
     System.Threading.Tasks.Task<System.Collections.Generic.List<KcetasWeb.Models.Fatura>> GetAllAsync();
-    System.Threading.Tasks.Task<KcetasWeb.Models.PaginatedResponse<KcetasWeb.Models.Fatura>> GetPagedAsync(int page, int pageSize);
+    
+    System.Threading.Tasks.Task<PagedResponse<KcetasWeb.Models.Fatura>> GetPagedAsync(
+        int page, 
+        int pageSize, 
+        string? faturaNo = null, 
+        int? durum = null, 
+        long? sozlesmeId = null);
+
     System.Threading.Tasks.Task<KcetasWeb.Models.Dtos.PagedResultDto<KcetasWeb.Models.Dtos.FaturaListDto>> GetPagedCursorAsync(long? lastId, int limit);
     
     System.Threading.Tasks.Task<KcetasWeb.Models.Fatura?> GetByIdAsync(int id);

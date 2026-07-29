@@ -24,6 +24,22 @@ namespace KcetasWeb.Services.Api
             };
         }
 
+        public async Task<int> GetTotalCountAsync()
+        {
+            try
+            {
+                var jsonStr = await _httpClient.GetStringAsync("/api/TuketimNoktasi?page=1&pageSize=1");
+                using var doc = JsonDocument.Parse(jsonStr);
+                
+                if (doc.RootElement.ValueKind == JsonValueKind.Array) return doc.RootElement.GetArrayLength();
+                if (doc.RootElement.TryGetProperty("totalCount", out var tc)) return tc.GetInt32();
+                if (doc.RootElement.TryGetProperty("data", out var data) && data.ValueKind == JsonValueKind.Array) return data.GetArrayLength();
+                
+                return 0;
+            }
+            catch { return 0; }
+        }
+
         public async Task<List<TuketimNoktasi>> GetAllAsync()
         {
             return await _cache.GetOrCreateAsync("TuketimNoktasi_GetAll", async entry =>
