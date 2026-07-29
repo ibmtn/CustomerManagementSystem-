@@ -54,43 +54,65 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public async Task<List<EntegrasyonOutbox>> FiltreleAsync(string? durum, string? hedefSistem, DateTime? baslangic, DateTime? bitis)
+        public async Task<PaginatedResponse<EntegrasyonOutbox>> FiltreleAsync(string? durum, string? hedefSistem, DateTime? baslangic, DateTime? bitis, string? faturaNo = null, int page = 1, int pageSize = 50)
         {
-            var all = await GetAllAsync();
-            var query = all.AsQueryable();
-            var normalizedDurum = OutboxListeViewModel.NormalizeDurum(durum);
-
-            if (!string.IsNullOrEmpty(normalizedDurum))
-                query = query.Where(x => OutboxListeViewModel.NormalizeDurum(x.durum.HasValue ? x.durum.Value.ToString() : null) == normalizedDurum);
-
-            if (!string.IsNullOrEmpty(hedefSistem))
-                query = query.Where(x => x.hedef_sistem != null && x.hedef_sistem.ToString().Contains(hedefSistem, StringComparison.OrdinalIgnoreCase));
-
-            if (baslangic.HasValue)
-                query = query.Where(x => x.created_at >= baslangic.Value);
-
-            if (bitis.HasValue)
+            try
             {
-                var bitisGunSonu = bitis.Value.Date.AddDays(1).AddTicks(-1);
-                query = query.Where(x => x.created_at <= bitisGunSonu);
-            }
+                var queryParams = new List<string> { $"page={page}", $"pageSize={pageSize}" };
+                
+                var normalizedDurum = OutboxListeViewModel.NormalizeDurum(durum);
+                if (!string.IsNullOrEmpty(normalizedDurum))
+                {
+                    string durumInt = normalizedDurum switch
+                    {
+                        "BEKLIYOR" => "1",
+                        "GONDERILDI" => "2",
+                        "BASARISIZ" => "3",
+                        "HATALI" => "3",
+                        "IPTAL" => "4",
+                        _ => ""
+                    };
+                    if (!string.IsNullOrEmpty(durumInt)) queryParams.Add($"durum={durumInt}");
+                }
 
-            return query.ToList();
+                if (!string.IsNullOrEmpty(hedefSistem)) queryParams.Add($"hedefSistem={Uri.EscapeDataString(hedefSistem)}");
+                if (!string.IsNullOrEmpty(faturaNo)) queryParams.Add($"faturaNo={Uri.EscapeDataString(faturaNo)}");
+                
+                if (baslangic.HasValue) queryParams.Add($"baslangic={baslangic.Value:yyyy-MM-dd}");
+                if (bitis.HasValue) queryParams.Add($"bitis={bitis.Value:yyyy-MM-dd}");
+
+                var queryString = string.Join("&", queryParams);
+                var result = await _httpClient.GetFromJsonAsync<PaginatedResponse<EntegrasyonOutbox>>($"/api/EntegrasyonOutbox?{queryString}", _jsonOptions);
+                return result ?? new PaginatedResponse<EntegrasyonOutbox>();
+            }
+            catch
+            {
+                return new PaginatedResponse<EntegrasyonOutbox>();
+            }
         }
 
         public async Task<(int Toplam, int Bekleyen, int Gonderilmis, int Basarisiz)> GetIstatistiklerAsync()
         {
-            var all = await GetAllAsync();
-            var toplam = all.Count;
-            var bekleyen = all.Count(x => OutboxListeViewModel.NormalizeDurum(x.durum.HasValue ? x.durum.Value.ToString() : null) == "BEKLIYOR");
-            var gonderilmis = all.Count(x => OutboxListeViewModel.NormalizeDurum(x.durum.HasValue ? x.durum.Value.ToString() : null) == "GONDERILDI");
-            var basarisiz = all.Count(x =>
+            try
             {
-                var durum = OutboxListeViewModel.NormalizeDurum(x.durum.HasValue ? x.durum.Value.ToString() : null);
-                return durum == "BASARISIZ" || durum == "HATALI";
-            });
+                var tTotal = _httpClient.GetFromJsonAsync<PaginatedResponse<EntegrasyonOutbox>>("/api/EntegrasyonOutbox?page=1&pageSize=1", _jsonOptions);
+                var tBekleyen = _httpClient.GetFromJsonAsync<PaginatedResponse<EntegrasyonOutbox>>("/api/EntegrasyonOutbox?durum=1&page=1&pageSize=1", _jsonOptions);
+                var tGonderildi = _httpClient.GetFromJsonAsync<PaginatedResponse<EntegrasyonOutbox>>("/api/EntegrasyonOutbox?durum=2&page=1&pageSize=1", _jsonOptions);
+                var tBasarisiz = _httpClient.GetFromJsonAsync<PaginatedResponse<EntegrasyonOutbox>>("/api/EntegrasyonOutbox?durum=3&page=1&pageSize=1", _jsonOptions);
 
-            return (toplam, bekleyen, gonderilmis, basarisiz);
+                await Task.WhenAll(tTotal, tBekleyen, tGonderildi, tBasarisiz);
+
+                return (
+                    tTotal.Result?.TotalCount ?? 0,
+                    tBekleyen.Result?.TotalCount ?? 0,
+                    tGonderildi.Result?.TotalCount ?? 0,
+                    tBasarisiz.Result?.TotalCount ?? 0
+                );
+            }
+            catch
+            {
+                return (0, 0, 0, 0);
+            }
         }
 
         public async Task<bool> YenidenGonderAsync(long id)

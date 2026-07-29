@@ -74,12 +74,15 @@
     </div>
 </div>
 
-<div class="card shadow-sm border-0 mb-4">
-    <div class="card-body">
-        <form asp-action="Index" method="get" class="row g-3 align-items-end">
-            <div class="col-md-3">
-                <label class="form-label fw-bold">Durum</label>
-                <select data-control="select2" name="durum" class="form-select">
+<div class="card shadow-sm border-0 mb-4 bg-light bg-gradient">
+    <div class="card-header bg-transparent border-0 pt-4 pb-0">
+        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-funnel-fill text-primary me-2"></i> Filtreleme Seçenekleri</h5>
+    </div>
+    <div class="card-body pb-4">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold text-muted small text-uppercase mb-1">Durum</label>
+                <select data-control="select2" name="durum" class="form-select border-0 shadow-sm">
                     <option value="">Tümü</option>
                     <option value="BEKLIYOR" selected="@(Model.FiltreDurum == "BEKLIYOR" ? "selected" : null)">Bekliyor</option>
                     <option value="GONDERILDI" selected="@(Model.FiltreDurum == "GONDERILDI" ? "selected" : null)">Gönderildi</option>
@@ -87,24 +90,31 @@
                     <option value="IPTAL" selected="@(Model.FiltreDurum == "IPTAL" ? "selected" : null)">İptal Edildi</option>
                 </select>
             </div>
-            <div class="col-md-3">
-                <label class="form-label fw-bold">Hedef Sistem</label>
-                <input name="hedefSistem" value="@Model.FiltreHedefSistem" type="text" class="form-control" placeholder="Örn: GIB_EFATURA" />
+            <div class="col-md-4">
+                <label class="form-label fw-semibold text-muted small text-uppercase mb-1">Hedef Sistem</label>
+                <input name="hedefSistem" value="@Model.FiltreHedefSistem" type="text" class="form-control border-0 shadow-sm" placeholder="Örn: GIB_EFATURA" />
             </div>
-            <div class="col-md-2">
-                <label class="form-label fw-bold">Başlangıç</label>
-                <input name="baslangicTarih" value="@Model.BaslangicTarih?.ToString("yyyy-MM-dd")" type="date" class="form-control" />
+            <div class="col-md-4">
+                <label class="form-label fw-semibold text-muted small text-uppercase mb-1">Fatura Adı/No</label>
+                <div class="input-group shadow-sm">
+                    <span class="input-group-text bg-white border-0"><i class="bi bi-receipt text-muted"></i></span>
+                    <input name="faturaNo" value="@Model.FiltreFaturaNo" type="text" class="form-control border-0" placeholder="Örn: FAT-2023..." />
+                </div>
             </div>
-            <div class="col-md-2">
-                <label class="form-label fw-bold">Bitiş</label>
-                <input name="bitisTarih" value="@Model.BitisTarih?.ToString("yyyy-MM-dd")" type="date" class="form-control" />
+            <div class="col-md-4 mt-3">
+                <label class="form-label fw-semibold text-muted small text-uppercase mb-1">Başlangıç Tarihi</label>
+                <input name="baslangicTarih" value="@Model.BaslangicTarih?.ToString("yyyy-MM-dd")" type="date" class="form-control border-0 shadow-sm" />
             </div>
-            <div class="col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-primary flex-fill">
-                    <i class="bi bi-search"></i> Filtrele
+            <div class="col-md-4 mt-3">
+                <label class="form-label fw-semibold text-muted small text-uppercase mb-1">Bitiş Tarihi</label>
+                <input name="bitisTarih" value="@Model.BitisTarih?.ToString("yyyy-MM-dd")" type="date" class="form-control border-0 shadow-sm" />
+            </div>
+            <div class="col-md-4 mt-3 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary px-4 shadow-sm fw-semibold flex-fill">
+                    <i class="bi bi-search me-1"></i> Filtrele
                 </button>
-                <a asp-action="Index" class="btn btn-outline-secondary" title="Temizle">
-                    <i class="bi bi-x-lg"></i>
+                <a asp-action="Index" class="btn btn-light px-3 shadow-sm text-dark border" title="Temizle">
+                    <i class="bi bi-eraser-fill me-1"></i>
                 </a>
             </div>
         </form>
@@ -200,6 +210,7 @@
         <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
         <input type="hidden" name="durum" value="@Model.FiltreDurum" />
         <input type="hidden" name="hedefSistem" value="@Model.FiltreHedefSistem" />
+        <input type="hidden" name="faturaNo" value="@Model.FiltreFaturaNo" />
         <input type="hidden" name="baslangicTarih" value="@Model.BaslangicTarih?.ToString("yyyy-MM-dd")" />
         <input type="hidden" name="bitisTarih" value="@Model.BitisTarih?.ToString("yyyy-MM-dd")" />
     </form>

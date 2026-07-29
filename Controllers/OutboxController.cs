@@ -25,12 +25,13 @@ public class OutboxController : Controller
     }
 
     public async Task<IActionResult> Index(string? durum, string? hedefSistem,
-        DateTime? baslangicTarih, DateTime? bitisTarih, int CurrentPage = 1)
+        DateTime? baslangicTarih, DateTime? bitisTarih, string? faturaNo, int CurrentPage = 1)
     {
-        var kayitlar = await _outboxService.FiltreleAsync(durum, hedefSistem, baslangicTarih, bitisTarih);
+        int pageSize = 50;
+        var paginatedResult = await _outboxService.FiltreleAsync(durum, hedefSistem, baslangicTarih, bitisTarih, faturaNo, CurrentPage, pageSize);
         var istatistikler = await _outboxService.GetIstatistiklerAsync();
 
-        var viewModels = kayitlar.Select(k => new OutboxListeViewModel.OutboxSatirViewModel
+        var viewModels = paginatedResult.Data.Select(k => new OutboxListeViewModel.OutboxSatirViewModel
         {
             OutboxId = k.outbox_id,
             FaturaId = k.fatura_id,
@@ -50,24 +51,21 @@ public class OutboxController : Controller
             PayloadOnizleme = k.paload != null && k.paload.Length > 120 ? k.paload[..120] + "..." : (k.paload ?? "")
         }).ToList();
 
-        int totalItems = viewModels.Count;
-        int pageSize = 50;
-        var pagedData = viewModels.Skip((CurrentPage - 1) * pageSize).Take(pageSize).ToList();
-
         var viewModel = new OutboxListeViewModel
         {
             FiltreDurum = durum,
             FiltreHedefSistem = hedefSistem,
+            FiltreFaturaNo = faturaNo,
             BaslangicTarih = baslangicTarih,
             BitisTarih = bitisTarih,
             ToplamKayit = istatistikler.Toplam,
             BekleyenSayisi = istatistikler.Bekleyen,
             GonderilmisSayisi = istatistikler.Gonderilmis,
             BasarisizSayisi = istatistikler.Basarisiz,
-            Kayitlar = pagedData,
+            Kayitlar = viewModels,
             CurrentPage = CurrentPage,
             PageSize = pageSize,
-            TotalItems = totalItems
+            TotalItems = paginatedResult.TotalCount
         };
 
         return View(viewModel);

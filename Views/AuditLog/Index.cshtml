@@ -150,15 +150,16 @@
                 <ul class="pagination pagination-sm shadow-sm">
                     @{
                         int currentPage = ViewBag.CurrentPage ?? 1;
-                        bool hasData = Model != null && Model.Count >= 50; // API 50'li sayfalama dönüyor, eğer 50 veya daha fazla veri geldiyse sonraki sayfa muhtemelen vardır.
+                        int totalPages = ViewBag.TotalPages ?? 1;
+                        bool hasNext = currentPage < totalPages;
                     }
                     <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
                         <a class="page-link fw-bold px-3" href="/AuditLog/Index?page=@(currentPage - 1)">&laquo; Önceki</a>
                     </li>
                     <li class="page-item active">
-                        <span class="page-link fw-bold px-4">Sayfa @currentPage</span>
+                        <span class="page-link fw-bold px-4">Sayfa @currentPage / @totalPages</span>
                     </li>
-                    <li class="page-item @(!hasData ? "disabled" : "")">
+                    <li class="page-item @(!hasNext ? "disabled" : "")">
                         <a class="page-link fw-bold px-3" href="/AuditLog/Index?page=@(currentPage + 1)">Sonraki &raquo;</a>
                     </li>
                 </ul>

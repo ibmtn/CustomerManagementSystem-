@@ -19,7 +19,7 @@ namespace KcetasWeb.Models
             set => _totalPages = value; 
         }
 
-        [System.Text.Json.Serialization.JsonPropertyName("currentPage")]
+        [System.Text.Json.Serialization.JsonPropertyName("page")]
         public int CurrentPage { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("pageSize")]

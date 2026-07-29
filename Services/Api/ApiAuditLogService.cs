@@ -6,13 +6,6 @@ using KcetasWeb.Services.Interfaces;
 
 namespace KcetasWeb.Services.Api
 {
-    public class PaginatedAuditLogResponse
-    {
-        public int Sayfa { get; set; }
-        public int Limit { get; set; }
-        public List<AuditLog> Data { get; set; }
-    }
-
     public class ApiAuditLogService : IAuditLogService
     {
         private readonly HttpClient _httpClient;
@@ -55,7 +48,7 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var result = await _httpClient.GetFromJsonAsync<PaginatedAuditLogResponse>($"/api/AuditLog?varlikTipi={varlikTipi}&varlikId={varlikId}", _jsonOptions);
+                var result = await _httpClient.GetFromJsonAsync<PaginatedResponse<AuditLog>>($"/api/AuditLog?varlikTipi={varlikTipi}&varlikId={varlikId}", _jsonOptions);
                 return result?.Data ?? new List<AuditLog>();
             }
             catch
@@ -64,22 +57,16 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public async System.Threading.Tasks.Task<List<AuditLog>> GetAllAsync(int page = 1, int pageSize = 100)
+        public async System.Threading.Tasks.Task<PaginatedResponse<AuditLog>> GetAllAsync(int page = 1, int pageSize = 100)
         {
             try
             {
-                // API sayfalama sarmalayıcısı (wrapper) ile yanıt dönüyor
-                var result = await _httpClient.GetFromJsonAsync<PaginatedAuditLogResponse>($"/api/AuditLog?page={page}&pageSize={pageSize}", _jsonOptions);
-                
-                if (result != null && result.Data != null)
-                {
-                    return result.Data;
-                }
-                return new List<AuditLog>();
+                var result = await _httpClient.GetFromJsonAsync<PaginatedResponse<AuditLog>>($"/api/AuditLog?page={page}&pageSize={pageSize}", _jsonOptions);
+                return result ?? new PaginatedResponse<AuditLog>();
             }
             catch
             {
-                return new List<AuditLog>();
+                return new PaginatedResponse<AuditLog>();
             }
         }
     }

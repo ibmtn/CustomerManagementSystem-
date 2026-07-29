@@ -7,6 +7,7 @@ namespace KcetasWeb.ViewModels
     {
         public string? FiltreDurum { get; set; }
         public string? FiltreHedefSistem { get; set; }
+        public string? FiltreFaturaNo { get; set; }
         public DateTime? BaslangicTarih { get; set; }
         public DateTime? BitisTarih { get; set; }
 

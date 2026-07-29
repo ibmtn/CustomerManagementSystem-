@@ -23,10 +23,13 @@ namespace KcetasWeb.Controllers
 
         public async Task<IActionResult> Index(int page = 1)
         {
-            int pageSize = 100; // Sayfa başına 100 veri ile kasmadan çekiyoruz
-            var loglar = await _auditLogService.GetAllAsync(page, pageSize);
+            int pageSize = 50; 
+            var result = await _auditLogService.GetAllAsync(page, pageSize);
+            var loglar = result.Data;
             
             ViewBag.CurrentPage = page;
+            ViewBag.TotalCount = result.TotalCount;
+            ViewBag.TotalPages = result.TotalPages;
 
             // Tüm kullanıcıları bir kez çekip View'a sözlük olarak gönderiyoruz
             // Böylece View içinde kullanici_id'yi isme çevirebiliriz.
