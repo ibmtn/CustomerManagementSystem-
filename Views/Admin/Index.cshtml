@@ -88,7 +88,7 @@
             <table class="table table-striped table-hover align-middle">
                 <thead class="table-dark">
                     <tr>
-                        <th>ID</th>
+                        <th class="text-center">ID</th>
                         <th>Ad Soyad</th>
                         <th>Kullanıcı Adı</th>
                         <th>E-Posta</th>
@@ -101,7 +101,7 @@
                     @foreach (var personel in Model.Kullanicilar)
                     {
                         <tr>
-                            <td><strong>#@personel.kullanici_id</strong></td>
+                            <td class="text-center"><strong>#@personel.kullanici_id</strong></td>
                             <td>@personel.ad_soyad</td>
                             <td>@personel.kullanici_adi</td>
                             <td>@personel.e_posta</td>

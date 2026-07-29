@@ -14,21 +14,21 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
-    <h2 class="h4 text-secondary fw-bold">
+    <h2 class="h4 text-dark fw-bold">
         <i class="bi bi-shield-lock me-2"></i> Sistem İşlem Kayıtları (Audit Log)
     </h2>
 </div>
 
 <div class="card shadow-lg border-0 rounded-4 overflow-hidden mb-5">
-    <div class="card-header bg-gradient bg-dark text-white p-3">
-        <h5 class="mb-0 fw-bold"><i class="bi bi-list-columns-reverse me-2"></i> Tüm Kayıtlar</h5>
+    <div class="card-header bg-gradient p-3" style="background-color: var(--kc-sidebar) !important;">
+        <h5 class="mb-0 fw-bold text-white"><i class="bi bi-list-columns-reverse me-2"></i> Tüm Kayıtlar</h5>
     </div>
     <div class="card-body p-0">
         @if (Model != null && Model.Any())
         {
             <div class="table-responsive">
                 <table class="table table-hover table-striped align-middle mb-0">
-                    <thead class="table-dark">
+                    <thead class="table-light">
                         <tr>
                             <th>Tarih</th>
                             <th>Kullanıcı</th>
@@ -44,7 +44,7 @@
                         {
                             <tr>
                                 <td>@log.islem_zamani.ToString("dd.MM.yyyy HH:mm:ss")</td>
-                                <td class="fw-bold text-primary">
+                                <td class="fw-bold text-dark">
                                     @(!string.IsNullOrEmpty(log.kullanici_adi) ? log.kullanici_adi : (kullanicilar.ContainsKey(log.kullanici_id) ? kullanicilar[log.kullanici_id] : $"Bilinmeyen (ID: {log.kullanici_id})"))
                                 </td>
                                 <td>
@@ -53,7 +53,7 @@
                                 <td class="fw-bold">@log.varlik_tipi</td>
                                 <td>#@log.varlik_id</td>
                                 <td>
-                                    <span class="text-muted small">@(string.IsNullOrEmpty(log.islem_gerekcesi) ? "-" : log.islem_gerekcesi)</span>
+                                    <span class="text-dark small">@(string.IsNullOrEmpty(log.islem_gerekcesi) ? "-" : log.islem_gerekcesi)</span>
                                 </td>
                                 <td class="text-center">
                                     <button class="btn btn-sm btn-outline-dark fw-bold" data-bs-toggle="modal" data-bs-target="#logModal-@log.audit_id">
