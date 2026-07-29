@@ -210,7 +210,7 @@
                         <table class="table table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th>İş Emri No</th>
+                                    <th class="text-center">İş Emri No</th>
                                     <th>Tip</th>
                                     <th>Tarih</th>
                                     <th>Durum</th>
@@ -221,7 +221,7 @@
                                 @foreach (KcetasWeb.Models.IsEmri ie in ViewBag.IsEmirleri)
                                 {
                                     <tr>
-                                        <td class="fw-bold">@ie.is_emri_no</td>
+                                        <td class="fw-bold text-center">@ie.is_emri_no</td>
                                         <td>@ie.tip</td>
                                         <td>@ie.created_at.ToString("dd.MM.yyyy")</td>
                                         <td><span class="badge bg-info">@ie.durum</span></td>

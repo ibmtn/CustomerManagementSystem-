@@ -240,7 +240,7 @@
                 <table class="table table-row-dashed align-middle mb-0">
                     <thead>
                     <tr>
-                        <th>Ad Soyad</th>
+                        <th class="ps-4">Ad Soyad</th>
                         <th>Kullanıcı Adı</th>
                         <th>Rol</th>
                         <th>Durum</th>
@@ -255,7 +255,7 @@
                             var rol = RolListesi.BulRolId(kullanici.rol_id ?? 0)?.aciklama ?? "Rol atanmadı";
                             var aktifMi = kullanici.durum == KcetasWeb.Models.Enums.KullaniciDurumu.Aktif;
                             <tr>
-                                <td class="fw-bold text-gray-800">@kullanici.ad_soyad</td>
+                                <td class="fw-bold text-gray-800 ps-4">@kullanici.ad_soyad</td>
                                 <td>@kullanici.kullanici_adi</td>
                                 <td class="text-muted">@rol</td>
                                 <td>
