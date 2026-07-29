@@ -46,7 +46,7 @@
         <form asp-action="Index" method="get" class="row g-3 align-items-end">
             <!-- 1. Satır: Yeni Eklenen Filtreler -->
             <input type="hidden" asp-for="CurrentPage" id="CurrentPage" />
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <label class="form-label">İş Emri No</label>
                 <select asp-for="FiltreIsEmriNo" data-control="select2" class="form-select" data-placeholder="Örn: IE-2026..." data-allow-clear="true">
                     <option value=""></option>
@@ -57,23 +57,12 @@
                     }
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <label class="form-label">Tekil Kod</label>
                 <select asp-for="FiltreTekilKod" data-control="select2" class="form-select" data-placeholder="Örn: TK-2026..." data-allow-clear="true">
                     <option value=""></option>
                     @if(ViewBag.TekilKodlar != null) {
                         foreach(var item in ViewBag.TekilKodlar as List<string>) {
-                            <option value="@item">@item</option>
-                        }
-                    }
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Abone Adı / Ünvanı</label>
-                <select asp-for="FiltreAboneAdi" data-control="select2" class="form-select" data-placeholder="İsim veya Ünvan" data-allow-clear="true">
-                    <option value=""></option>
-                    @if(ViewBag.AboneAdlari != null) {
-                        foreach(var item in ViewBag.AboneAdlari as List<string>) {
                             <option value="@item">@item</option>
                         }
                     }
@@ -90,7 +79,7 @@
                     }
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <label class="form-label">Öncelik</label>
                 <select data-control="select2" asp-for="FiltreOncelik" class="form-select">
                     <option value="">Tümü</option>
