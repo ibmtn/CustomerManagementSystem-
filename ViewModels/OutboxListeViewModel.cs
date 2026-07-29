@@ -40,6 +40,7 @@ namespace KcetasWeb.ViewModels
             public bool YenidenGonderilebilir =>
                 string.Equals(Durum, "BASARISIZ", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(Durum, "HATALI", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(Durum, "HATA", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(Durum, "Basarisiz", StringComparison.OrdinalIgnoreCase);
         }
 
@@ -49,6 +50,9 @@ namespace KcetasWeb.ViewModels
             "GONDERILDI" => "success",
             "BASARISIZ" => "danger",
             "HATALI" => "danger",
+            "HATA" => "danger",
+            "MANUEL_MUDAHALE" => "primary",
+            "MANUELMUDAHALE" => "primary",
             "IPTAL" => "secondary",
             _ => "dark"
         };
@@ -59,6 +63,9 @@ namespace KcetasWeb.ViewModels
             "GONDERILDI" => "Gönderildi",
             "BASARISIZ" => "Başarısız",
             "HATALI" => "Hatalı",
+            "HATA" => "Hata",
+            "MANUEL_MUDAHALE" => "Manuel Müdahale",
+            "MANUELMUDAHALE" => "Manuel Müdahale",
             "IPTAL" => "İptal Edildi",
             "" => "-",
             _ => durum ?? "-"
