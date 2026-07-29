@@ -4,35 +4,42 @@ using KcetasWeb.Helpers;
 using KcetasWeb.Models;
 using KcetasWeb.Services.Interfaces;
 
+using Microsoft.Extensions.Caching.Memory;
+
 namespace KcetasWeb.Services.Api
 {
     public class ApiSayacService : ISayacService
     {
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
+        private readonly IMemoryCache _cache;
 
-        public ApiSayacService(HttpClient httpClient)
+        public ApiSayacService(HttpClient httpClient, IMemoryCache cache)
         {
             _httpClient = httpClient;
+            _cache = cache;
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
                 PropertyNameCaseInsensitive = true
             };
-
         }
 
         public async Task<List<Sayac>> GetAllAsync()
         {
-            try
+            return await _cache.GetOrCreateAsync("Sayac_GetAll", async entry =>
             {
-                var result = await _httpClient.GetFromJsonAsync<List<Sayac>>("/api/Sayaclar", _jsonOptions);
-                return result ?? new List<Sayac>();
-            }
-            catch
-            {
-                return new List<Sayac>();
-            }
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
+                try
+                {
+                    var result = await _httpClient.GetFromJsonAsync<List<Sayac>>("/api/Sayaclar", _jsonOptions);
+                    return result ?? new List<Sayac>();
+                }
+                catch
+                {
+                    return new List<Sayac>();
+                }
+            }) ?? new List<Sayac>();
         }
 
         public async Task<PagedResponse<Sayac>> GetPagedAsync(
@@ -82,6 +89,7 @@ namespace KcetasWeb.Services.Api
             {
                 throw new Exception($"API Hatası: {response.StatusCode} - Sayaç oluşturulamadı.");
             }
+            _cache.Remove("Sayac_GetAll");
         }
 
         public async Task UpdateAsync(Sayac sayac)
@@ -91,11 +99,13 @@ namespace KcetasWeb.Services.Api
             {
                 throw new Exception($"API Hatası: {response.StatusCode} - Sayaç güncellenemedi.");
             }
+            _cache.Remove("Sayac_GetAll");
         }
 
         public async Task DeleteAsync(long id)
         {
             await _httpClient.DeleteAsync($"/api/Sayaclar/{id}");
+            _cache.Remove("Sayac_GetAll");
         }
     }
 }

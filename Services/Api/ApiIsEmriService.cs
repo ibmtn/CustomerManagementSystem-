@@ -4,6 +4,7 @@ using KcetasWeb.Helpers;
 using KcetasWeb.Models;
 using KcetasWeb.Models.entities;
 using KcetasWeb.Services.Interfaces;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace KcetasWeb.Services.Api
 {
@@ -12,11 +13,13 @@ namespace KcetasWeb.Services.Api
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
         private readonly ILogger<ApiIsEmriService> _logger;
+        private readonly IMemoryCache _cache;
 
-        public ApiIsEmriService(HttpClient httpClient, ILogger<ApiIsEmriService> logger)
+        public ApiIsEmriService(HttpClient httpClient, ILogger<ApiIsEmriService> logger, IMemoryCache cache)
         {
             _httpClient = httpClient;
             _logger = logger;
+            _cache = cache;
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
@@ -26,82 +29,90 @@ namespace KcetasWeb.Services.Api
 
         public async Task<int> GetTotalCountAsync()
         {
-            try
+            return await _cache.GetOrCreateAsync("IsEmri_TotalCount", async entry =>
             {
-                var jsonStr = await _httpClient.GetStringAsync("/api/IsEmirleri?includeCompleted=true&page=1&pageSize=1");
-                using var doc = JsonDocument.Parse(jsonStr);
-                
-                if (doc.RootElement.ValueKind == JsonValueKind.Array) return doc.RootElement.GetArrayLength();
-                if (doc.RootElement.TryGetProperty("totalCount", out var tc)) return tc.GetInt32();
-                if (doc.RootElement.TryGetProperty("data", out var data) && data.ValueKind == JsonValueKind.Array) return data.GetArrayLength();
-                
-                return 0;
-            }
-            catch { return 0; }
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
+                try
+                {
+                    var jsonStr = await _httpClient.GetStringAsync("/api/IsEmirleri?includeCompleted=true&page=1&pageSize=1");
+                    using var doc = JsonDocument.Parse(jsonStr);
+                    
+                    if (doc.RootElement.ValueKind == JsonValueKind.Array) return doc.RootElement.GetArrayLength();
+                    if (doc.RootElement.TryGetProperty("totalCount", out var tc)) return tc.GetInt32();
+                    if (doc.RootElement.TryGetProperty("data", out var data) && data.ValueKind == JsonValueKind.Array) return data.GetArrayLength();
+                    
+                    return 0;
+                }
+                catch { return 0; }
+            });
         }
 
         public async Task<List<IsEmri>> GetAllAsync()
         {
-            try
+            return await _cache.GetOrCreateAsync("IsEmri_GetAll", async entry =>
             {
-                List<IsEmri> list = new List<IsEmri>();
-                int currentPage = 1;
-                int totalPages = 1;
-
-                do
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
+                try
                 {
-                    try
-                    {
-                        var response = await _httpClient.GetAsync($"/api/IsEmirleri?includeCompleted=true&page={currentPage}&pageSize=500");
-                        response.EnsureSuccessStatusCode();
-                        
-                        var json = await response.Content.ReadFromJsonAsync<JsonElement>(_jsonOptions);
-                        
-                        if (json.TryGetProperty("totalPages", out var tp) && tp.ValueKind == JsonValueKind.Number)
-                        {
-                            totalPages = tp.GetInt32();
-                            // GÜVENLİK/PERFORMANS: Sunucudaki 1 milyon veriyi RAM'e çekip çökmesini önlemek için
-                            // Maksimum 10 sayfa (10 x 500 = 5000 kayıt) çekmesine izin veriyoruz.
-                            if (totalPages > 10) totalPages = 10;
-                        }
+                    List<IsEmri> list = new List<IsEmri>();
+                    int currentPage = 1;
+                    int totalPages = 1;
 
-                        if (json.ValueKind == JsonValueKind.Array)
-                        {
-                            var items = json.Deserialize<List<IsEmri>>(_jsonOptions);
-                            if (items != null) list.AddRange(items);
-                            break;
-                        }
-                        else if (json.TryGetProperty("data", out var data) && data.ValueKind == JsonValueKind.Array)
-                        {
-                            var items = data.Deserialize<List<IsEmri>>(_jsonOptions);
-                            if (items != null) list.AddRange(items);
-                        }
-                        else if (json.TryGetProperty("Data", out var capitalData) && capitalData.ValueKind == JsonValueKind.Array)
-                        {
-                            var items = capitalData.Deserialize<List<IsEmri>>(_jsonOptions);
-                            if (items != null) list.AddRange(items);
-                        }
-                        else if (json.TryGetProperty("items", out var itemsNode) && itemsNode.ValueKind == JsonValueKind.Array)
-                        {
-                            var items = itemsNode.Deserialize<List<IsEmri>>(_jsonOptions);
-                            if (items != null) list.AddRange(items);
-                        }
-                    }
-                    catch (Exception ex)
+                    do
                     {
-                        _logger.LogWarning(ex, $"IsEmirleri API'den çekilirken Sayfa {currentPage} üzerinde veri hatası oluştu. Bu sayfa atlanıyor.");
-                    }
+                        try
+                        {
+                            var response = await _httpClient.GetAsync($"/api/IsEmirleri?includeCompleted=true&page={currentPage}&pageSize=500");
+                            response.EnsureSuccessStatusCode();
+                            
+                            var json = await response.Content.ReadFromJsonAsync<JsonElement>(_jsonOptions);
+                            
+                            if (json.TryGetProperty("totalPages", out var tp) && tp.ValueKind == JsonValueKind.Number)
+                            {
+                                totalPages = tp.GetInt32();
+                                // GÜVENLİK/PERFORMANS: Sunucudaki 1 milyon veriyi RAM'e çekip çökmesini önlemek için
+                                // Maksimum 10 sayfa (10 x 500 = 5000 kayıt) çekmesine izin veriyoruz.
+                                if (totalPages > 10) totalPages = 10;
+                            }
+
+                            if (json.ValueKind == JsonValueKind.Array)
+                            {
+                                var items = json.Deserialize<List<IsEmri>>(_jsonOptions);
+                                if (items != null) list.AddRange(items);
+                                break;
+                            }
+                            else if (json.TryGetProperty("data", out var data) && data.ValueKind == JsonValueKind.Array)
+                            {
+                                var items = data.Deserialize<List<IsEmri>>(_jsonOptions);
+                                if (items != null) list.AddRange(items);
+                            }
+                            else if (json.TryGetProperty("Data", out var capitalData) && capitalData.ValueKind == JsonValueKind.Array)
+                            {
+                                var items = capitalData.Deserialize<List<IsEmri>>(_jsonOptions);
+                                if (items != null) list.AddRange(items);
+                            }
+                            else if (json.TryGetProperty("items", out var itemsNode) && itemsNode.ValueKind == JsonValueKind.Array)
+                            {
+                                var items = itemsNode.Deserialize<List<IsEmri>>(_jsonOptions);
+                                if (items != null) list.AddRange(items);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, $"IsEmirleri API'den çekilirken Sayfa {currentPage} üzerinde veri hatası oluştu. Bu sayfa atlanıyor.");
+                        }
+                        
+                        currentPage++;
+                    } while (currentPage <= totalPages);
                     
-                    currentPage++;
-                } while (currentPage <= totalPages);
-                
-                return list;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "İş Emirleri API'den çekilirken hata oluştu.");
-                throw; // Hatayı yutmak yerine fırlatıyoruz, böylece arayüz haberdar olur.
-            }
+                    return list;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "İş Emirleri API'den çekilirken hata oluştu.");
+                    return new List<IsEmri>();
+                }
+            }) ?? new List<IsEmri>();
         }
 
         public async Task<IsEmri?> GetByIdAsync(long id)
@@ -191,6 +202,7 @@ namespace KcetasWeb.Services.Api
                 var err = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Tutanak kaydedilirken hata oluştu. Detay: {err}");
             }
+            _cache.Remove("IsEmri_GetAll"); _cache.Remove("IsEmri_TotalCount");
         }
 
         public async Task<IsEmri> EkleAsync(IsEmri isEmri)
@@ -199,6 +211,7 @@ namespace KcetasWeb.Services.Api
             response.EnsureSuccessStatusCode();
             
             var result = await response.Content.ReadFromJsonAsync<IsEmri>(_jsonOptions);
+            _cache.Remove("IsEmri_GetAll"); _cache.Remove("IsEmri_TotalCount");
             return result ?? isEmri;
         }
 
@@ -243,6 +256,7 @@ namespace KcetasWeb.Services.Api
                 var err = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - İş Emri durumu güncellenemedi. Detay: {err}");
             }
+            _cache.Remove("IsEmri_GetAll"); _cache.Remove("IsEmri_TotalCount");
         }
 
         public async Task PersonelAtaAsync(long id, long personelId)
@@ -255,9 +269,9 @@ namespace KcetasWeb.Services.Api
                 var err = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - İş Emri personeli atanamadı. Detay: {err}");
             }
+            _cache.Remove("IsEmri_GetAll"); _cache.Remove("IsEmri_TotalCount");
         }
-
-
     }
 }
+
 

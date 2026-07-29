@@ -72,10 +72,10 @@ namespace KcetasWeb.Controllers
             
             await Task.WhenAll(faturaTask, sozlesmeTask, tuketimNoktasiTask);
 
-            var pagedResponse = faturaTask.Result;
+            var pagedResponse = (await faturaTask);
             var faturalar = pagedResponse.Data;
-            var sozlesmeler = sozlesmeTask.Result.GroupBy(s => s.sozlesme_id).ToDictionary(g => g.Key, g => g.First());
-            var tuketimNoktalari = tuketimNoktasiTask.Result.GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
+            var sozlesmeler = (await sozlesmeTask).GroupBy(s => s.sozlesme_id).ToDictionary(g => g.Key, g => g.First());
+            var tuketimNoktalari = (await tuketimNoktasiTask).GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
             
             var viewModels = faturalar.Select(f => {
                 string gercekTekilKod = f.tekil_kod ?? "";
@@ -298,3 +298,4 @@ namespace KcetasWeb.Controllers
         }
     }
 }
+

@@ -4,22 +4,25 @@ using KcetasWeb.Helpers;
 using KcetasWeb.Models.entities;
 using KcetasWeb.Services.Interfaces;
 
+using Microsoft.Extensions.Caching.Memory;
+
 namespace KcetasWeb.Services.Api
 {
     public class ApiKullaniciDeposu : IKullaniciDeposu
     {
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
+        private readonly IMemoryCache _cache;
 
-        public ApiKullaniciDeposu(HttpClient httpClient)
+        public ApiKullaniciDeposu(HttpClient httpClient, IMemoryCache cache)
         {
             _httpClient = httpClient;
+            _cache = cache;
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
                 PropertyNameCaseInsensitive = true
             };
-
         }
 
         public async Task<Kullanici?> BulIdAsync(long id)
@@ -37,7 +40,6 @@ namespace KcetasWeb.Services.Api
 
         public async Task<Kullanici?> BulKullaniciAdiIleAsync(string kullaniciAdi)
         {
-            // Kullanicilar listesini çekip filtreliyoruz (API'de özel bir endpoint yoksa)
             var liste = await ListeleAsync();
             return liste.FirstOrDefault(k => string.Equals(k.kullanici_adi, kullaniciAdi, StringComparison.OrdinalIgnoreCase));
         }
@@ -50,12 +52,14 @@ namespace KcetasWeb.Services.Api
                 var error = await response.Content.ReadAsStringAsync();
                 throw new HttpRequestException($"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}). Details: {error}");
             }
-            return kullanici; // API'den dönen model de alınabilir ama şimdilik request nesnesini döndürüyoruz.
+            _cache.Remove("Kullanici_Listele");
+            return kullanici;
         }
 
         public async Task<bool> GuncelleAsync(Kullanici kullanici)
         {
             var response = await _httpClient.PutAsJsonAsync($"/api/Kullanici/{kullanici.kullanici_id}", kullanici, _jsonOptions);
+            _cache.Remove("Kullanici_Listele");
             return response.IsSuccessStatusCode;
         }
 
@@ -73,20 +77,25 @@ namespace KcetasWeb.Services.Api
 
         public async Task<List<Kullanici>> ListeleAsync()
         {
-            try
+            return await _cache.GetOrCreateAsync("Kullanici_Listele", async entry =>
             {
-                var result = await _httpClient.GetFromJsonAsync<List<Kullanici>>("/api/Kullanici", _jsonOptions);
-                return result ?? new List<Kullanici>();
-            }
-            catch
-            {
-                return new List<Kullanici>();
-            }
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
+                try
+                {
+                    var result = await _httpClient.GetFromJsonAsync<List<Kullanici>>("/api/Kullanici", _jsonOptions);
+                    return result ?? new List<Kullanici>();
+                }
+                catch
+                {
+                    return new List<Kullanici>();
+                }
+            }) ?? new List<Kullanici>();
         }
 
         public async Task<bool> SilAsync(long id)
         {
             var response = await _httpClient.DeleteAsync($"/api/Kullanici/{id}");
+            _cache.Remove("Kullanici_Listele");
             return response.IsSuccessStatusCode;
         }
     }

@@ -4,16 +4,20 @@ using KcetasWeb.Helpers;
 using KcetasWeb.Models;
 using KcetasWeb.Services.Interfaces;
 
+using Microsoft.Extensions.Caching.Memory;
+
 namespace KcetasWeb.Services.Api
 {
     public class ApiSozlesmeService : ISozlesmeService
     {
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
+        private readonly IMemoryCache _cache;
 
-        public ApiSozlesmeService(HttpClient httpClient)
+        public ApiSozlesmeService(HttpClient httpClient, IMemoryCache cache)
         {
             _httpClient = httpClient;
+            _cache = cache;
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
@@ -23,18 +27,22 @@ namespace KcetasWeb.Services.Api
 
         public async Task<int> GetTotalCountAsync()
         {
-            try
+            return await _cache.GetOrCreateAsync("Sozlesme_TotalCount", async entry =>
             {
-                var jsonStr = await _httpClient.GetStringAsync("/api/Sozlesmeler?page=1&pageSize=1");
-                using var doc = JsonDocument.Parse(jsonStr);
-                
-                if (doc.RootElement.ValueKind == JsonValueKind.Array) return doc.RootElement.GetArrayLength();
-                if (doc.RootElement.TryGetProperty("totalCount", out var tc)) return tc.GetInt32();
-                if (doc.RootElement.TryGetProperty("data", out var data) && data.ValueKind == JsonValueKind.Array) return data.GetArrayLength();
-                
-                return 0;
-            }
-            catch { return 0; }
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
+                try
+                {
+                    var jsonStr = await _httpClient.GetStringAsync("/api/Sozlesmeler?page=1&pageSize=1");
+                    using var doc = JsonDocument.Parse(jsonStr);
+                    
+                    if (doc.RootElement.ValueKind == JsonValueKind.Array) return doc.RootElement.GetArrayLength();
+                    if (doc.RootElement.TryGetProperty("totalCount", out var tc)) return tc.GetInt32();
+                    if (doc.RootElement.TryGetProperty("data", out var data) && data.ValueKind == JsonValueKind.Array) return data.GetArrayLength();
+                    
+                    return 0;
+                }
+                catch { return 0; }
+            });
         }
 
         public async Task<PaginatedResponse<Sozlesme>> GetPagedAsync(int page, int pageSize)
@@ -61,25 +69,29 @@ namespace KcetasWeb.Services.Api
 
         public async Task<List<Sozlesme>> GetAllAsync()
         {
-            try
+            return await _cache.GetOrCreateAsync("Sozlesme_GetAll", async entry =>
             {
-                var jsonElement = await _httpClient.GetFromJsonAsync<JsonElement>("/api/Sozlesmeler?page=1&pageSize=2000", _jsonOptions);
-                if (jsonElement.ValueKind == JsonValueKind.Array)
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
+                try
                 {
-                    var result = jsonElement.Deserialize<List<Sozlesme>>(_jsonOptions);
-                    return result ?? new List<Sozlesme>();
+                    var jsonElement = await _httpClient.GetFromJsonAsync<JsonElement>("/api/Sozlesmeler?page=1&pageSize=2000", _jsonOptions);
+                    if (jsonElement.ValueKind == JsonValueKind.Array)
+                    {
+                        var result = jsonElement.Deserialize<List<Sozlesme>>(_jsonOptions);
+                        return result ?? new List<Sozlesme>();
+                    }
+                    else if (jsonElement.TryGetProperty("data", out var dataProp))
+                    {
+                        var result = dataProp.Deserialize<List<Sozlesme>>(_jsonOptions);
+                        return result ?? new List<Sozlesme>();
+                    }
+                    return new List<Sozlesme>();
                 }
-                else if (jsonElement.TryGetProperty("data", out var dataProp))
+                catch
                 {
-                    var result = dataProp.Deserialize<List<Sozlesme>>(_jsonOptions);
-                    return result ?? new List<Sozlesme>();
+                    return new List<Sozlesme>();
                 }
-                return new List<Sozlesme>();
-            }
-            catch
-            {
-                return new List<Sozlesme>();
-            }
+            }) ?? new List<Sozlesme>();
         }
 
         public async Task<Sozlesme?> GetByIdAsync(string sozlesmeNo)
@@ -103,6 +115,7 @@ namespace KcetasWeb.Services.Api
                 var errorContent = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Sözleşme oluşturulamadı. Detay: {errorContent}");
             }
+            _cache.Remove("Sozlesme_GetAll"); _cache.Remove("Sozlesme_TotalCount");
         }
 
         public async Task UpdateAsync(Sozlesme sozlesme)
@@ -113,11 +126,14 @@ namespace KcetasWeb.Services.Api
                 var errorContent = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Sözleşme güncellenemedi. Detay: {errorContent}");
             }
+            _cache.Remove("Sozlesme_GetAll"); _cache.Remove("Sozlesme_TotalCount");
         }
 
         public async Task DeleteAsync(string sozlesmeNo)
         {
             await _httpClient.DeleteAsync($"/api/Sozlesmeler/{sozlesmeNo}");
+            _cache.Remove("Sozlesme_GetAll"); _cache.Remove("Sozlesme_TotalCount");
         }
     }
 }
+

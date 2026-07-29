@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Sisteme MemoryCache ekliyoruz (Tüketim noktaları gibi büyük tabloları önbelleğe almak için)
 builder.Services.AddMemoryCache();
+builder.Services.AddResponseCompression(options => { options.EnableForHttps = true; });
 
 // Sisteme MVC Controller yapılarını ekliyoruz
 builder.Services.AddControllersWithViews();
@@ -50,12 +51,10 @@ if (!app.Environment.IsDevelopment())
 }
 else 
 {
-    // Geliştirme ortamında bile şık hata sayfasını görmek için zorunlu yönlendirme eklenebilir, 
-    // ama şimdilik production'da /Error sayfasına gitsin, Development'ta DeveloperExceptionPage çıksın.
-    // Eğer isterseniz her ortamda /Error için yorum satırından çıkarın:
     app.UseExceptionHandler("/Error");
 }
 
+app.UseResponseCompression();
 app.UseStaticFiles();
 app.UseRouting();
 

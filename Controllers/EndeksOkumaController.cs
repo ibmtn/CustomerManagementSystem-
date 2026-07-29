@@ -66,11 +66,11 @@ namespace KcetasWeb.Controllers
             
             await Task.WhenAll(sozlesmeTask, aboneTask, isEmriTask, tuketimNoktasiTask, sayacTask);
 
-            var sozlesmeler = sozlesmeTask.Result;
-            var aboneler = aboneTask.Result;
-            var isEmirleri = isEmriTask.Result;
-            var tuketimNoktalari = tuketimNoktasiTask.Result;
-            var sayaclar = sayacTask.Result;
+            var sozlesmeler = (await sozlesmeTask);
+            var aboneler = (await aboneTask);
+            var isEmirleri = (await isEmriTask);
+            var tuketimNoktalari = (await tuketimNoktasiTask);
+            var sayaclar = (await sayacTask);
 
             var viewModels = pagedData.Select(o => {
                 var sozlesme = sozlesmeler.FirstOrDefault(s => s.sozlesme_id == o.sozlesme_id);
@@ -188,9 +188,9 @@ namespace KcetasWeb.Controllers
             var sycTask = _sayacService.GetAllAsync();
             var szlTask = _sozlesmeService.GetAllAsync();
             await Task.WhenAll(tnTask, sycTask, szlTask);
-            ViewBag.TuketimNoktalari = tnTask.Result;
-            ViewBag.Sayaclar = sycTask.Result;
-            ViewBag.Sozlesmeler = szlTask.Result;
+            ViewBag.TuketimNoktalari = (await tnTask);
+            ViewBag.Sayaclar = (await sycTask);
+            ViewBag.Sozlesmeler = (await szlTask);
             return View();
         }
 
@@ -429,4 +429,5 @@ namespace KcetasWeb.Controllers
         }
     }
 }
+
 

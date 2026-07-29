@@ -38,12 +38,12 @@ namespace KcetasWeb.Controllers
 
             await Task.WhenAll(tuketimNoktasiTask, faturaTask, isEmriTask, sozlesmeTask);
 
-            var tnMap = tuketimNoktasiTask.Result.GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
+            var tnMap = (await tuketimNoktasiTask).GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
             var tumBelgeler = new List<BelgeSatirViewModel>();
 
             // 1. Faturaları Çek
-            var faturalar = faturaTask.Result;
-            var sozlesmelerD = sozlesmeTask.Result.GroupBy(s => s.sozlesme_id).ToDictionary(g => g.Key, g => g.First());
+            var faturalar = (await faturaTask);
+            var sozlesmelerD = (await sozlesmeTask).GroupBy(s => s.sozlesme_id).ToDictionary(g => g.Key, g => g.First());
 
             foreach (var f in faturalar)
             {
@@ -70,7 +70,7 @@ namespace KcetasWeb.Controllers
             }
 
             // 2. Tutanakları Çek (İş Emri tablosunda durumu Tamamlandi olanlar)
-            var tumIsEmirleri = isEmriTask.Result;
+            var tumIsEmirleri = (await isEmriTask);
             var isEmirleri = tumIsEmirleri.Where(ie => ie.durum == KcetasWeb.Models.Enums.IsEmriDurumu.Tamamlandi);
             foreach (var ie in isEmirleri)
             {
@@ -96,7 +96,7 @@ namespace KcetasWeb.Controllers
             }
 
             // 3. Sözleşmeleri Çek
-            var sozlesmeler = sozlesmeTask.Result;
+            var sozlesmeler = (await sozlesmeTask);
             foreach (var s in sozlesmeler)
             {
                 var tn = tnMap.ContainsKey(s.tuketim_noktasi_id) ? tnMap[s.tuketim_noktasi_id] : null;
@@ -226,3 +226,4 @@ namespace KcetasWeb.Controllers
         }
     }
 }
+

@@ -115,36 +115,19 @@ namespace KcetasWeb.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Eski şifre doğrulaması
-            var hash = kullanici.sifre_hash ?? "";
-            PasswordVerificationResult dogrulamaSonucu = PasswordVerificationResult.Failed;
-
-            if (hash.StartsWith("$2a$") || hash.StartsWith("$2b$") || hash.StartsWith("$2y$"))
-            {
-                try
-                {
-                    if (global::BCrypt.Net.BCrypt.Verify(model.EskiSifre, hash))
-                        dogrulamaSonucu = PasswordVerificationResult.Success;
-                }
-                catch { }
-            }
-            else if (hash.StartsWith("AQAAAA"))
-            {
-                try
-                {
-                    dogrulamaSonucu = _sifreHasher.VerifyHashedPassword(kullanici, hash, model.EskiSifre);
-                }
-                catch { }
-            }
-            else
-            {
-                if (hash == model.EskiSifre || kullanici.Sifre == model.EskiSifre)
-                {
-                    dogrulamaSonucu = PasswordVerificationResult.Success;
-                }
-            }
+            // Eski şifre doğrulaması (Güvenlik nedeniyle API üzerinden Login testi yaparak)
+            bool sifreDogruMu = await _kullaniciDeposu.GirisKontrolAsync(kullanici.kullanici_adi, model.EskiSifre);
             
-            if (dogrulamaSonucu == PasswordVerificationResult.Failed)
+            // Eğer API üzerinden doğrulanamazsa, düz metin yedeğini kontrol edelim (Test hesapları için)
+            if (!sifreDogruMu)
+            {
+                if (kullanici.Sifre == model.EskiSifre || (kullanici.sifre_hash != null && kullanici.sifre_hash == model.EskiSifre))
+                {
+                    sifreDogruMu = true;
+                }
+            }
+
+            if (!sifreDogruMu)
             {
                 TempData["HataMesaji"] = "Eski şifrenizi yanlış girdiniz.";
                 return RedirectToAction("Index");

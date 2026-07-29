@@ -58,9 +58,9 @@ public class IsEmriController : Controller
 
         await Task.WhenAll(isEmirleriTask, kullaniciTask, tuketimNoktasiTask);
 
-        var isEmirleri = isEmirleriTask.Result.OrderByDescending(x => x.created_at).ToList();
-        var tumKullanicilar = kullaniciTask.Result.GroupBy(k => k.kullanici_id).ToDictionary(g => g.Key, g => g.First());
-        var tumTuketimNoktalari = tuketimNoktasiTask.Result.GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
+        var isEmirleri = (await isEmirleriTask).OrderByDescending(x => x.created_at).ToList();
+        var tumKullanicilar = (await kullaniciTask).GroupBy(k => k.kullanici_id).ToDictionary(g => g.Key, g => g.First());
+        var tumTuketimNoktalari = (await tuketimNoktasiTask).GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
 
         filtre.IsEmirleri = isEmirleri.Select(ie => {
             var kullanici = ie.atanan_kullanici_id.HasValue && tumKullanicilar.ContainsKey((int)ie.atanan_kullanici_id.Value) 
@@ -648,3 +648,4 @@ public class IsEmriController : Controller
         return View("Tamamlama", viewModel);
     }
 }
+

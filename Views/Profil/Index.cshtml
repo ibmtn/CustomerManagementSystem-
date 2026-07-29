@@ -8,7 +8,7 @@
     <h1 class="h3 mb-0 text-gray-800 fw-bold">
         <i class="bi bi-person-badge text-primary me-2"></i>Profilim
     </h1>
-    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary fw-bold shadow-sm">
+    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary fw-bold shadow-sm">
         <i class="bi bi-arrow-left me-1"></i> Ana Sayfaya Dön
     </a>
 </div>
@@ -17,6 +17,14 @@
 {
     <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
         <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["HataMesaji"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["BasariMesaji"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["BasariMesaji"]
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
@@ -128,3 +136,4 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+

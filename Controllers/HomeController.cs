@@ -28,37 +28,9 @@ public class HomeController : Controller
 
     public async System.Threading.Tasks.Task<IActionResult> Index()
     {
-        var aboneCount = 0;
-        var sozlesmeCount = 0;
-        var aktifIsEmriCount = 0;
-        var bekleyenFaturaCount = 0;
-
-        try { 
-            var aboneResponse = await _aboneService.GetPagedAsync(1, 1); 
-            aboneCount = aboneResponse.TotalCount; 
-        } catch { }
-
-        try { 
-            var sozlesmeResponse = await _sozlesmeService.GetPagedAsync(1, 1); 
-            sozlesmeCount = sozlesmeResponse.TotalCount; 
-        } catch { }
-
-        try { 
-            var isEmirleri = await _isEmriService.GetAllAsync();
-            aktifIsEmriCount = isEmirleri.Count(i => i.durum != KcetasWeb.Models.Enums.IsEmriDurumu.Tamamlandi && i.durum != KcetasWeb.Models.Enums.IsEmriDurumu.Iptal);
-        } catch { }
-
-        try { 
-            var faturaResponse = await _faturaService.GetPagedAsync(1, 1); 
-            bekleyenFaturaCount = faturaResponse.TotalCount; 
-        } catch { }
-
-        ViewBag.AboneCount = aboneCount;
-        ViewBag.SozlesmeCount = sozlesmeCount;
-        ViewBag.AktifIsEmriCount = aktifIsEmriCount;
-        ViewBag.BekleyenFaturaCount = bekleyenFaturaCount;
-
-        return View();
+        // Kullanıcılar eski Ana Sayfaya veya Profil'den dönüşte buraya düşerse 
+        // doğrudan Gösterge Paneline (Dashboard) yönlendiriliyor.
+        return RedirectToAction("Index", "Dashboard");
     }
 
     public async System.Threading.Tasks.Task<IActionResult> Privacy()
