@@ -86,9 +86,6 @@ namespace KcetasWeb.Services.Api
 
         public async Task CreateAsync(TuketimNoktasi tuketimNoktasi)
         {
-<<<<<<< HEAD
-            var response = await _httpClient.PostAsJsonAsync("/api/TuketimNoktasi", tuketimNoktasi, _jsonOptions);
-=======
             var dto = new
             {
                 ilceId = tuketimNoktasi.ilce_id,
@@ -104,19 +101,14 @@ namespace KcetasWeb.Services.Api
             };
 
             var response = await _httpClient.PostAsJsonAsync("/api/TuketimNoktasi", dto, _jsonOptions);
->>>>>>> 43e28cdbb9f91406e7d3767a8a39055208588792
             if (!response.IsSuccessStatusCode)
             {
                 var payload = System.Text.Json.JsonSerializer.Serialize(tuketimNoktasi, _jsonOptions);
                 var errorContent = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Tüketim noktası oluşturulamadı. \nPayload: {payload}\nDetay: {errorContent}");
             }
-<<<<<<< HEAD
             
             _cache.Remove("TuketimNoktasi_TotalCount");
-=======
-
->>>>>>> 43e28cdbb9f91406e7d3767a8a39055208588792
             _cache.Remove("TuketimNoktasi_GetAll");
         }
 

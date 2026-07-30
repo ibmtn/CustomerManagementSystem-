@@ -162,6 +162,16 @@ namespace KcetasWeb.Services.Api
                 throw new Exception($"API Hatası: {response.StatusCode} - Endeks okuması güncellenemedi. Detay: {errorContent}");
             }
         }
+        
+        public async System.Threading.Tasks.Task DeleteAsync(long id)
+        {
+            var response = await _httpClient.DeleteAsync($"/api/EndeksOkuma/{id}");
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new Exception($"API Hatası: {response.StatusCode} - Endeks okuması silinemedi. Detay: {errorContent}");
+            }
+        }
     }
 }
 

@@ -219,6 +219,12 @@ namespace KcetasWeb.Controllers
             // İlgili tüketim noktasına ait sözleşmeyi bul
             var sozlesmeler = (await _sozlesmeService.GetAllAsync()).Where(s => s.tuketim_noktasi_id == TuketimNoktasiId).ToList();
             var aktifSozlesme = sozlesmeler.FirstOrDefault(s => s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi && s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Pasif) ?? sozlesmeler.FirstOrDefault();
+
+            if (aktifSozlesme == null)
+            {
+                TempData["OkumaMesaji"] = "HATA: Seçilen tüketim noktasına ait bir sözleşme bulunamadı! Endeks okuması ve faturalandırma yapılabilmesi için öncelikle bir sözleşme oluşturmalısınız.";
+                return RedirectToAction("Yeni");
+            }
             
             string tarifeGrubu = aktifSozlesme != null ? 
                 (aktifSozlesme.tarife_id == 1 ? "Mesken" : 
@@ -264,11 +270,29 @@ namespace KcetasWeb.Controllers
 
             try
             {
+                // Önce bu sayaç ve dönem için daha önce okuma yapılmış mı kontrol et
+                var oncekiOkumalar = await _endeksOkumaService.GetAllAsync();
+                bool okumaZatenVar = oncekiOkumalar.Any(x => x.sayac_id == yeniOkuma.sayac_id && x.donem == yeniOkuma.donem);
+
+                if (okumaZatenVar)
+                {
+                    TempData["OkumaMesaji"] = $"HATA: Bu sayaç için {yeniOkuma.donem} döneminde zaten bir endeks okuması kaydı bulunmaktadır. Aynı döneme birden fazla okuma girilemez.";
+                    return RedirectToAction("Yeni");
+                }
+
                 await _endeksOkumaService.CreateAsync(yeniOkuma);
             }
             catch (Exception ex)
             {
-                apiHataMesaji += $"Okuma API Hatası: {ex.Message} | ";
+                // BAZI DURUMLARDA BACKEND API KAYDI BAŞARIYLA YAPIYOR ANCAK İKİNCİL BİR İŞLEMDE 
+                // HATA VERİP 500 DÖNDÜRÜYOR. BU YÜZDEN KAYDİ GERÇEKTEN YAPIP YAPMADIĞINI KONTROL EDELİM.
+                var okumalarSonrasi = await _endeksOkumaService.GetAllAsync();
+                bool gercektenKaydetti = okumalarSonrasi.Any(x => x.sayac_id == yeniOkuma.sayac_id && x.donem == yeniOkuma.donem);
+
+                if (!gercektenKaydetti)
+                {
+                    apiHataMesaji += $"Okuma API Hatası: {ex.Message} | ";
+                }
             }
 
             var tn = (await _tuketimNoktasiService.GetAllAsync()).FirstOrDefault(t => t.tuketim_noktasi_id == TuketimNoktasiId);
@@ -344,11 +368,6 @@ namespace KcetasWeb.Controllers
             if (okuma == null || okuma.dogrulama_durumu == KcetasWeb.Models.Enums.DogrulamaDurumu.Onaylandi)
                 return RedirectToAction("Index");
 
-            // 1. Okumayı Onayla
-            okuma.dogrulama_durumu = KcetasWeb.Models.Enums.DogrulamaDurumu.Onaylandi;
-            okuma.updated_at = DateTime.UtcNow;
-            try { await _endeksOkumaService.UpdateAsync(okuma); } catch { }
-
             // 2. Fatura Oluştur
             decimal tuketim = (okuma.yeni_endeks ?? 0) - (okuma.onceki_endeks ?? 0);
             if (tuketim < 0) tuketim = 0;
@@ -375,6 +394,7 @@ namespace KcetasWeb.Controllers
                 fatura_tarihi = DateOnly.FromDateTime(DateTime.Now),
                 son_odeme_tarihi = DateOnly.FromDateTime(DateTime.Now.AddDays(15)),
                 donem = okuma.donem ?? DateTime.Now.ToString("yyyy-MM"),
+                okuma_id = okuma.okuma_id,
                 ilk_endeks = okuma.onceki_endeks,
                 son_endeks = okuma.yeni_endeks,
                 tuketim_kwh = tuketim,
@@ -387,7 +407,7 @@ namespace KcetasWeb.Controllers
                 reaktif_kapasitif = 0m,
                 hizmet_bedeli = 0m,
                 kesme_baglama_bedeli = 0m,
-                durum = "HESAPLANDI",
+                durum = "HESAPLANDI", // Fatura API bu string'i otomatik olarak enum (2) yapacak
                 status = "AKTIF",
                 created_at = DateTime.Now,
                 kullanici_id = 1
@@ -396,7 +416,18 @@ namespace KcetasWeb.Controllers
             try
             {
                 await _faturaService.EkleAsync(yeniFatura);
+                
+                // Artık faturaya bağlandığı için okuma durumunu ONAYLANDI yapmalıyız
+                okuma.dogrulama_durumu = KcetasWeb.Models.Enums.DogrulamaDurumu.Onaylandi;
+                await _endeksOkumaService.UpdateAsync(okuma);
+
                 TempData["OkumaMesaji"] = $"Endeks okuması başarıyla onaylandı ve yeni fatura oluşturuldu. (Fatura No: {yeniFatura.fatura_no} - Tutar: {yeniFatura.toplam_tutar?.ToString("C2")})";
+            }
+            catch (Exception ex)
+            {
+                TempData["OkumaMesaji"] = $"Okuma onaylama aşamasında fatura kesilirken hata oluştu: {ex.Message}";
+                return RedirectToAction("Index");
+            }
 
                 // YENİ İŞ MANTIĞI: Eğer bu okuma bir İLK OKUMA ise ve fatura kesildiyse, ENERJİ AÇMA iş emri atılsın!
                 if (okuma.okuma_tipi == KcetasWeb.Models.Enums.OkumaTipi.IlkOkuma)
@@ -421,11 +452,7 @@ namespace KcetasWeb.Controllers
                     } 
                     catch { }
                 }
-            }
-            catch (Exception ex)
-            {
-                TempData["OkumaMesaji"] = $"Okuma onaylandı ancak fatura kesilirken hata oluştu: {ex.Message}";
-            }
+
 
             return RedirectToAction("Index");
         }

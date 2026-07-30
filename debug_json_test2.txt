@@ -1,0 +1,1 @@
+{"sayacId":82,"donem":"2026-07","isEmriId":null,"sozlesmeId":82,"okumaTipi":2,"okumaKaynagi":1,"oncekiEndeks":138.239,"yeniEndeks":150,"okumaZamani":"2026-07-30","kullaniciId":1,"okunamamaNedeni":"","dogrulamaDurumu":3,"anomaliMi":false,"status":"AKTIF","createdAt":"2026-07-30T11:59:49.3998606Z","updatedAt":"2026-07-30T11:59:49.3998607Z"}

@@ -30,7 +30,8 @@ namespace KcetasWeb.Controllers
             var tumAboneler = await _aboneService.GetAllAsync();
             
             // Son eklenenlerin en üstte gözükmesi için id'ye göre ters sıralayalım
-            var aboneler = tumAboneler.OrderByDescending(x => x.abone_id).AsQueryable();
+            // SADECE aktif olan aboneleri gösterelim (Silinenler/Pasifler listede çıkmasın)
+            var aboneler = tumAboneler.Where(x => x.Durum != "PASIF").OrderByDescending(x => x.abone_id).AsQueryable();
 
             if (!string.IsNullOrEmpty(filtre.FiltreTCKNVKN))
                 aboneler = aboneler.Where(x => (x.tckn != null && x.tckn.Contains(filtre.FiltreTCKNVKN)) || (x.vkn != null && x.vkn.Contains(filtre.FiltreTCKNVKN)));
@@ -245,26 +246,26 @@ namespace KcetasWeb.Controllers
                 if (abone == null) return NotFound();
 
                 abone.abone_tipi = model.IsTuzel ? KcetasWeb.Models.Enums.AboneTipi.Kurumsal : KcetasWeb.Models.Enums.AboneTipi.Bireysel;
-                abone.telefon = model.Telefon;
-                abone.e_posta = model.Mail;
+                abone.telefon = string.IsNullOrWhiteSpace(model.Telefon) ? null : model.Telefon;
+                abone.e_posta = string.IsNullOrWhiteSpace(model.Mail) ? null : model.Mail;
 
 
                 if (model.IsTuzel)
                 {
-                    abone.Unvan = model.AdSoyadUnvan;
-                    abone.vkn = model.VKN ?? "";
-                    abone.Ad = "";
-                    abone.Soyad = "";
-                    abone.tckn = "";
+                    abone.Unvan = string.IsNullOrWhiteSpace(model.AdSoyadUnvan) ? null : model.AdSoyadUnvan;
+                    abone.vkn = string.IsNullOrWhiteSpace(model.VKN) ? null : model.VKN;
+                    abone.Ad = null;
+                    abone.Soyad = null;
+                    abone.tckn = null;
                 }
                 else
                 {
                     var nameParts = model.AdSoyadUnvan.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                    abone.Soyad = nameParts.Length > 1 ? nameParts.Last() : "";
+                    abone.Soyad = nameParts.Length > 1 ? nameParts.Last() : null;
                     abone.Ad = nameParts.Length > 1 ? string.Join(" ", nameParts.Take(nameParts.Length - 1)) : model.AdSoyadUnvan;
-                    abone.tckn = model.TCKN ?? "";
-                    abone.vkn = "";
-                    abone.Unvan = "";
+                    abone.tckn = string.IsNullOrWhiteSpace(model.TCKN) ? null : model.TCKN;
+                    abone.vkn = null;
+                    abone.Unvan = null;
                 }
 
                 try

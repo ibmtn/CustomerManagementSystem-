@@ -50,4 +50,6 @@ public interface IEndeksOkumaService
     System.Threading.Tasks.Task CreateAsync(EndeksOkuma model);
     
     System.Threading.Tasks.Task UpdateAsync(EndeksOkuma model);
+    
+    System.Threading.Tasks.Task DeleteAsync(long id);
 }

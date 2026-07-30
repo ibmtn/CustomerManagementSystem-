@@ -148,15 +148,9 @@ namespace KcetasWeb.Controllers
                 bagimsiz_bolum_no = string.IsNullOrWhiteSpace(model.bagimsiz_bolum_no) ? "-" : model.bagimsiz_bolum_no,
                 acik_adres = string.IsNullOrWhiteSpace(model.acik_adres) ? "Belirtilmemiş" : model.acik_adres,
                 baglanti_gucu_kw = model.baglanti_gucu_kw,
-<<<<<<< HEAD
-                koordinat_lat = model.koordinat_lat,
-                koordinat_lot = model.koordinat_lot,
-                tuketici_grubu = string.IsNullOrWhiteSpace(model.tuketici_grubu) ? "Mesken" : model.tuketici_grubu,
-=======
                 koordinat_lat = model.koordinat_lat == 0 ? null : model.koordinat_lat,
                 koordinat_lot = model.koordinat_lot == 0 ? null : model.koordinat_lot,
-                tuketici_grubu = model.tuketici_grubu,
->>>>>>> 43e28cdbb9f91406e7d3767a8a39055208588792
+                tuketici_grubu = string.IsNullOrWhiteSpace(model.tuketici_grubu) ? "MESKEN" : model.tuketici_grubu,
                 baglanti_durumu = model.baglanti_durumu ?? KcetasWeb.Models.Enums.BaglantiDurumu.Pasif,
                 status = "PASIF",
                 created_at = DateTime.Now,

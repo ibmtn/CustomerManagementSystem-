@@ -178,22 +178,25 @@
                 const sayacId = selectedOption.getAttribute('data-sayac');
 
                 if (tnId) {
-                    tuketimNoktasiSelect.value = tnId;
+                    $(tuketimNoktasiSelect).val(tnId).trigger('change'); // Select2 UI'ını güncelle
                     
                     // Trigger flash effect
                     tuketimNoktasiSelect.classList.add('bg-warning', 'bg-opacity-25');
                     setTimeout(() => tuketimNoktasiSelect.classList.remove('bg-warning', 'bg-opacity-25'), 1000);
+                } else {
+                    $(tuketimNoktasiSelect).val('').trigger('change');
                 }
 
-                if (sayacId && sayacId != "0") {
-                    sayacSelect.value = sayacId;
+                if (sayacId && sayacId !== "0") {
+                    $(sayacSelect).val(sayacId).trigger('change'); // Select2 UI'ını güncelle
+                    
                     sayacSelect.classList.add('bg-warning', 'bg-opacity-25');
                     setTimeout(() => sayacSelect.classList.remove('bg-warning', 'bg-opacity-25'), 1000);
                     
                     // Manually trigger change event to fetch previous index
                     sayacSelect.dispatchEvent(new Event('change'));
                 } else {
-                    sayacSelect.value = '';
+                    $(sayacSelect).val('').trigger('change'); // Select2 UI'ını güncelle
                     sayacSelect.dispatchEvent(new Event('change'));
                 }
             });
