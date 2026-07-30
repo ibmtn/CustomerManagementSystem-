@@ -86,15 +86,37 @@ namespace KcetasWeb.Services.Api
 
         public async Task CreateAsync(TuketimNoktasi tuketimNoktasi)
         {
+<<<<<<< HEAD
             var response = await _httpClient.PostAsJsonAsync("/api/TuketimNoktasi", tuketimNoktasi, _jsonOptions);
+=======
+            var dto = new
+            {
+                ilceId = tuketimNoktasi.ilce_id,
+                mahalle = string.IsNullOrWhiteSpace(tuketimNoktasi.mahalle) ? "Bilinmiyor" : tuketimNoktasi.mahalle,
+                binaNo = tuketimNoktasi.bina_no,
+                bagimsizBolumNo = tuketimNoktasi.bagimsiz_bolum_no,
+                acikAdres = string.IsNullOrWhiteSpace(tuketimNoktasi.acik_adres) ? "Belirtilmemiş" : tuketimNoktasi.acik_adres,
+                koordinatLat = tuketimNoktasi.koordinat_lat,
+                koordinatLon = tuketimNoktasi.koordinat_lot,
+                baglantiGucuKw = tuketimNoktasi.baglanti_gucu_kw,
+                tuketiciGrubu = string.IsNullOrWhiteSpace(tuketimNoktasi.tuketici_grubu) ? "MESKEN" : tuketimNoktasi.tuketici_grubu,
+                baglantiDurumu = tuketimNoktasi.baglanti_durumu ?? KcetasWeb.Models.Enums.BaglantiDurumu.Pasif
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("/api/TuketimNoktasi", dto, _jsonOptions);
+>>>>>>> 43e28cdbb9f91406e7d3767a8a39055208588792
             if (!response.IsSuccessStatusCode)
             {
                 var payload = System.Text.Json.JsonSerializer.Serialize(tuketimNoktasi, _jsonOptions);
                 var errorContent = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Tüketim noktası oluşturulamadı. \nPayload: {payload}\nDetay: {errorContent}");
             }
+<<<<<<< HEAD
             
             _cache.Remove("TuketimNoktasi_TotalCount");
+=======
+
+>>>>>>> 43e28cdbb9f91406e7d3767a8a39055208588792
             _cache.Remove("TuketimNoktasi_GetAll");
         }
 
@@ -114,8 +136,3 @@ namespace KcetasWeb.Services.Api
         }
     }
 }
-
-
-
-
-

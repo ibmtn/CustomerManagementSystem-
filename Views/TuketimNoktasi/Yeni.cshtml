@@ -1,4 +1,4 @@
-@model KcetasWeb.Models.TuketimNoktasi
+@model KcetasWeb.ViewModels.TuketimNoktasiViewModels
 
 @{
     ViewData["Title"] = "Yeni Tüketici ve Tüketim Noktası";
@@ -16,7 +16,10 @@
             </div>
             <div class="card-body p-4">
                 <form action="/TuketimNoktasi/Yeni" method="post">
-                    
+                    @if (ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+                    {
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                    }
 
 
                     <!-- Tesisat Bilgileri -->
@@ -39,35 +42,44 @@
                             <select data-control="select2" class="form-select" name="ilce_id" id="ilceSelect" required>
                                 <option value="">Önce İl Seçin</option>
                             </select>
+                            <span asp-validation-for="ilce_id" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label fw-bold">Mahalle <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="mahalle" value="@Model.mahalle" required />
+                            <span asp-validation-for="mahalle" class="text-danger small"></span>
                         </div>
                         <div class="col-md-2 mb-3">
                             <label class="form-label fw-bold">Bina No</label>
-                            <input type="text" class="form-control" name="bina_no" />
+                            <input type="text" class="form-control" name="bina_no" value="@Model.bina_no" />
                         </div>
                         <div class="col-md-2 mb-3">
                             <label class="form-label fw-bold">Daire No</label>
-                            <input type="text" class="form-control" name="bagimsiz_bolum_no" />
+                            <input type="text" class="form-control" name="bagimsiz_bolum_no" value="@Model.bagimsiz_bolum_no" />
                         </div>
                         
                         <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Açık Adres</label>
-                            <textarea class="form-control" name="acik_adres" rows="2"></textarea>
+                            <label class="form-label fw-bold">Açık Adres <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="acik_adres" rows="2" required>@Model.acik_adres</textarea>
+                            <span asp-validation-for="acik_adres" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Tüketici Grubu <span class="text-danger">*</span></label>
                             <select data-control="select2" class="form-select" name="tuketici_grubu" required>
-                                <option value="Mesken">MESKEN</option>
-                                <option value="Ticarethane">TİCARETHANE</option>
-                                <option value="Sanayi">SANAYİ</option>
-                                <option value="TarimsalSulama">TARIMSAL SULAMA</option>
-                                <option value="Aydinlatma">AYDINLATMA</option>
+                                <option value="MESKEN" selected="@(Model.tuketici_grubu == "MESKEN" ? "selected" : null)">MESKEN</option>
+                                <option value="TICARETHANE" selected="@(Model.tuketici_grubu == "TICARETHANE" ? "selected" : null)">TICARETHANE</option>
+                                <option value="SANAYI" selected="@(Model.tuketici_grubu == "SANAYI" ? "selected" : null)">SANAYI</option>
+                                <option value="TARIMSAL SULAMA" selected="@(Model.tuketici_grubu == "TARIMSAL SULAMA" ? "selected" : null)">TARIMSAL SULAMA</option>
+                                <option value="AYDINLATMA" selected="@(Model.tuketici_grubu == "AYDINLATMA" ? "selected" : null)">AYDINLATMA</option>
                             </select>
+                            <span asp-validation-for="tuketici_grubu" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Bağlantı Gücü (kW)</label>
-                            <input type="number" step="0.01" class="form-control" name="baglanti_gucu_kw" />
+                            <label class="form-label fw-bold">Bağlantı Gücü (kW) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" min="0.01" class="form-control" name="baglanti_gucu_kw" value="@(Model.baglanti_gucu_kw > 0 ? Model.baglanti_gucu_kw.ToString(System.Globalization.CultureInfo.InvariantCulture) : "")" required />
+                            <span asp-validation-for="baglanti_gucu_kw" class="text-danger small"></span>
                         </div>
                     </div>
 
@@ -100,6 +112,7 @@
 
         function ilceDoldur() {
             var ilceSelect = document.getElementById("ilceSelect");
+            var seciliIlce = "@Model.ilce_id";
             
             ilceSelect.innerHTML = '<option value="">İlçe Seçin</option>';
 
@@ -107,8 +120,10 @@
                 var option = document.createElement("option");
                 option.value = id;
                 option.text = id + " - " + kayseriIlceler[id];
+                if (id === seciliIlce) option.selected = true;
                 ilceSelect.appendChild(option);
             });
         }
     </script>
+    <partial name="_ValidationScriptsPartial" />
 }

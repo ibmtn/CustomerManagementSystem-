@@ -83,6 +83,9 @@ namespace KcetasWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> Yeni(AboneEkleViewModel model)
         {
+            NormalizeAboneModel(model);
+            ValidateKimlikAlanlari(model);
+
             var tumAboneler = await _aboneService.GetAllAsync();
 
             if (!string.IsNullOrEmpty(model.TCKN) && tumAboneler.Any(a => a.tckn == model.TCKN))
@@ -133,20 +136,36 @@ namespace KcetasWeb.Controllers
                     yeniAbone.Unvan = "";
                 }
 
-                await _aboneService.CreateAsync(yeniAbone);
+                try
+                {
+                    await _aboneService.CreateAsync(yeniAbone);
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError(string.Empty, $"Abone kaydedilemedi. API detayı: {ex.Message}");
+                    return View(model);
+                }
 
                 // API BUG WORKAROUND: Harici API, yeni kayıt (POST) sırasında e-posta adresini yoksayıyor.
                 // Ancak güncelleme (PUT) işleminde e-postayı başarıyla kaydediyor.
                 // Bu yüzden yeni eklenen aboneyi bulup hemen arkasından bir Update (PUT) isteği atarak e-postayı zorla kaydediyoruz.
                 var createdAbone = (await _aboneService.GetAllAsync()).OrderByDescending(a => a.abone_id).FirstOrDefault(a => a.telefon == model.Telefon);
                 int yeniId = 1;
+                string emailUpdateWarning = null;
                 if (createdAbone != null)
                 {
                     yeniId = createdAbone.abone_id;
                     if (!string.IsNullOrEmpty(model.Mail))
                     {
-                        createdAbone.e_posta = model.Mail;
-                        await _aboneService.UpdateAsync(createdAbone);
+                        try
+                        {
+                            createdAbone.e_posta = model.Mail;
+                            await _aboneService.UpdateAsync(createdAbone);
+                        }
+                        catch (Exception ex)
+                        {
+                            emailUpdateWarning = $"Abone oluşturuldu fakat e-posta güncellenemedi. API detayı: {ex.Message}";
+                        }
                     }
                 }
                 
@@ -160,8 +179,8 @@ namespace KcetasWeb.Controllers
                     islemGerekcesi: "Yeni abone kaydı oluşturuldu."
                 );
 
-                TempData["Mesaj"] = "Müşteri / Abone başarıyla eklendi!";
-                TempData["MesajTip"] = "success";
+                TempData["Mesaj"] = emailUpdateWarning ?? "Müşteri / Abone başarıyla eklendi!";
+                TempData["MesajTip"] = emailUpdateWarning == null ? "success" : "warning";
                 return RedirectToAction("Index");
             }
             return View(model);
@@ -206,6 +225,9 @@ namespace KcetasWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> Duzenle(int id, AboneEkleViewModel model)
         {
+            NormalizeAboneModel(model);
+            ValidateKimlikAlanlari(model);
+
             var tumAboneler = await _aboneService.GetAllAsync();
 
             if (!string.IsNullOrEmpty(model.TCKN) && tumAboneler.Any(a => a.tckn == model.TCKN && a.abone_id != id))
@@ -245,7 +267,16 @@ namespace KcetasWeb.Controllers
                     abone.Unvan = "";
                 }
 
-                await _aboneService.UpdateAsync(abone);
+                try
+                {
+                    await _aboneService.UpdateAsync(abone);
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError(string.Empty, $"Abone güncellenemedi. API detayı: {ex.Message}");
+                    ViewBag.AboneId = id;
+                    return View("Duzenle", model);
+                }
 
                 await _auditLogService.EkleAsync(
                     varlikTipi: "Abone",
@@ -324,6 +355,48 @@ namespace KcetasWeb.Controllers
         {
             if (string.IsNullOrWhiteSpace(deger) || deger.Length < 5) return "***";
             return deger.Substring(0, 3) + new string('*', deger.Length - 5) + deger.Substring(deger.Length - 2);
+        }
+
+        private void NormalizeAboneModel(AboneEkleViewModel model)
+        {
+            model.AdSoyadUnvan = model.AdSoyadUnvan?.Trim();
+            model.Telefon = model.Telefon?.Trim();
+            model.Mail = model.Mail?.Trim();
+            model.TCKN = DigitsOnly(model.TCKN);
+            model.VKN = DigitsOnly(model.VKN);
+
+            if (model.IsTuzel)
+            {
+                model.TCKN = string.Empty;
+            }
+            else
+            {
+                model.VKN = string.Empty;
+            }
+        }
+
+        private void ValidateKimlikAlanlari(AboneEkleViewModel model)
+        {
+            if (model.IsTuzel)
+            {
+                if (string.IsNullOrWhiteSpace(model.VKN))
+                    ModelState.AddModelError("VKN", "Vergi Kimlik Numarası zorunludur.");
+                else if (model.VKN.Length != 10)
+                    ModelState.AddModelError("VKN", "Vergi Kimlik Numarası 10 haneli olmalıdır.");
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(model.TCKN))
+                    ModelState.AddModelError("TCKN", "TC Kimlik Numarası zorunludur.");
+                else if (model.TCKN.Length != 11)
+                    ModelState.AddModelError("TCKN", "TC Kimlik Numarası 11 haneli olmalıdır.");
+            }
+        }
+
+        private static string DigitsOnly(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+            return new string(value.Where(char.IsDigit).ToArray());
         }
     }
 }
