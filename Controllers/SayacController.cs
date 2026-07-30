@@ -113,58 +113,110 @@ namespace KcetasWeb.Controllers
             return View(new Sayac
             {
                 carpan = 1.0m,
-                faz = KcetasWeb.Models.Enums.SayacFaz.Monofaze
+                faz = KcetasWeb.Models.Enums.SayacFaz.Monofaze,
+                uretim_yili = DateTime.Now.Year
             });
         }
 
         [HttpPost]
-        public async Task<IActionResult> Yeni(Sayac model)
+        public async Task<IActionResult> Yeni(Sayac sayac)
         {
-            if (!string.IsNullOrEmpty(model.muhur_no) && !model.muhur_no.StartsWith("MHR-"))
-            {
-                model.muhur_no = "MHR-" + model.muhur_no;
-            }
+            NormalizeYeniSayacModel(sayac);
 
             var sayaclar = await _sayacService.GetAllAsync();
 
-            if (!string.IsNullOrEmpty(model.seri_no) && sayaclar.Any(s => s.seri_no == model.seri_no))
+            if (string.IsNullOrWhiteSpace(sayac.marka))
+            {
+                ModelState.AddModelError(nameof(Sayac.marka), "Marka alanı zorunludur.");
+            }
+
+            if (string.IsNullOrWhiteSpace(sayac.model))
+            {
+                ModelState.AddModelError(nameof(Sayac.model), "Model alanı zorunludur.");
+            }
+
+            if (string.IsNullOrWhiteSpace(sayac.muhur_no))
+            {
+                ModelState.AddModelError(nameof(Sayac.muhur_no), "Mühür no alanı zorunludur.");
+            }
+
+            if (sayac.uretim_yili < 2000 || sayac.uretim_yili > DateTime.Now.Year)
+            {
+                ModelState.AddModelError(nameof(Sayac.uretim_yili), $"Üretim yılı 2000 ile {DateTime.Now.Year} arasında olmalıdır.");
+            }
+
+            if (!string.IsNullOrEmpty(sayac.seri_no) && sayaclar.Any(s => s.seri_no == sayac.seri_no))
             {
                 ModelState.AddModelError("seri_no", "HATA: Bu Sayaç Seri Numarası sistemde zaten mevcut! Lütfen farklı bir seri numarası girin.");
             }
 
-            ModelState.Remove("seri_no"); ModelState.Remove("status"); if(string.IsNullOrEmpty(model.seri_no)) model.seri_no = "SYC-" + DateTime.Now.ToString("yyyyMMddHHmmss"); if (ModelState.IsValid)
+            if (!string.IsNullOrEmpty(sayac.muhur_no) && sayaclar.Any(s => s.muhur_no == sayac.muhur_no))
             {
+                ModelState.AddModelError("muhur_no", "HATA: Bu mühür numarası sistemde başka bir sayaçta kayıtlı! Lütfen farklı bir mühür numarası girin.");
+            }
 
-                model.sayac_id = sayaclar.Any()
-                    ? sayaclar.Max(x => x.sayac_id) + 1
-                    : 1;
+            if (ModelState.IsValid)
+            {
+                sayac.durum = KcetasWeb.Models.Enums.SayacDurumu.Depoda;
+                sayac.status = "DEPODA";
+                sayac.created_at = DateTime.Now;
+                sayac.updated_at = DateTime.Now;
 
-                model.durum = KcetasWeb.Models.Enums.SayacDurumu.Depoda;
-                model.status = "Depoda";
-                model.created_at = DateTime.Now;
-                model.updated_at = DateTime.Now;
-
-                await _sayacService.CreateAsync(model);
-                var endeks = new EndeksOkuma
-{
-    sayac_id = (int)model.sayac_id,
-    yeni_endeks = 0,
-    onceki_endeks = 0,
-    okuma_tipi = KcetasWeb.Models.Enums.OkumaTipi.IlkOkuma,
-    okuma_kaynagi = KcetasWeb.Models.Enums.OkumaKaynagi.Manuel,
-    okuma_zamani = DateTime.Now,
-    kullanici_id = 1,
-    status = "AKTIF"
-};
-
-await _endeksOkumaService.CreateAsync(endeks);
+                try
+                {
+                    await _sayacService.CreateAsync(sayac);
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError(string.Empty, $"Sayaç oluşturulamadı. API detayı: {ex.Message}");
+                    return View(sayac);
+                }
 
                 TempData["BasariMesaji"] = "Yeni sayaç başarıyla sisteme eklendi.";
 
                 return RedirectToAction("Index");
             }
 
-            return View(model);
+            return View(sayac);
+        }
+
+        private void NormalizeYeniSayacModel(Sayac sayac)
+        {
+            sayac.marka = sayac.marka?.Trim();
+            sayac.model = sayac.model?.Trim();
+            sayac.muhur_no = sayac.muhur_no?.Trim();
+
+            if (string.IsNullOrWhiteSpace(sayac.seri_no))
+            {
+                sayac.seri_no = "SYC-" + DateTime.Now.ToString("yyyyMMddHHmmss");
+            }
+
+            if (!string.IsNullOrEmpty(sayac.muhur_no) && !sayac.muhur_no.StartsWith("MHR-"))
+            {
+                sayac.muhur_no = "MHR-" + sayac.muhur_no;
+            }
+
+            if (sayac.uretim_yili <= 0)
+            {
+                sayac.uretim_yili = DateTime.Now.Year;
+            }
+
+            if (sayac.carpan <= 0)
+            {
+                sayac.carpan = 1.0m;
+            }
+
+            sayac.faz ??= KcetasWeb.Models.Enums.SayacFaz.Monofaze;
+
+            ModelState.Remove(nameof(Sayac.sayac_id));
+            ModelState.Remove(nameof(Sayac.seri_no));
+            ModelState.Remove(nameof(Sayac.status));
+            ModelState.Remove(nameof(Sayac.created_at));
+            ModelState.Remove(nameof(Sayac.updated_at));
+            ModelState.Remove(nameof(Sayac.created_by));
+            ModelState.Remove(nameof(Sayac.updated_by));
+            ModelState.Remove(nameof(Sayac.tuketim_noktasi_id));
+            ModelState.Remove(nameof(Sayac.durum));
         }
 
         public async Task<IActionResult> Detay(long id)

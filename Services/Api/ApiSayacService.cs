@@ -84,11 +84,36 @@ namespace KcetasWeb.Services.Api
 
         public async Task CreateAsync(Sayac sayac)
         {
-            var response = await _httpClient.PostAsJsonAsync("/api/Sayaclar", sayac, _jsonOptions);
+            var dto = new
+            {
+                seriNo = sayac.seri_no,
+                tuketimNoktasiId = sayac.tuketim_noktasi_id.HasValue && sayac.tuketim_noktasi_id.Value > 0 ? sayac.tuketim_noktasi_id : null,
+                marka = string.IsNullOrWhiteSpace(sayac.marka) ? null : sayac.marka.Trim(),
+                model = string.IsNullOrWhiteSpace(sayac.model) ? null : sayac.model.Trim(),
+                uretimYili = sayac.uretim_yili <= 0 ? DateTime.Now.Year : sayac.uretim_yili,
+                faz = sayac.faz ?? KcetasWeb.Models.Enums.SayacFaz.Monofaze,
+                carpan = sayac.carpan <= 0 ? 1.0m : sayac.carpan,
+                muhurNo = string.IsNullOrWhiteSpace(sayac.muhur_no) ? null : sayac.muhur_no.Trim(),
+                durum = sayac.durum ?? KcetasWeb.Models.Enums.SayacDurumu.Depoda,
+                status = string.IsNullOrWhiteSpace(sayac.status) ? "DEPODA" : sayac.status,
+                createdBy = sayac.created_by ?? 1
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("/api/Sayaclar", dto, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"API Hatası: {response.StatusCode} - Sayaç oluşturulamadı.");
+                var errorContent = await response.Content.ReadAsStringAsync();
+                var payload = JsonSerializer.Serialize(dto, _jsonOptions);
+                throw new Exception($"API Hatası: {response.StatusCode} - Sayaç oluşturulamadı. Payload: {payload}. Detay: {errorContent}");
             }
+
+            var created = await response.Content.ReadFromJsonAsync<Sayac>(_jsonOptions);
+            if (created != null)
+            {
+                sayac.sayac_id = created.sayac_id;
+                sayac.seri_no = created.seri_no;
+            }
+
             _cache.Remove("Sayac_GetAll");
         }
 
@@ -109,4 +134,3 @@ namespace KcetasWeb.Services.Api
         }
     }
 }
-

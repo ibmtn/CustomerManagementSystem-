@@ -2,6 +2,9 @@
 
 @{
     ViewData["Title"] = "Yeni Sayaç Ekle";
+    var muhurNoValue = Model.muhur_no != null && Model.muhur_no.StartsWith("MHR-")
+        ? Model.muhur_no.Substring(4)
+        : Model.muhur_no;
 }
 
 <div class="container mt-4">
@@ -23,6 +26,10 @@
                 <div class="card-body p-5">
 
                     <form asp-action="Yeni" method="post">
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        }
 
                         <div class="row g-4">
 
@@ -52,6 +59,7 @@
                                            class="form-control border-start-0 ps-0"
                                            required />
                                 </div>
+                                <span asp-validation-for="marka" class="text-danger small"></span>
                             </div>
 
                             <!-- Model -->
@@ -69,6 +77,7 @@
                                            class="form-control border-start-0 ps-0"
                                            required />
                                 </div>
+                                <span asp-validation-for="model" class="text-danger small"></span>
                             </div>
 
                             <!-- Faz -->
@@ -101,6 +110,7 @@
                                            class="form-control border-start-0 ps-0"
                                            required />
                                 </div>
+                                <span asp-validation-for="uretim_yili" class="text-danger small"></span>
                             </div>
 
                             <!-- Çarpan -->
@@ -120,6 +130,7 @@
                                            class="form-control border-start-0 ps-0"
                                            required />
                                 </div>
+                                <span asp-validation-for="carpan" class="text-danger small"></span>
 
                                 <div class="form-text">
                                     Direkt sayaçlar için genellikle 1 kullanılır.
@@ -139,12 +150,15 @@
                                         <i class="bi bi-shield-lock text-primary me-1"></i> MHR-
                                     </span>
 
-                                    <input asp-for="muhur_no"
+                                    <input name="muhur_no"
+                                           id="muhur_no"
+                                           value="@muhurNoValue"
                                            type="text"
                                            class="form-control border-start-0 ps-0"
                                            placeholder="123456"
                                            required />
                                 </div>
+                                <span asp-validation-for="muhur_no" class="text-danger small"></span>
                             </div>
 
                         </div>
