@@ -1,40 +1,24 @@
 ﻿@model KcetasWeb.Models.TuketimNoktasi
 
 @{
-<<<<<<< HEAD
-    ViewData["Title"] = "T�ketici ve Tesisat D�zenle";
-=======
     ViewData["Title"] = "Tüketici ve Tesisat Düzenle";
->>>>>>> 43e28cdbb9f91406e7d3767a8a39055208588792
 }
 
 <div class="row justify-content-center">
     <div class="col-md-10">
         <div class="mb-3">
-<<<<<<< HEAD
-            <a href="/TuketimNoktasi/Detay/@Model.tekil_kod" class="btn btn-sm btn-outline-secondary">&larr; Detaya Geri D�n</a>
-=======
             <a href="/TuketimNoktasi/Detay/@Model.tekil_kod" class="btn btn-sm btn-outline-secondary">&larr; Detaya Geri Dön</a>
->>>>>>> 43e28cdbb9f91406e7d3767a8a39055208588792
         </div>
 
         <div class="card shadow-sm border-0">
             <div class="card-header bg-warning text-dark py-3">
-<<<<<<< HEAD
-                <h5 class="card-title mb-0 fw-bold">T�ketici ve Tesisat Bilgilerini D�zenle</h5>
-            </div>
-            <div class="card-body p-4">
-                <form action="/TuketimNoktasi/Duzenle" method="post">
-                    <!-- Gizli ID Alan� -->
-                    <input type="hidden" name="tekil_kod" value="@Model.tekil_kod" />`r`n                    <input type="hidden" name="tuketim_noktasi_id" value="@Model.tuketim_noktasi_id" />
-=======
                 <h5 class="card-title mb-0 fw-bold">Tüketici ve Tesisat Bilgilerini Düzenle</h5>
             </div>
             <div class="card-body p-4">
                 <form action="/TuketimNoktasi/Duzenle" method="post">
                     <!-- Gizli ID Alanı -->
                     <input type="hidden" name="tekil_kod" value="@Model.tekil_kod" />
->>>>>>> 43e28cdbb9f91406e7d3767a8a39055208588792
+                    <input type="hidden" name="tuketim_noktasi_id" value="@Model.tuketim_noktasi_id" />
 
 
 
@@ -42,25 +26,15 @@
                     <h5 class="text-warning border-bottom pb-2 mb-3 mt-4"><i class="bi bi-house-door"></i> Tesisat ve Adres Bilgileri</h5>
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
-<<<<<<< HEAD
-                            <label class="form-label fw-bold">�l <span class="text-danger">*</span></label>
-=======
                             <label class="form-label fw-bold">İl <span class="text-danger">*</span></label>
->>>>>>> 43e28cdbb9f91406e7d3767a8a39055208588792
                             <select data-control="select2" class="form-select bg-light" name="il_adi" id="ilSelect" readonly style="pointer-events: none;">
                                 <option value="Kayseri" selected>Kayseri</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-<<<<<<< HEAD
-                            <label class="form-label fw-bold">�l�e Se�iniz <span class="text-danger">*</span></label>
-                            <select data-control="select2" class="form-select" name="ilce_id" id="ilceSelect" required>
-                                <option value="">�nce �l Se�in</option>
-=======
                             <label class="form-label fw-bold">İlçe Seçiniz <span class="text-danger">*</span></label>
                             <select data-control="select2" class="form-select" name="ilce_id" id="ilceSelect" required>
                                 <option value="">Önce İl Seçin</option>
->>>>>>> 43e28cdbb9f91406e7d3767a8a39055208588792
                             </select>
                         </div>
                         <div class="col-md-2 mb-3">
@@ -73,24 +47,11 @@
                         </div>
                         
                         <div class="col-md-12 mb-3">
-<<<<<<< HEAD
-                            <label class="form-label fw-bold">A��k Adres</label>
-=======
                             <label class="form-label fw-bold">Açık Adres</label>
->>>>>>> 43e28cdbb9f91406e7d3767a8a39055208588792
                             <textarea class="form-control" name="acik_adres" rows="2">@Model.acik_adres</textarea>
                         </div>
 
                         <div class="col-md-6 mb-3">
-<<<<<<< HEAD
-                            <label class="form-label fw-bold">T�ketici Grubu</label>
-                            <select data-control="select2" class="form-select" name="tuketici_grubu" required>
-                                <option value="MESKEN" selected="@(Model.tuketici_grubu == "MESKEN" || Model.tuketici_grubu == "Mesken")">MESKEN</option>
-                                <option value="T�CARETHANE" selected="@(Model.tuketici_grubu == "T�CARETHANE" || Model.tuketici_grubu == "Ticarethane")">T�CARETHANE</option>
-                                <option value="SANAY�" selected="@(Model.tuketici_grubu == "SANAY�" || Model.tuketici_grubu == "Sanayi")">SANAY�</option>
-                                <option value="TARIMSAL SULAMA" selected="@(Model.tuketici_grubu == "TARIMSAL SULAMA" || Model.tuketici_grubu == "Tar�msal Sulama")">TARIMSAL SULAMA</option>
-                                <option value="AYDINLATMA" selected="@(Model.tuketici_grubu == "AYDINLATMA" || Model.tuketici_grubu == "Ayd�nlatma")">AYDINLATMA</option>
-=======
                             <label class="form-label fw-bold">Tüketici Grubu</label>
                             <select data-control="select2" class="form-select" name="tuketici_grubu" required>
                                 <option value="MESKEN" selected="@(Model.tuketici_grubu == "MESKEN" || Model.tuketici_grubu == "Mesken")">MESKEN</option>
@@ -98,28 +59,19 @@
                                 <option value="SANAYİ" selected="@(Model.tuketici_grubu == "SANAYİ" || Model.tuketici_grubu == "Sanayi")">SANAYİ</option>
                                 <option value="TARIMSAL SULAMA" selected="@(Model.tuketici_grubu == "TARIMSAL SULAMA" || Model.tuketici_grubu == "Tarımsal Sulama")">TARIMSAL SULAMA</option>
                                 <option value="AYDINLATMA" selected="@(Model.tuketici_grubu == "AYDINLATMA" || Model.tuketici_grubu == "Aydınlatma")">AYDINLATMA</option>
->>>>>>> 43e28cdbb9f91406e7d3767a8a39055208588792
                             </select>
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Durum</label>
                             <select data-control="select2" class="form-select" name="status">
-<<<<<<< HEAD
-                                <option value="Ba�l�" selected="@(Model.status == "Ba�l�" || Model.baglanti_durumu == KcetasWeb.Models.Enums.BaglantiDurumu.Aktif)">Ba�l�</option>
-=======
                                 <option value="Bağlı" selected="@(Model.status == "Bağlı" || Model.baglanti_durumu == KcetasWeb.Models.Enums.BaglantiDurumu.Aktif)">Bağlı</option>
->>>>>>> 43e28cdbb9f91406e7d3767a8a39055208588792
                                 <option value="Kesik" selected="@(Model.status == "Kesik" || Model.baglanti_durumu == KcetasWeb.Models.Enums.BaglantiDurumu.Pasif)">Kesik</option>
                             </select>
                         </div>
 
                         <div class="col-md-12 mb-3">
-<<<<<<< HEAD
-                            <label class="form-label fw-bold">Ba�lant� G�c� (kW)</label>
-=======
                             <label class="form-label fw-bold">Bağlantı Gücü (kW)</label>
->>>>>>> 43e28cdbb9f91406e7d3767a8a39055208588792
                             <input type="number" step="0.01" class="form-control" name="baglanti_gucu_kw" value="@Model.baglanti_gucu_kw" />
                         </div>
                     </div>
@@ -127,13 +79,8 @@
                     <hr class="text-muted mb-4">
 
                     <div class="d-flex justify-content-end gap-2">
-<<<<<<< HEAD
-                        <a href="/TuketimNoktasi/Detay/@Model.tekil_kod" class="btn btn-light border">�ptal</a>
-                        <button type="submit" class="btn btn-warning px-4 fw-bold shadow-sm">De�i�iklikleri Kaydet</button>
-=======
                         <a href="/TuketimNoktasi/Detay/@Model.tekil_kod" class="btn btn-light border">İptal</a>
                         <button type="submit" class="btn btn-warning px-4 fw-bold shadow-sm">Değişiklikleri Kaydet</button>
->>>>>>> 43e28cdbb9f91406e7d3767a8a39055208588792
                     </div>
                 </form>
             </div>
@@ -144,17 +91,10 @@
 @section Scripts {
     <script>
         const kayseriIlceler = {
-<<<<<<< HEAD
-            "1": "Melikgazi", "2": "Kocasinan", "3": "Talas", "4": "Akk��la", 
-            "5": "B�nyan", "6": "Develi", "7": "Felahiye", "8": "Hac�lar",
-            "9": "�ncesu", "10": "�zvatan", "11": "P�narba��", "12": "Sar�o�lan",
-            "13": "Sar�z", "14": "Tomarza", "15": "Yahyal�", "16": "Ye�ilhisar"
-=======
             "1": "Melikgazi", "2": "Kocasinan", "3": "Talas", "4": "Akkışla",
             "5": "Bünyan", "6": "Develi", "7": "Felahiye", "8": "Hacılar",
             "9": "İncesu", "10": "Özvatan", "11": "Pınarbaşı", "12": "Sarıoğlan",
             "13": "Sarız", "14": "Tomarza", "15": "Yahyalı", "16": "Yeşilhisar"
->>>>>>> 43e28cdbb9f91406e7d3767a8a39055208588792
         };
 
 
@@ -170,11 +110,7 @@
             var ilAd = document.getElementById("ilSelect").value;
             var ilceSelect = document.getElementById("ilceSelect");
             
-<<<<<<< HEAD
-            ilceSelect.innerHTML = '<option value="">�l�e Se�in</option>';
-=======
             ilceSelect.innerHTML = '<option value="">İlçe Seçin</option>';
->>>>>>> 43e28cdbb9f91406e7d3767a8a39055208588792
 
             if (ilAd === "Kayseri") {
                 Object.keys(kayseriIlceler).forEach(function(id) {
@@ -187,11 +123,7 @@
             } else if (ilAd) {
                 var option = document.createElement("option");
                 option.value = "99";
-<<<<<<< HEAD
-                option.text = "Merkez �l�e";
-=======
                 option.text = "Merkez İlçe";
->>>>>>> 43e28cdbb9f91406e7d3767a8a39055208588792
                 if (isInitialLoad && "99" == currentIlce) option.selected = true;
                 ilceSelect.appendChild(option);
             }
