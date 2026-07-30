@@ -103,11 +103,15 @@ namespace KcetasWeb.Services.Api
             var response = await _httpClient.PostAsJsonAsync("/api/TuketimNoktasi", dto, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
-                var payload = System.Text.Json.JsonSerializer.Serialize(tuketimNoktasi, _jsonOptions);
+                var payload = System.Text.Json.JsonSerializer.Serialize(dto, _jsonOptions);
                 var errorContent = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Tüketim noktası oluşturulamadı. \nPayload: {payload}\nDetay: {errorContent}");
             }
+<<<<<<< HEAD
             
+=======
+
+>>>>>>> 600e20d70a5f7feb91e6f07cc290984fb95fb6e2
             _cache.Remove("TuketimNoktasi_TotalCount");
             _cache.Remove("TuketimNoktasi_GetAll");
         }

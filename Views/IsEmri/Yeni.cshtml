@@ -50,15 +50,15 @@
                     <select data-control="select2" asp-for="Tip" class="form-select">
                         <option value="">-- Tip Seçiniz --</option>
 
-                        <option value="Degistirme">Sayaç Değiştirme (DEGISTIRME)</option>
-                        <option value="Sokme">Sayaç Sökme (SOKME)</option>
-                        <option value="Kesme">Enerji Kesme (KESME)</option>
-                        <option value="Acma">Enerji Açma (ACMA)</option>
-                        <option value="EndeksOkuma">Endeks Okuma (ENDEKS_OKUMA)</option>
-                        <option value="SayacAriza">Sayaç Arıza (SAYAC_ARIZA)</option>
-                        <option value="Muhurleme">Mühürleme (MUHURLEME)</option>
-                        <option value="KesifInceleme">Keşif İnceleme (KESIF_INCELEME)</option>
-                        <option value="YeniBaglanti">Yeni Bağlantı (YENI_BAGLANTI)</option>
+                        <option value="@((int)KcetasWeb.Models.Enums.IsEmriTipi.Degistirme)">Sayaç Değiştirme</option>
+                        <option value="@((int)KcetasWeb.Models.Enums.IsEmriTipi.Sokme)">Sayaç Sökme</option>
+                        <option value="@((int)KcetasWeb.Models.Enums.IsEmriTipi.Kesme)">Enerji Kesme</option>
+                        <option value="@((int)KcetasWeb.Models.Enums.IsEmriTipi.Acma)">Enerji Açma</option>
+                        <option value="@((int)KcetasWeb.Models.Enums.IsEmriTipi.EndeksOkuma)">Endeks Okuma</option>
+                        <option value="@((int)KcetasWeb.Models.Enums.IsEmriTipi.SayacAriza)">Sayaç Arıza</option>
+                        <option value="@((int)KcetasWeb.Models.Enums.IsEmriTipi.Muhurleme)">Mühürleme</option>
+                        <option value="@((int)KcetasWeb.Models.Enums.IsEmriTipi.KesifInceleme)">Keşif İnceleme</option>
+                        <option value="@((int)KcetasWeb.Models.Enums.IsEmriTipi.YeniBaglanti)">Yeni Bağlantı</option>
                     </select>
                     <span asp-validation-for="Tip" class="text-danger small"></span>
                 </div>
@@ -153,4 +153,3 @@
         });
     </script>
 }
-

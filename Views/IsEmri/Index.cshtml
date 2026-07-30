@@ -4,15 +4,15 @@
     ViewData["Title"] = "İş Emri Listesi";
     var tipSecenekleri = new List<SelectListItem> { 
 
-        new SelectListItem("Sayaç Değiştirme", "Sayaç Değiştirme"), 
-        new SelectListItem("Sayaç Sökme", "Sayaç Sökme"), 
-        new SelectListItem("Enerji Kesme", "Enerji Kesme"), 
-        new SelectListItem("Enerji Açma", "Enerji Açma"),
-        new SelectListItem("Sayaç Arıza", "Sayaç Arıza"),
-        new SelectListItem("Yeni Bağlantı", "Yeni Bağlantı"),
-        new SelectListItem("Endeks Okuma", "Endeks Okuma"),
-        new SelectListItem("Mühürleme", "Mühürleme"),
-        new SelectListItem("Keşif İnceleme", "Keşif İnceleme")
+        new SelectListItem("Sayaç Değiştirme", "Degistirme"), 
+        new SelectListItem("Sayaç Sökme", "Sokme"), 
+        new SelectListItem("Enerji Kesme", "Kesme"), 
+        new SelectListItem("Enerji Açma", "Acma"),
+        new SelectListItem("Sayaç Arıza", "SayacAriza"),
+        new SelectListItem("Yeni Bağlantı", "YeniBaglanti"),
+        new SelectListItem("Endeks Okuma", "EndeksOkuma"),
+        new SelectListItem("Mühürleme", "Muhurleme"),
+        new SelectListItem("Keşif İnceleme", "KesifInceleme")
     };
     var durumSecenekleri = new List<SelectListItem> { new SelectListItem("Açık", "ACIK"), new SelectListItem("Atandı", "ATANDI"), new SelectListItem("Yolda", "YOLDA"), new SelectListItem("Sahada", "SAHADA"), new SelectListItem("Tamamlandı", "TAMAMLANDI"), new SelectListItem("İptal", "IPTAL"), new SelectListItem("Başarısız", "BASARISIZ") };
 }
@@ -83,10 +83,10 @@
                 <label class="form-label">Öncelik</label>
                 <select data-control="select2" asp-for="FiltreOncelik" class="form-select">
                     <option value="">Tümü</option>
-                    <option value="Acil">Acil</option>
-                    <option value="Yüksek">Yüksek</option>
-                    <option value="Normal">Normal</option>
-                    <option value="Düşük">Düşük</option>
+                    <option value="ACIL">Acil</option>
+                    <option value="YUKSEK">Yüksek</option>
+                    <option value="NORMAL">Normal</option>
+                    <option value="DUSUK">Düşük</option>
                 </select>
             </div>
 
@@ -169,22 +169,23 @@
 
                                 <td>
                                     @{
-                                        var oncelikStr = string.IsNullOrEmpty(item.oncelik) ? "Normal" : item.oncelik;
-                                        if (oncelikStr.Equals("Acil", StringComparison.OrdinalIgnoreCase))
+                                        var oncelikKey = KcetasWeb.ViewModels.IsEmriListeViewModel.NormalizeOncelikKey(item.oncelik);
+                                        var oncelikAd = KcetasWeb.ViewModels.IsEmriListeViewModel.GetOncelikAd(item.oncelik);
+                                        if (oncelikKey == "ACIL")
                                         {
-                                            <span class="badge bg-light-danger text-danger border border-danger">Acil</span>
+                                            <span class="badge bg-light-danger text-danger border border-danger">@oncelikAd</span>
                                         }
-                                        else if (oncelikStr.Equals("Yüksek", StringComparison.OrdinalIgnoreCase))
+                                        else if (oncelikKey == "YUKSEK")
                                         {
-                                            <span class="badge bg-light-warning text-warning border border-warning">Yüksek</span>
+                                            <span class="badge bg-light-warning text-warning border border-warning">@oncelikAd</span>
                                         }
-                                        else if (oncelikStr.Equals("Düşük", StringComparison.OrdinalIgnoreCase))
+                                        else if (oncelikKey == "DUSUK")
                                         {
-                                            <span class="badge bg-light-info text-info border border-info">Düşük</span>
+                                            <span class="badge bg-light-info text-info border border-info">@oncelikAd</span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-light-primary text-primary border border-primary">Normal</span>
+                                            <span class="badge bg-light-primary text-primary border border-primary">@oncelikAd</span>
                                         }
                                     }
                                 </td>
@@ -247,5 +248,4 @@
         }
     </div>
 </div>
-
 

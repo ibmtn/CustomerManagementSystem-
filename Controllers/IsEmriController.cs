@@ -99,7 +99,11 @@ public class IsEmriController : Controller
 
         // Şimdi UI uyumlu hale gelmiş nesneler üzerinde detaylı string filtrelerini uyguluyoruz
         if (!string.IsNullOrEmpty(filtre.FiltreTip))
-            filtre.IsEmirleri = filtre.IsEmirleri.Where(x => x.Tip.ToString().Equals(filtre.FiltreTip, StringComparison.OrdinalIgnoreCase)).ToList();
+            filtre.IsEmirleri = filtre.IsEmirleri
+                .Where(x =>
+                    x.Tip.ToString().Equals(filtre.FiltreTip, StringComparison.OrdinalIgnoreCase) ||
+                    IsEmriListeViewModel.GetTipAd(x.Tip).Equals(filtre.FiltreTip, StringComparison.OrdinalIgnoreCase))
+                .ToList();
 
         if (!string.IsNullOrEmpty(filtre.FiltreIsEmriNo))
             filtre.IsEmirleri = filtre.IsEmirleri.Where(x => x.IsEmriNo != null && x.IsEmriNo.Contains(filtre.FiltreIsEmriNo, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -114,7 +118,12 @@ public class IsEmriController : Controller
             filtre.IsEmirleri = filtre.IsEmirleri.Where(x => x.AtananKullaniciAdi != null && x.AtananKullaniciAdi.Contains(filtre.FiltrePersonel, StringComparison.OrdinalIgnoreCase)).ToList();
 
         if (!string.IsNullOrEmpty(filtre.FiltreOncelik))
-            filtre.IsEmirleri = filtre.IsEmirleri.Where(x => x.oncelik != null && x.oncelik.Equals(filtre.FiltreOncelik, StringComparison.OrdinalIgnoreCase)).ToList();
+        {
+            var filtreOncelik = IsEmriListeViewModel.NormalizeOncelikKey(filtre.FiltreOncelik);
+            filtre.IsEmirleri = filtre.IsEmirleri
+                .Where(x => IsEmriListeViewModel.NormalizeOncelikKey(x.oncelik) == filtreOncelik)
+                .ToList();
+        }
 
         // SIRALAMA MANTIĞI:
         // 1. Durumu "Tamamlandı" olanlar listenin en sonuna gitsin (0 olanlar üste, 1 olanlar alta)
@@ -139,39 +148,7 @@ public class IsEmriController : Controller
     [Authorize(Roles = $"{AppRoles.SahaOperasyonAmiri},{AppRoles.BTYoneticisi},{AppRoles.Denetci}")]
     public async Task<IActionResult> Yeni()
     {
-        ViewBag.TuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync())
-            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.tuketim_noktasi_id.ToString(), Text = $"{x.tekil_kod}" })
-            .ToList();
-            
-        ViewBag.Personeller = (await _kullaniciDeposu.ListeleAsync())
-            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.kullanici_id.ToString(), Text = x.ad_soyad })
-            .ToList();
-            
-        ViewBag.Sozlesmeler = (await _sozlesmeService.GetAllAsync())
-            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sozlesme_id.ToString(), Text = $"{x.sozlesme_no} - {x.sozlesme_tipi}" })
-            .ToList();
-
-        ViewBag.Sayaclar = (await _sayacService.GetAllAsync())
-            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sayac_id.ToString(), Text = $"{x.seri_no} - {x.marka} {x.model}" })
-            .ToList();
-
-        var sayacMap = (await _sayacService.GetAllAsync())
-            .Where(s => s.tuketim_noktasi_id != null && s.tuketim_noktasi_id > 0)
-            .GroupBy(s => s.tuketim_noktasi_id.Value.ToString())
-            .ToDictionary(g => g.Key, g => g.First().sayac_id);
-
-        var sozlesmeMap = (await _sozlesmeService.GetAllAsync())
-            .Where(s => s.tuketim_noktasi_id > 0)
-            .GroupBy(s => s.tuketim_noktasi_id.ToString())
-            .ToDictionary(g => g.Key, g => g.First().sozlesme_id);
-
-        var sozlesmeToTnMap = (await _sozlesmeService.GetAllAsync())
-            .Where(s => s.tuketim_noktasi_id > 0)
-            .ToDictionary(s => s.sozlesme_id.ToString(), s => s.tuketim_noktasi_id.ToString());
-
-        ViewBag.SayacMapJson = System.Text.Json.JsonSerializer.Serialize(sayacMap);
-        ViewBag.SozlesmeMapJson = System.Text.Json.JsonSerializer.Serialize(sozlesmeMap);
-        ViewBag.SozlesmeToTnMapJson = System.Text.Json.JsonSerializer.Serialize(sozlesmeToTnMap);
+        await PrepareYeniViewBagAsync();
             
         return View(new YeniIsEmriViewModel());
     }
@@ -180,7 +157,9 @@ public class IsEmriController : Controller
     [HttpPost]
     public async Task<IActionResult> Yeni(YeniIsEmriViewModel model)
     {
-        ModelState.Clear(); if (ModelState.IsValid)
+        NormalizeYeniIsEmriModel(model);
+
+        if (ModelState.IsValid)
         {
             var isEmri = new IsEmri
             {
@@ -203,46 +182,23 @@ public class IsEmriController : Controller
                 tutanak_no = ""
             };
             
-            await _isEmriService.EkleAsync(isEmri);
+            try
+            {
+                await _isEmriService.EkleAsync(isEmri);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, $"İş emri oluşturulamadı. API detayı: {ex.Message}");
+                await PrepareYeniViewBagAsync();
+                return View(model);
+            }
             
             TempData["Mesaj"] = "İş emri başarıyla oluşturuldu.";
             TempData["MesajTip"] = "success";
             return RedirectToAction("Index");
         }
 
-        ViewBag.TuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync())
-            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.tuketim_noktasi_id.ToString(), Text = $"{x.tekil_kod}" })
-            .ToList();
-            
-        ViewBag.Personeller = (await _kullaniciDeposu.ListeleAsync())
-            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.kullanici_id.ToString(), Text = x.ad_soyad })
-            .ToList();
-
-        ViewBag.Sozlesmeler = (await _sozlesmeService.GetAllAsync())
-            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sozlesme_id.ToString(), Text = $"{x.sozlesme_no} - {x.sozlesme_tipi}" })
-            .ToList();
-
-        ViewBag.Sayaclar = (await _sayacService.GetAllAsync())
-            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sayac_id.ToString(), Text = $"{x.seri_no} - {x.marka} {x.model}" })
-            .ToList();
-
-        var sayacMap = (await _sayacService.GetAllAsync())
-            .Where(s => s.tuketim_noktasi_id != null && s.tuketim_noktasi_id > 0)
-            .GroupBy(s => s.tuketim_noktasi_id.Value.ToString())
-            .ToDictionary(g => g.Key, g => g.First().sayac_id);
-
-        var sozlesmeMap = (await _sozlesmeService.GetAllAsync())
-            .Where(s => s.tuketim_noktasi_id > 0)
-            .GroupBy(s => s.tuketim_noktasi_id.ToString())
-            .ToDictionary(g => g.Key, g => g.First().sozlesme_id);
-
-        var sozlesmeToTnMap = (await _sozlesmeService.GetAllAsync())
-            .Where(s => s.tuketim_noktasi_id > 0)
-            .ToDictionary(s => s.sozlesme_id.ToString(), s => s.tuketim_noktasi_id.ToString());
-
-        ViewBag.SayacMapJson = System.Text.Json.JsonSerializer.Serialize(sayacMap);
-        ViewBag.SozlesmeMapJson = System.Text.Json.JsonSerializer.Serialize(sozlesmeMap);
-        ViewBag.SozlesmeToTnMapJson = System.Text.Json.JsonSerializer.Serialize(sozlesmeToTnMap);
+        await PrepareYeniViewBagAsync();
 
         return View(model);
     }
@@ -648,6 +604,72 @@ public class IsEmriController : Controller
 
         return View("Tamamlama", viewModel);
     }
+
+    private void NormalizeYeniIsEmriModel(YeniIsEmriViewModel model)
+    {
+        model.Oncelik = string.IsNullOrWhiteSpace(model.Oncelik) ? "Normal" : model.Oncelik.Trim();
+        model.Aciklama = model.Aciklama?.Trim();
+
+        if (model.TuketimNoktasiId <= 0)
+            ModelState.AddModelError(nameof(model.TuketimNoktasiId), "Tüketim noktası seçimi zorunludur.");
+
+        if ((int)model.Tip <= 0)
+            ModelState.AddModelError(nameof(model.Tip), "İş emri tipi zorunludur.");
+
+        if (model.AtananKullaniciId <= 0)
+            model.AtananKullaniciId = null;
+
+        if (model.SayacId <= 0)
+            model.SayacId = null;
+    }
+
+    private async Task PrepareYeniViewBagAsync()
+    {
+        var tuketimNoktalariTask = _tuketimNoktasiService.GetAllAsync();
+        var personellerTask = _kullaniciDeposu.ListeleAsync();
+        var sozlesmelerTask = _sozlesmeService.GetAllAsync();
+        var sayaclarTask = _sayacService.GetAllAsync();
+
+        await Task.WhenAll(tuketimNoktalariTask, personellerTask, sozlesmelerTask, sayaclarTask);
+
+        var tuketimNoktalari = await tuketimNoktalariTask;
+        var personeller = await personellerTask;
+        var sozlesmeler = await sozlesmelerTask;
+        var sayaclar = await sayaclarTask;
+
+        ViewBag.TuketimNoktalari = tuketimNoktalari
+            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.tuketim_noktasi_id.ToString(), Text = $"{x.tekil_kod}" })
+            .ToList();
+
+        ViewBag.Personeller = personeller
+            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.kullanici_id.ToString(), Text = x.ad_soyad })
+            .ToList();
+
+        ViewBag.Sozlesmeler = sozlesmeler
+            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sozlesme_id.ToString(), Text = $"{x.sozlesme_no} - {x.sozlesme_tipi}" })
+            .ToList();
+
+        ViewBag.Sayaclar = sayaclar
+            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sayac_id.ToString(), Text = $"{x.seri_no} - {x.marka} {x.model}" })
+            .ToList();
+
+        var sayacMap = sayaclar
+            .Where(s => s.tuketim_noktasi_id != null && s.tuketim_noktasi_id > 0)
+            .GroupBy(s => s.tuketim_noktasi_id.Value.ToString())
+            .ToDictionary(g => g.Key, g => g.First().sayac_id);
+
+        var sozlesmeMap = sozlesmeler
+            .Where(s => s.tuketim_noktasi_id > 0)
+            .GroupBy(s => s.tuketim_noktasi_id.ToString())
+            .ToDictionary(g => g.Key, g => g.First().sozlesme_id);
+
+        var sozlesmeToTnMap = sozlesmeler
+            .Where(s => s.tuketim_noktasi_id > 0)
+            .GroupBy(s => s.sozlesme_id.ToString())
+            .ToDictionary(g => g.Key, g => g.First().tuketim_noktasi_id.ToString());
+
+        ViewBag.SayacMapJson = System.Text.Json.JsonSerializer.Serialize(sayacMap);
+        ViewBag.SozlesmeMapJson = System.Text.Json.JsonSerializer.Serialize(sozlesmeMap);
+        ViewBag.SozlesmeToTnMapJson = System.Text.Json.JsonSerializer.Serialize(sozlesmeToTnMap);
+    }
 }
-
-

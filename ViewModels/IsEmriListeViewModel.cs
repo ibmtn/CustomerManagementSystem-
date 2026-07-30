@@ -51,6 +51,27 @@ namespace KcetasWeb.ViewModels
             (KcetasWeb.Models.Enums.IsEmriTipi)1 => "Yeni Bağlama", // Handle legacy/missing 1 value
             _ => tip.ToString()
         };
+
+        public static string NormalizeOncelikKey(string? oncelik)
+        {
+            if (string.IsNullOrWhiteSpace(oncelik)) return "NORMAL";
+
+            return oncelik.Trim().ToUpperInvariant() switch
+            {
+                "ACİL" or "ACIL" => "ACIL",
+                "YÜKSEK" or "YUKSEK" => "YUKSEK",
+                "DÜŞÜK" or "DUSUK" => "DUSUK",
+                _ => "NORMAL"
+            };
+        }
+
+        public static string GetOncelikAd(string? oncelik) => NormalizeOncelikKey(oncelik) switch
+        {
+            "ACIL" => "Acil",
+            "YUKSEK" => "Yüksek",
+            "DUSUK" => "Düşük",
+            _ => "Normal"
+        };
     }
 
     public class IsEmriSatirViewModel
