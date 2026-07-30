@@ -152,12 +152,25 @@ namespace KcetasWeb.Services.Api
 
         public async System.Threading.Tasks.Task CreateAsync(Abone abone)
         {
-            var response = await _httpClient.PostAsJsonAsync("/api/Aboneler", abone, _jsonOptions);
+            var dto = new
+            {
+                aboneTipi = abone.abone_tipi ?? KcetasWeb.Models.Enums.AboneTipi.Bireysel,
+                ad = NullIfWhiteSpace(abone.Ad),
+                soyad = NullIfWhiteSpace(abone.Soyad),
+                unvan = NullIfWhiteSpace(abone.Unvan),
+                tckn = NullIfWhiteSpace(abone.tckn),
+                vkn = NullIfWhiteSpace(abone.vkn),
+                telefon = NullIfWhiteSpace(abone.telefon)
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("/api/Aboneler", dto, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
                 var err = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Abone oluşturulamadı. Detay: {err}");
             }
+
+            _cache.Remove("Abone_GetAll_2");
         }
 
         public async System.Threading.Tasks.Task UpdateAsync(Abone abone)
@@ -168,6 +181,8 @@ namespace KcetasWeb.Services.Api
                 var err = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Abone güncellenemedi. Detay: {err}");
             }
+
+            _cache.Remove("Abone_GetAll_2");
         }
 
         public async System.Threading.Tasks.Task DeleteAsync(int id)
@@ -177,6 +192,13 @@ namespace KcetasWeb.Services.Api
             {
                 throw new Exception($"API Hatası: {response.StatusCode} - Abone silinemedi.");
             }
+
+            _cache.Remove("Abone_GetAll_2");
+        }
+
+        private static string NullIfWhiteSpace(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
         }
     }
 }

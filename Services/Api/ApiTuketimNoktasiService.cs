@@ -89,15 +89,15 @@ namespace KcetasWeb.Services.Api
             var dto = new
             {
                 ilceId = tuketimNoktasi.ilce_id,
-                mahalle = tuketimNoktasi.mahalle ?? "Bilinmiyor",
+                mahalle = string.IsNullOrWhiteSpace(tuketimNoktasi.mahalle) ? "Bilinmiyor" : tuketimNoktasi.mahalle,
                 binaNo = tuketimNoktasi.bina_no,
                 bagimsizBolumNo = tuketimNoktasi.bagimsiz_bolum_no,
-                acikAdres = tuketimNoktasi.acik_adres ?? "Belirtilmemiş",
+                acikAdres = string.IsNullOrWhiteSpace(tuketimNoktasi.acik_adres) ? "Belirtilmemiş" : tuketimNoktasi.acik_adres,
                 koordinatLat = tuketimNoktasi.koordinat_lat,
                 koordinatLon = tuketimNoktasi.koordinat_lot,
                 baglantiGucuKw = tuketimNoktasi.baglanti_gucu_kw,
-                tuketiciGrubu = tuketimNoktasi.tuketici_grubu ?? "Mesken",
-                baglantiDurumu = tuketimNoktasi.baglanti_durumu
+                tuketiciGrubu = string.IsNullOrWhiteSpace(tuketimNoktasi.tuketici_grubu) ? "MESKEN" : tuketimNoktasi.tuketici_grubu,
+                baglantiDurumu = tuketimNoktasi.baglanti_durumu ?? KcetasWeb.Models.Enums.BaglantiDurumu.Pasif
             };
 
             var response = await _httpClient.PostAsJsonAsync("/api/TuketimNoktasi", dto, _jsonOptions);
@@ -106,6 +106,8 @@ namespace KcetasWeb.Services.Api
                 var errorContent = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Tüketim noktası oluşturulamadı. Detay: {errorContent}");
             }
+
+            _cache.Remove("TuketimNoktasi_GetAll");
         }
 
         public async Task UpdateAsync(TuketimNoktasi tuketimNoktasi)
@@ -124,8 +126,3 @@ namespace KcetasWeb.Services.Api
         }
     }
 }
-
-
-
-
-

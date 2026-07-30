@@ -1,0 +1,3 @@
+System.Net.Http.HttpRequestException: Response status code does not indicate success: 405 (Method Not Allowed).
+   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at KcetasWeb.Services.Api.ApiFaturaService.GetAllAsync() in /Users/arzusahinaral/Desktop/KcetaşProjesi/KcetasProjeWeb/Services/Api/ApiFaturaService.cs:line 102

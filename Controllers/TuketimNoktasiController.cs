@@ -85,14 +85,35 @@ namespace KcetasWeb.Controllers
             return View(filtre);
         }
 
-        public async Task<IActionResult> Yeni()
+        public IActionResult Yeni()
         {
-            return View();
+            return View(new TuketimNoktasiViewModels
+            {
+                tuketici_grubu = "MESKEN",
+                baglanti_durumu = KcetasWeb.Models.Enums.BaglantiDurumu.Pasif
+            });
         }
 
         [HttpPost]
         public async Task<IActionResult> Yeni(KcetasWeb.ViewModels.TuketimNoktasiViewModels model)
         {
+            model.mahalle = model.mahalle?.Trim();
+            model.bina_no = model.bina_no?.Trim();
+            model.bagimsiz_bolum_no = model.bagimsiz_bolum_no?.Trim();
+            model.acik_adres = model.acik_adres?.Trim();
+            model.tuketici_grubu = NormalizeTuketiciGrubu(model.tuketici_grubu);
+
+            if (model.ilce_id <= 0)
+                ModelState.AddModelError(nameof(model.ilce_id), "Lütfen ilçe seçiniz.");
+            if (string.IsNullOrWhiteSpace(model.mahalle))
+                ModelState.AddModelError(nameof(model.mahalle), "Mahalle alanı zorunludur.");
+            if (string.IsNullOrWhiteSpace(model.acik_adres))
+                ModelState.AddModelError(nameof(model.acik_adres), "Açık adres alanı zorunludur.");
+            if (model.baglanti_gucu_kw <= 0)
+                ModelState.AddModelError(nameof(model.baglanti_gucu_kw), "Bağlantı gücü 0'dan büyük olmalıdır.");
+            if (string.IsNullOrWhiteSpace(model.tuketici_grubu))
+                ModelState.AddModelError(nameof(model.tuketici_grubu), "Lütfen tüketici grubu seçiniz.");
+
             var allData = await _tuketimNoktasiService.GetAllAsync();
             
             if (model.koordinat_lat != 0 && model.koordinat_lot != 0 &&
@@ -128,14 +149,23 @@ namespace KcetasWeb.Controllers
                 bagimsiz_bolum_no = model.bagimsiz_bolum_no,
                 acik_adres = model.acik_adres,
                 baglanti_gucu_kw = model.baglanti_gucu_kw,
-                koordinat_lat = model.koordinat_lat,
-                koordinat_lot = model.koordinat_lot,
+                koordinat_lat = model.koordinat_lat == 0 ? null : model.koordinat_lat,
+                koordinat_lot = model.koordinat_lot == 0 ? null : model.koordinat_lot,
                 tuketici_grubu = model.tuketici_grubu,
                 baglanti_durumu = model.baglanti_durumu ?? KcetasWeb.Models.Enums.BaglantiDurumu.Pasif,
                 status = "Pasif"
             };
 
-            await _tuketimNoktasiService.CreateAsync(yeniNokta);
+            try
+            {
+                await _tuketimNoktasiService.CreateAsync(yeniNokta);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Tüketim noktası kayıt API hatası: " + ex);
+                ModelState.AddModelError(string.Empty, "Tüketim noktası API tarafında kaydedilemedi. API/veritabanı kayıt işlemindeki inner exception incelenmelidir.");
+                return View(model);
+            }
 
             await _auditLogService.EkleAsync(
                 varlikTipi: "TuketimNoktasi",
@@ -195,6 +225,19 @@ namespace KcetasWeb.Controllers
 
             TempData["BasariMesaji"] = "Harika! Yeni tüketim noktası ve abone başarıyla oluşturuldu.";
             return RedirectToAction("Index");
+        }
+
+        private static string NormalizeTuketiciGrubu(string tuketiciGrubu)
+        {
+            return tuketiciGrubu?.Trim() switch
+            {
+                "Mesken" or "MESKEN" => "MESKEN",
+                "Ticarethane" or "TICARETHANE" or "TİCARETHANE" => "TICARETHANE",
+                "Sanayi" or "SANAYI" or "SANAYİ" => "SANAYI",
+                "TarimsalSulama" or "Tarımsal Sulama" or "TARIMSAL SULAMA" or "TARIMSAL_SULAMA" => "TARIMSAL SULAMA",
+                "Aydinlatma" or "Aydınlatma" or "AYDINLATMA" => "AYDINLATMA",
+                var value => value ?? string.Empty
+            };
         }
 
         public async Task<IActionResult> Detay(string id)
