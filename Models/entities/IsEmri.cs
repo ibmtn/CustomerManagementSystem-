@@ -5,6 +5,7 @@ namespace KcetasWeb.Models
     public class IsEmri
     {
         [System.Text.Json.Serialization.JsonPropertyName("isEmriId")]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public int is_emri_id { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("isEmriNo")]
@@ -19,18 +20,21 @@ namespace KcetasWeb.Models
         [System.Text.Json.Serialization.JsonPropertyName("sayacId")]
         public int? sayac_id { get; set; }
         [System.Text.Json.Serialization.JsonPropertyName("tip")]
+        
         public KcetasWeb.Models.Enums.IsEmriTipi tip { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("oncelik")]
         public string oncelik { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("planlananTarih")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(KcetasWeb.Helpers.DateOnlyJsonConverter))]
         public DateTime? planlanan_tarih { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("atananKullaniciId")]
         public long? atanan_kullanici_id { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("durum")]
+        
         public KcetasWeb.Models.Enums.IsEmriDurumu durum { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("sahaSonucu")]

@@ -106,7 +106,7 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var pagedResponse = await GetPagedAsync(1, 1000);
+                var pagedResponse = await GetPagedAsync(1, 50000);
                 return pagedResponse.Data ?? new List<Fatura>();
             }
             catch (Exception ex)

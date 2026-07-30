@@ -53,9 +53,20 @@ namespace KcetasWeb.Controllers
             filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
 
             int? durumParam = null;
-            if (!string.IsNullOrEmpty(filtre.FiltreDurum) && Enum.TryParse<KcetasWeb.Models.enums.FaturaDurumu>(filtre.FiltreDurum, true, out var seciliDurum))
+            if (!string.IsNullOrEmpty(filtre.FiltreDurum))
             {
-                durumParam = (int)seciliDurum;
+                durumParam = filtre.FiltreDurum.ToUpperInvariant() switch
+                {
+                    "TASLAK" => 1,
+                    "HESAPLANDI" => 2,
+                    "ONAYLANDI" => 3,
+                    "GONDERILDI" => 4,
+                    "HATALI" => 5,
+                    "IPTAL" => 6,
+                    "ODENMEDI" => 7,
+                    "ODENDI" => 8,
+                    _ => null
+                };
             }
 
             // Not: SozlesmeNo üzerinden SozlesmeId'yi bulup API'ye parametre olarak geçebiliriz,
@@ -153,7 +164,7 @@ namespace KcetasWeb.Controllers
             fatura.son_odeme_tarihi = DateOnly.FromDateTime(DateTime.Now.AddDays(15));
             fatura.donem = DateTime.Now.ToString("yyyy-MM");
             fatura.durum = "TASLAK";
-            fatura.status = "Active";
+            fatura.status = "AKTIF";
             fatura.created_at = DateTime.Now;
             fatura.kullanici_id = await GetCurrentUserId();
             fatura.tekil_kod = "BILINMIYOR"; // Varsayılan
@@ -298,4 +309,5 @@ namespace KcetasWeb.Controllers
         }
     }
 }
+
 

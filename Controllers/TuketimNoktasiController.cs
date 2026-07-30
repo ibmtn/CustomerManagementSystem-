@@ -120,19 +120,22 @@ namespace KcetasWeb.Controllers
             
             var yeniNokta = new TuketimNoktasi
             {
-                tuketim_noktasi_id = maxId + 1,
                 tekil_kod = $"TK-2026-{(maxId + 1).ToString().PadLeft(3, '0')}",
                 ilce_id = model.ilce_id,
-                mahalle = model.mahalle,
-                bina_no = model.bina_no,
-                bagimsiz_bolum_no = model.bagimsiz_bolum_no,
-                acik_adres = model.acik_adres,
+                mahalle = string.IsNullOrWhiteSpace(model.mahalle) ? "Bilinmiyor" : model.mahalle,
+                bina_no = string.IsNullOrWhiteSpace(model.bina_no) ? "-" : model.bina_no,
+                bagimsiz_bolum_no = string.IsNullOrWhiteSpace(model.bagimsiz_bolum_no) ? "-" : model.bagimsiz_bolum_no,
+                acik_adres = string.IsNullOrWhiteSpace(model.acik_adres) ? "Belirtilmemiş" : model.acik_adres,
                 baglanti_gucu_kw = model.baglanti_gucu_kw,
                 koordinat_lat = model.koordinat_lat,
                 koordinat_lot = model.koordinat_lot,
-                tuketici_grubu = model.tuketici_grubu,
+                tuketici_grubu = string.IsNullOrWhiteSpace(model.tuketici_grubu) ? "Mesken" : model.tuketici_grubu,
                 baglanti_durumu = model.baglanti_durumu ?? KcetasWeb.Models.Enums.BaglantiDurumu.Pasif,
-                status = "Pasif"
+                status = "PASIF",
+                created_at = DateTime.Now,
+                created_by = 1,
+                updated_at = DateTime.Now,
+                updated_by = 1
             };
 
             await _tuketimNoktasiService.CreateAsync(yeniNokta);
@@ -290,7 +293,7 @@ namespace KcetasWeb.Controllers
                 item.koordinat_lot = model.koordinat_lot;
                 item.tuketici_grubu = string.IsNullOrWhiteSpace(model.tuketici_grubu) ? "Mesken" : model.tuketici_grubu;
                 item.baglanti_durumu = model.baglanti_durumu ?? KcetasWeb.Models.Enums.BaglantiDurumu.Pasif;
-                item.status = string.IsNullOrWhiteSpace(model.status) ? "Pasif" : model.status;
+                item.status = string.IsNullOrWhiteSpace(model.status) ? "PASIF" : model.status.ToUpper();
                 item.updated_at = DateTime.Now;
 
                 await _tuketimNoktasiService.UpdateAsync(item);

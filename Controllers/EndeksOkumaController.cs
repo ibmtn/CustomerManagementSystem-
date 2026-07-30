@@ -256,7 +256,8 @@ namespace KcetasWeb.Controllers
                 anomali_mi = tuketim > 1000,
                 status = "AKTIF",
                 okunamama_nedeni = "",
-                created_at = DateTime.UtcNow
+                created_at = DateTime.UtcNow,
+                updated_at = DateTime.UtcNow
             };
 
             string apiHataMesaji = "";
@@ -294,7 +295,7 @@ namespace KcetasWeb.Controllers
                 hizmet_bedeli = 0m,
                 kesme_baglama_bedeli = 0m,
                 durum = "HESAPLANDI",
-                status = "Active",
+                status = "AKTIF",
                 created_at = DateTime.Now,
                 kullanici_id = 1
             };
@@ -345,6 +346,7 @@ namespace KcetasWeb.Controllers
 
             // 1. Okumayı Onayla
             okuma.dogrulama_durumu = KcetasWeb.Models.Enums.DogrulamaDurumu.Onaylandi;
+            okuma.updated_at = DateTime.UtcNow;
             try { await _endeksOkumaService.UpdateAsync(okuma); } catch { }
 
             // 2. Fatura Oluştur
@@ -386,7 +388,7 @@ namespace KcetasWeb.Controllers
                 hizmet_bedeli = 0m,
                 kesme_baglama_bedeli = 0m,
                 durum = "HESAPLANDI",
-                status = "Active",
+                status = "AKTIF",
                 created_at = DateTime.Now,
                 kullanici_id = 1
             };
@@ -429,5 +431,6 @@ namespace KcetasWeb.Controllers
         }
     }
 }
+
 
 

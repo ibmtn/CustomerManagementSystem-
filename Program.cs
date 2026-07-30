@@ -1,14 +1,28 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using KcetasWeb.Services.Interfaces;
+using Serilog;
+using KcetasWeb.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Serilog Yapılandırması
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File("logs/web-log-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 // Sisteme MemoryCache ekliyoruz (Tüketim noktaları gibi büyük tabloları önbelleğe almak için)
 builder.Services.AddMemoryCache();
 builder.Services.AddResponseCompression(options => { options.EnableForHttps = true; });
 
-// Sisteme MVC Controller yapılarını ekliyoruz
-builder.Services.AddControllersWithViews();
+// Sisteme MVC Controller yapılarını ve Global Exception Filter'ı ekliyoruz
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<GlobalExceptionFilter>();
+});
 
 // 1. SİSTEME COOKIE (ÇEREZ) KİMLİK DOĞRULAMASINI TANITIYORUZ
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

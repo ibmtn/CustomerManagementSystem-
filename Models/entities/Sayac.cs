@@ -5,6 +5,7 @@ namespace KcetasWeb.Models
     public class Sayac
     {
         [System.Text.Json.Serialization.JsonPropertyName("sayacId")]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public int sayac_id { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("seriNo")]
@@ -15,6 +16,7 @@ namespace KcetasWeb.Models
         
         public string marka { get; set; }
         public string model { get; set; }
+        
         public KcetasWeb.Models.Enums.SayacFaz? faz { get; set; }
         public decimal carpan { get; set; }
         
@@ -23,6 +25,7 @@ namespace KcetasWeb.Models
         
         
         [System.Text.Json.Serialization.JsonPropertyName("durum")]
+        
         public KcetasWeb.Models.Enums.SayacDurumu? durum { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("status")]
@@ -39,7 +42,7 @@ namespace KcetasWeb.Models
         public DateTime created_at { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("updatedAt")]
-        public DateTime? updated_aT { get; set; }
+        public DateTime? updated_at { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("uretimYili")]
         public int uretim_yili { get; set; }

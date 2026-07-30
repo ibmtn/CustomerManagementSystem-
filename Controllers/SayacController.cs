@@ -95,6 +95,7 @@ namespace KcetasWeb.Controllers
                 sayac.durum = tuketim_noktasi_id > 0 ? KcetasWeb.Models.Enums.SayacDurumu.Bagli : KcetasWeb.Models.Enums.SayacDurumu.Depoda;
                 sayac.status = sayac.durum.ToString();
                 sayac.muhur_no = muhur_no;
+                sayac.updated_at = DateTime.Now;
 
                 await _sayacService.UpdateAsync(sayac);
 
@@ -131,7 +132,7 @@ namespace KcetasWeb.Controllers
                 ModelState.AddModelError("seri_no", "HATA: Bu Sayaç Seri Numarası sistemde zaten mevcut! Lütfen farklı bir seri numarası girin.");
             }
 
-            if (ModelState.IsValid)
+            ModelState.Remove("seri_no"); ModelState.Remove("status"); if(string.IsNullOrEmpty(model.seri_no)) model.seri_no = "SYC-" + DateTime.Now.ToString("yyyyMMddHHmmss"); if (ModelState.IsValid)
             {
 
                 model.sayac_id = sayaclar.Any()
@@ -141,6 +142,7 @@ namespace KcetasWeb.Controllers
                 model.durum = KcetasWeb.Models.Enums.SayacDurumu.Depoda;
                 model.status = "Depoda";
                 model.created_at = DateTime.Now;
+                model.updated_at = DateTime.Now;
 
                 await _sayacService.CreateAsync(model);
                 var endeks = new EndeksOkuma

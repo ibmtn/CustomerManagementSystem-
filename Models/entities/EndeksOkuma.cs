@@ -5,6 +5,7 @@ namespace KcetasWeb.Models
     public class EndeksOkuma
     {
         [System.Text.Json.Serialization.JsonPropertyName("okumaId")]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public int okuma_id { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("sayacId")]
@@ -20,9 +21,11 @@ namespace KcetasWeb.Models
         public int? sozlesme_id { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("okumaTipi")]
+        
         public KcetasWeb.Models.Enums.OkumaTipi? okuma_tipi { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("okumaKaynagi")]
+        
         public KcetasWeb.Models.Enums.OkumaKaynagi? okuma_kaynagi { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("oncekiEndeks")]
@@ -32,6 +35,7 @@ namespace KcetasWeb.Models
         public decimal? yeni_endeks { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("okumaZamani")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(KcetasWeb.Helpers.DateOnlyJsonConverter))]
         public DateTime? okuma_zamani { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("kullaniciId")]
@@ -41,6 +45,7 @@ namespace KcetasWeb.Models
         public string? okunamama_nedeni { get; set; } 
         
         [System.Text.Json.Serialization.JsonPropertyName("dogrulamaDurumu")]
+        
         public KcetasWeb.Models.Enums.DogrulamaDurumu? dogrulama_durumu { get; set; } 
         
         [System.Text.Json.Serialization.JsonPropertyName("anomaliMi")]
@@ -52,6 +57,9 @@ namespace KcetasWeb.Models
         
         [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
         public DateTime created_at { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("updatedAt")]
+        public DateTime? updated_at { get; set; }
        
     }
 }

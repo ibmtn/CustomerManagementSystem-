@@ -195,7 +195,8 @@ namespace KcetasWeb.Controllers
                 tarife_id = model.tarife_id,
                 guvence_bedeli = model.guvence_bedeli,
                 durum = KcetasWeb.Models.Enums.SozlesmeDurumu.GuvenceBekliyor,
-                created_at = DateTime.Now
+                created_at = DateTime.Now,
+                updated_at = DateTime.Now
             };
 
             await _sozlesmeService.CreateAsync(yeniSozlesme);
@@ -210,9 +211,14 @@ namespace KcetasWeb.Controllers
                 is_emri_no = $"IE-{DateTime.Now.Year}-{(count + 1).ToString().PadLeft(4, '0')}", // Geçici mock numara üretimi (gerçek sistemde API atar)
                 tuketim_noktasi_id = model.tuketim_noktasi_id,
                 planlanan_tarih = DateTime.Now.AddDays(1),
-                oncelik = "Yüksek",
-                atanan_kullanici_id = null, // API doğrulamasına takılmaması için boş bırakılıyor
-                created_at = DateTime.Now
+                oncelik = "Normal",
+                created_at = DateTime.Now,
+                updated_at = DateTime.Now,
+                saha_sonucu = "",
+                gerekce = "",
+                muhur_no = "",
+                tutanak_no = "",
+                status = "ACIK"
             };
             
             try

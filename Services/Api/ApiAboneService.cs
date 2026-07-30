@@ -155,9 +155,15 @@ namespace KcetasWeb.Services.Api
             var response = await _httpClient.PostAsJsonAsync("/api/Aboneler", abone, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
+                var payload = System.Text.Json.JsonSerializer.Serialize(abone, _jsonOptions);
                 var err = await response.Content.ReadAsStringAsync();
-                throw new Exception($"API Hatası: {response.StatusCode} - Abone oluşturulamadı. Detay: {err}");
+                throw new Exception($"API Hatası: {response.StatusCode} - Abone oluşturulamadı. \nPayload: {payload}\nDetay: {err}");
             }
+            
+            // Clear cache so new item appears immediately in searches
+            _cache.Remove("Abone_TotalCount");
+            _cache.Remove("Abone_GetAll");
+            _cache.Remove("Abone_GetAll_2");
         }
 
         public async System.Threading.Tasks.Task UpdateAsync(Abone abone)
@@ -175,7 +181,8 @@ namespace KcetasWeb.Services.Api
             var response = await _httpClient.DeleteAsync($"/api/Aboneler/{id}");
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"API Hatası: {response.StatusCode} - Abone silinemedi.");
+                var err = await response.Content.ReadAsStringAsync();
+                throw new Exception($"API Hatası: {response.StatusCode} - Abone silinemedi. Detay: {err}");
             }
         }
     }

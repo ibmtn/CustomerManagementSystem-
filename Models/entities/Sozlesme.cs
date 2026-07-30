@@ -23,9 +23,11 @@ namespace KcetasWeb.Models
         public string? sozlesme_tipi { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("baslangicTarihi")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(KcetasWeb.Helpers.DateOnlyJsonConverter))]
         public DateTime? baslangic_tarihi { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("bitisTarihi")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(KcetasWeb.Helpers.DateOnlyJsonConverter))]
         public DateTime? bitis_tarihi { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("guvenceBedeli")]

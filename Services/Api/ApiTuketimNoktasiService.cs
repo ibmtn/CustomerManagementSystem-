@@ -86,26 +86,16 @@ namespace KcetasWeb.Services.Api
 
         public async Task CreateAsync(TuketimNoktasi tuketimNoktasi)
         {
-            var dto = new
-            {
-                ilceId = tuketimNoktasi.ilce_id,
-                mahalle = tuketimNoktasi.mahalle ?? "Bilinmiyor",
-                binaNo = tuketimNoktasi.bina_no,
-                bagimsizBolumNo = tuketimNoktasi.bagimsiz_bolum_no,
-                acikAdres = tuketimNoktasi.acik_adres ?? "Belirtilmemiş",
-                koordinatLat = tuketimNoktasi.koordinat_lat,
-                koordinatLon = tuketimNoktasi.koordinat_lot,
-                baglantiGucuKw = tuketimNoktasi.baglanti_gucu_kw,
-                tuketiciGrubu = tuketimNoktasi.tuketici_grubu ?? "Mesken",
-                baglantiDurumu = tuketimNoktasi.baglanti_durumu
-            };
-
-            var response = await _httpClient.PostAsJsonAsync("/api/TuketimNoktasi", dto, _jsonOptions);
+            var response = await _httpClient.PostAsJsonAsync("/api/TuketimNoktasi", tuketimNoktasi, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
+                var payload = System.Text.Json.JsonSerializer.Serialize(tuketimNoktasi, _jsonOptions);
                 var errorContent = await response.Content.ReadAsStringAsync();
-                throw new Exception($"API Hatası: {response.StatusCode} - Tüketim noktası oluşturulamadı. Detay: {errorContent}");
+                throw new Exception($"API Hatası: {response.StatusCode} - Tüketim noktası oluşturulamadı. \nPayload: {payload}\nDetay: {errorContent}");
             }
+            
+            _cache.Remove("TuketimNoktasi_TotalCount");
+            _cache.Remove("TuketimNoktasi_GetAll");
         }
 
         public async Task UpdateAsync(TuketimNoktasi tuketimNoktasi)

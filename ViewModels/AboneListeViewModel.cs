@@ -7,6 +7,7 @@ namespace KcetasWeb.ViewModels
         public string? FiltreTCKNVKN { get; set; }
         public string? FiltreAdSoyadUnvan { get; set; }
         public string? FiltreAboneTipi { get; set; }
+        public string? FiltreDurum { get; set; }
 
         public List<AboneSatirViewModel> Aboneler { get; set; } = new();
     }

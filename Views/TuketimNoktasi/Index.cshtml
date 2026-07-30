@@ -112,7 +112,7 @@
                                 <td>@item.bina_no / @item.bagimsiz_bolum_no</td>
                                 <td>@item.tuketici_grubu</td>
                                 <td>
-                                    <span class="badge bg-@(item.status == "Aktif" ? "success" : "danger")">
+                                    <span class="badge bg-@(item.status ?.ToUpper() == "AKTIF" ? "success" : "danger")">
                                         @item.status
                                     </span>
                                 </td>
@@ -168,4 +168,5 @@
         </nav>
     </div>
 }
+
 

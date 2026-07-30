@@ -13,11 +13,13 @@ namespace KcetasWeb.Controllers
     {
         private readonly IAboneService _aboneService;
         private readonly IAuditLogService _auditLogService;
+        private readonly ISozlesmeService _sozlesmeService;
 
-        public AboneController(IAboneService aboneService, IAuditLogService auditLogService)
+        public AboneController(IAboneService aboneService, IAuditLogService auditLogService, ISozlesmeService sozlesmeService)
         {
             _aboneService = aboneService;
             _auditLogService = auditLogService;
+            _sozlesmeService = sozlesmeService;
         }
 
         public async System.Threading.Tasks.Task<IActionResult> Index(AboneListeViewModel filtre)
@@ -25,8 +27,10 @@ namespace KcetasWeb.Controllers
             filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
             filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
 
-            var pagedResponse = await _aboneService.GetPagedAsync(filtre.CurrentPage, filtre.PageSize);
-            var aboneler = pagedResponse.Data.AsQueryable();
+            var tumAboneler = await _aboneService.GetAllAsync();
+            
+            // Son eklenenlerin en üstte gözükmesi için id'ye göre ters sıralayalım
+            var aboneler = tumAboneler.OrderByDescending(x => x.abone_id).AsQueryable();
 
             if (!string.IsNullOrEmpty(filtre.FiltreTCKNVKN))
                 aboneler = aboneler.Where(x => (x.tckn != null && x.tckn.Contains(filtre.FiltreTCKNVKN)) || (x.vkn != null && x.vkn.Contains(filtre.FiltreTCKNVKN)));
@@ -45,9 +49,13 @@ namespace KcetasWeb.Controllers
                     aboneler = aboneler.Where(x => x.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Kurumsal);
             }
 
-            var aboneList = aboneler.ToList();
+            filtre.TotalItems = aboneler.Count();
+
+            var aboneList = aboneler
+                .Skip((filtre.CurrentPage - 1) * filtre.PageSize)
+                .Take(filtre.PageSize)
+                .ToList();
             
-            filtre.TotalItems = pagedResponse.TotalCount;
             filtre.Aboneler = aboneList.Select(a => new AboneSatirViewModel
             {
                 AboneId = a.abone_id,
@@ -98,28 +106,30 @@ namespace KcetasWeb.Controllers
                 var yeniAbone = new Abone
                 {
                     abone_tipi = model.IsTuzel ? KcetasWeb.Models.Enums.AboneTipi.Kurumsal : KcetasWeb.Models.Enums.AboneTipi.Bireysel,
-                    telefon = model.Telefon,
-                    e_posta = model.Mail,
+                    telefon = model.Telefon ?? "",
+                    e_posta = model.Mail ?? "",
 
-                    Durum = "Aktif",
-                    CreatedAt = DateTime.Now
+                    Durum = "AKTIF",
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                    abone_no = "ABN-" + DateTime.Now.ToString("yyyyMMddHHmmss")
                 };
 
                 if (model.IsTuzel)
                 {
                     yeniAbone.Unvan = model.AdSoyadUnvan;
-                    yeniAbone.vkn = model.VKN ?? "";
+                    yeniAbone.vkn = string.IsNullOrWhiteSpace(model.VKN) ? null : model.VKN;
                     yeniAbone.Ad = "";
                     yeniAbone.Soyad = "";
-                    yeniAbone.tckn = "";
+                    yeniAbone.tckn = null;
                 }
                 else
                 {
                     var nameParts = model.AdSoyadUnvan.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                     yeniAbone.Soyad = nameParts.Length > 1 ? nameParts.Last() : "";
                     yeniAbone.Ad = nameParts.Length > 1 ? string.Join(" ", nameParts.Take(nameParts.Length - 1)) : model.AdSoyadUnvan;
-                    yeniAbone.tckn = model.TCKN ?? "";
-                    yeniAbone.vkn = "";
+                    yeniAbone.tckn = string.IsNullOrWhiteSpace(model.TCKN) ? null : model.TCKN;
+                    yeniAbone.vkn = null;
                     yeniAbone.Unvan = "";
                 }
 
@@ -165,8 +175,8 @@ namespace KcetasWeb.Controllers
             var viewModel = new AboneDetayViewModel
             {
                 Abone = abone,
-                KimlikNoMaskeli = (abone.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Bireysel) ? Maskele(abone.tckn) : Maskele(abone.vkn)
-                // Diğer sekmelerdeki Sözleşmeler, İş Emirleri, Tüketim Noktaları mocklanmış şekilde sayfa içinde foreach döngüsü boş kalacak şekilde bırakıldı, istendiğinde servisten çekilecek.
+                KimlikNoMaskeli = (abone.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Bireysel) ? Maskele(abone.tckn) : Maskele(abone.vkn),
+                Sozlesmeler = (await _sozlesmeService.GetAllAsync()).Where(s => s.abone_id == id).ToList()
             };
 
             return View(viewModel);
@@ -258,21 +268,56 @@ namespace KcetasWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> Sil(int id)
         {
-            await _aboneService.DeleteAsync(id);
+            try 
+            {
+                await _aboneService.DeleteAsync(id);
 
-            await _auditLogService.EkleAsync(
-                varlikTipi: "Abone",
-                varlikId: id,
-                islemTipi: "DELETE",
-                eskiDeger: "Sistemde Kayıtlı Abone",
-                yeniDeger: "SİLİNDİ",
-                kullaniciId: 1, // Mock User ID
-                islemGerekcesi: "Abone sistemden silindi."
-            );
+                await _auditLogService.EkleAsync(
+                    varlikTipi: "Abone",
+                    varlikId: id,
+                    islemTipi: "DELETE",
+                    eskiDeger: "Sistemde Kayıtlı Abone",
+                    yeniDeger: "SİLİNDİ/PASİF",
+                    kullaniciId: 1, // Mock User ID
+                    islemGerekcesi: "Abone sistemden silindi (pasife alındı)."
+                );
 
-            TempData["Mesaj"] = "Abone başarıyla silindi.";
-            TempData["MesajTip"] = "success";
-            return RedirectToAction("Index");
+                TempData["Mesaj"] = "Abone başarıyla pasife alındı (silindi).";
+                TempData["MesajTip"] = "success";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData["Mesaj"] = "Hata: Abone silinemedi. " + (ex.Message.Contains("sözleşme") ? "Bu aboneye ait sözleşme bulunduğu için silinemez!" : ex.Message);
+                TempData["MesajTip"] = "danger";
+                var referer = Request.Headers["Referer"].ToString();
+                return Redirect(string.IsNullOrEmpty(referer) ? "/Abone/Index" : referer);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DurumGuncelle(int id, string yeniDurum)
+        {
+            try
+            {
+                var abone = await _aboneService.GetByIdAsync(id);
+                if (abone == null) return NotFound();
+
+                abone.Durum = yeniDurum;
+                abone.UpdatedAt = DateTime.Now;
+
+                await _aboneService.UpdateAsync(abone);
+                
+                TempData["Mesaj"] = $"Abone durumu başarıyla '{yeniDurum}' olarak güncellendi.";
+                TempData["MesajTip"] = "success";
+            }
+            catch (Exception ex)
+            {
+                TempData["Mesaj"] = $"Hata: Durum güncellenemedi. Detay: {ex.Message}";
+                TempData["MesajTip"] = "danger";
+            }
+            
+            return RedirectToAction("Detay", new { id });
         }
 
         private string Maskele(string deger)

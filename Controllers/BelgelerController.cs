@@ -197,12 +197,12 @@ namespace KcetasWeb.Controllers
             else if (tip == "Tutanak")
             {
                 var isEmri = await _isEmriService.GetByIdAsync(id);
-                if (isEmri == null || string.IsNullOrEmpty(isEmri.tutanak_no)) return NotFound();
+                if (isEmri == null) return NotFound();
 
-                viewModel.BelgeNo = isEmri.tutanak_no;
+                viewModel.BelgeNo = !string.IsNullOrEmpty(isEmri.tutanak_no) ? isEmri.tutanak_no : $"TUT-{isEmri.is_emri_id}";
                 viewModel.Tarih = isEmri.updated_at ?? isEmri.created_at;
                 viewModel.TutanakIslemTipi = isEmri.tip.ToString();
-                viewModel.TutanakSahaSonucu = isEmri.saha_sonucu;
+                viewModel.TutanakSahaSonucu = isEmri.saha_sonucu ?? "Sonuç girilmemiş";
                 viewModel.TutanakGerekce = isEmri.gerekce;
                 viewModel.TutanakDurum = isEmri.durum.ToString();
                 

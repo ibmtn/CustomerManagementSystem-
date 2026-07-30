@@ -162,7 +162,7 @@
         data.forEach(abone => {
             const tr = document.createElement('tr');
             
-            const isKurumsal = abone.abone_tipi === 2; // Assuming 2 is Kurumsal in Enums
+            const isKurumsal = abone.aboneTipi === 2; // Assuming 2 is Kurumsal in Enums
             const adSoyadUnvan = isKurumsal ? (abone.unvan || '') : `${abone.ad || ''} ${abone.soyad || ''}`;
             const kimlik = isKurumsal ? (abone.vkn || '') : (abone.tckn || '');
             
@@ -170,12 +170,12 @@
                 ? `<span class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-3">KURUMSAL</span>`
                 : `<span class="badge bg-info bg-opacity-10 text-info border border-info rounded-pill px-3">BİREYSEL</span>`;
                 
-            const durumBadge = abone.durum === "Aktif"
+            const durumBadge = (abone.durum || abone.status || "").toUpperCase() === "AKTIF"
                 ? `<span class="badge bg-success rounded-pill px-3">Aktif</span>`
                 : `<span class="badge bg-danger rounded-pill px-3">Pasif</span>`;
 
             tr.innerHTML = `
-                <td class="ps-4"><strong>${abone.abone_no || ''}</strong></td>
+                <td class="ps-4"><strong>${abone.aboneNo || ''}</strong></td>
                 <td>
                     <div class="d-flex align-items-center">
                         <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 40px; height: 40px;">
@@ -219,4 +219,5 @@
     }
 </script>
 }
+
 

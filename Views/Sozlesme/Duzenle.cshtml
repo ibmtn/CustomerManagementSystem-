@@ -1,28 +1,28 @@
 @model KcetasWeb.ViewModels.SozlesmeViewModels
 
 @{
-    ViewData["Title"] = "SÃ¶zleÅŸme DÃ¼zenle";
+    ViewData["Title"] = "Sözleþme Düzenle";
 }
 
 <div class="row justify-content-center">
     <div class="col-md-10">
         <div class="mb-3">
-            <a href="/Sozlesme/Detay/@Model.sozlesme_no" class="btn btn-sm btn-outline-secondary">&larr; Detaya Geri DÃ¶n</a>
+            <a href="/Sozlesme/Detay/@Model.sozlesme_no" class="btn btn-sm btn-outline-secondary">&larr; Detaya Geri Dön</a>
         </div>
 
         <div class="card shadow-sm border-0">
             <div class="card-header bg-warning text-dark py-3">
-                <h5 class="card-title mb-0 fw-bold">SÃ¶zleÅŸme DÃ¼zenle: @Model.sozlesme_no</h5>
+                <h5 class="card-title mb-0 fw-bold">Sözleþme Düzenle: @Model.sozlesme_no</h5>
             </div>
             <div class="card-body p-4">
                 <form action="/Sozlesme/Duzenle" method="post">
-                    <input type="hidden" name="sozlesme_no" value="@Model.sozlesme_no" />
+                    <input type="hidden" name="sozlesme_no" value="@Model.sozlesme_no" />`r`n                    <input type="hidden" name="sozlesme_id" value="@Model.sozlesme_id" />
 
-                    <h6 class="fw-bold text-warning border-bottom pb-2 mb-3 mt-2">1. SÃ¶zleÅŸme ve Tesisat Bilgileri</h6>
+                    <h6 class="fw-bold text-warning border-bottom pb-2 mb-3 mt-2">1. Sözleþme ve Tesisat Bilgileri</h6>
                     <div class="row mb-3">
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">SÃ¶zleÅŸme Tipi <span class="text-danger">*</span></label>
+                            <label class="form-label fw-bold">Sözleþme Tipi <span class="text-danger">*</span></label>
                             <select data-control="select2" class="form-select" name="sozlesme_tipi" required>
                                 <option value="Bireysel" selected="@(Model.sozlesme_tipi == "Bireysel")">Bireysel</option>
                                 <option value="Kurumsal" selected="@(Model.sozlesme_tipi == "Kurumsal")">Kurumsal</option>
@@ -34,22 +34,22 @@
                                 <option value="1" selected="@(Model.tarife_id == 1)">1 - Mesken</option>
                                 <option value="3" selected="@(Model.tarife_id == 3)">3 - Ticarethane</option>
                                 <option value="2" selected="@(Model.tarife_id == 2)">2 - Sanayi</option>
-                                <option value="4" selected="@(Model.tarife_id == 4)">4 - TarÄ±msal Sulama</option>
-                                <option value="5" selected="@(Model.tarife_id == 5)">5 - AydÄ±nlatma</option>
+                                <option value="4" selected="@(Model.tarife_id == 4)">4 - Tarýmsal Sulama</option>
+                                <option value="5" selected="@(Model.tarife_id == 5)">5 - Aydýnlatma</option>
                             </select>
                         </div>
 
                         <div class="col-md-12 mb-3">
                             <label class="form-label fw-bold">Durum</label>
                             <select data-control="select2" class="form-select" name="statu">
-                                <option value="Aktif" selected="@(Model.statu == "Aktif")">Aktif</option>
-                                <option value="GÃ¼vence Bekliyor" selected="@(Model.statu == "GÃ¼vence Bekliyor")">GÃ¼vence Bekliyor</option>
+                                <option value="AKTIF" selected="@(Model.statu ?.ToUpper() == "AKTIF")">AKTIF</option>
+                                <option value="Güvence Bekliyor" selected="@(Model.statu == "Güvence Bekliyor")">Güvence Bekliyor</option>
                                 <option value="Feshedildi" selected="@(Model.statu == "Feshedildi")">Feshedildi</option>
                             </select>
                         </div>
                     </div>
 
-                    <h6 class="fw-bold text-warning border-bottom pb-2 mb-3 mt-4">2. Abone (MÃ¼ÅŸteri) Bilgileri</h6>
+                    <h6 class="fw-bold text-warning border-bottom pb-2 mb-3 mt-4">2. Abone (Müþteri) Bilgileri</h6>
                     <div class="row mb-3">
                         <div class="col-md-4 mb-3">
                             <label class="form-label fw-bold">Ad</label>
@@ -60,16 +60,16 @@
                             <input type="text" class="form-control" name="soyad" value="@Model.soyad" />
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">Ãœnvan (TÃ¼zel KiÅŸi)</label>
+                            <label class="form-label fw-bold">Ünvan (Tüzel Kiþi)</label>
                             <input type="text" class="form-control" name="unvan" value="@Model.unvan" />
                         </div>
                         
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">TC Kimlik No (GerÃ§ek KiÅŸi)</label>
+                            <label class="form-label fw-bold">TC Kimlik No (Gerçek Kiþi)</label>
                             <input type="text" class="form-control" name="tckn" value="@Model.tckn" />
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Vergi No (TÃ¼zel KiÅŸi)</label>
+                            <label class="form-label fw-bold">Vergi No (Tüzel Kiþi)</label>
                             <input type="text" class="form-control" name="vkn" value="@Model.vkn" />
                         </div>
                         
@@ -82,7 +82,7 @@
                             <input type="email" class="form-control" name="e_posta" value="@Model.e_posta" />
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">Ä°letiÅŸim Tercihi</label>
+                            <label class="form-label fw-bold">Ýletiþim Tercihi</label>
                             <select data-control="select2" class="form-select" name="iletisim_tercihi">
                                 <option value="SMS" selected="@(Model.iletisim_tercihi == "SMS")">SMS</option>
                                 <option value="Email" selected="@(Model.iletisim_tercihi == "Email")">E-Posta</option>
@@ -93,12 +93,13 @@
                     <hr class="text-muted mb-4">
 
                     <div class="d-flex justify-content-end gap-2">
-                        <a href="/Sozlesme/Detay/@Model.sozlesme_no" class="btn btn-light border">Ä°ptal</a>
-                        <button type="submit" class="btn btn-warning px-4 fw-bold shadow-sm">DeÄŸiÅŸiklikleri Kaydet</button>
+                        <a href="/Sozlesme/Detay/@Model.sozlesme_no" class="btn btn-light border">Ýptal</a>
+                        <button type="submit" class="btn btn-warning px-4 fw-bold shadow-sm">Deðiþiklikleri Kaydet</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
 

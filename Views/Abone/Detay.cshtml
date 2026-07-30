@@ -8,7 +8,14 @@
         <i class="bi bi-arrow-left"></i> Listeye Dön
     </a>
     <div>
-        <form action="/Abone/Sil/@Model.Abone.abone_id" method="post" class="d-inline" onsubmit="return confirm('Bu aboneyi silmek istediğinize emin misiniz?');">
+        <form action="/Abone/DurumGuncelle" method="post" class="d-inline">
+            <input type="hidden" name="id" value="@Model.Abone.abone_id" />
+            <input type="hidden" name="yeniDurum" value="@(Model.Abone.Durum == "AKTIF" ? "PASIF" : "AKTIF")" />
+            <button type="submit" class="btn btn-@(Model.Abone.Durum == "AKTIF" ? "warning" : "success") btn-sm fw-bold shadow-sm me-2">
+                <i class="bi bi-arrow-repeat"></i> @(Model.Abone.Durum == "AKTIF" ? "Pasife Al" : "Aktife Al")
+            </button>
+        </form>
+        <form action="/Abone/Sil/@Model.Abone.abone_id" method="post" class="d-inline" onsubmit="return confirm('Bu aboneyi silmek (pasife almak) istediğinize emin misiniz?');">
             <button type="submit" class="btn btn-danger btn-sm fw-bold shadow-sm"><i class="bi bi-trash"></i> Sil</button>
         </form>
     </div>
@@ -34,7 +41,10 @@
                     <div class="d-flex gap-2">
                         <span class="badge bg-light text-dark border font-monospace">@Model.KimlikNoMaskeli</span>
                         <span class="badge bg-@(Model.Abone.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Bireysel ? "info" : "warning") bg-opacity-10 text-@(Model.Abone.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Bireysel ? "info" : "warning") border">@Model.Abone.abone_tipi</span>
-                        <span class="badge bg-@(Model.Abone.Durum == "Aktif" ? "success" : "secondary")">@Model.Abone.Durum</span>
+                        <span class="badge bg-@(Model.Abone.Durum ?.ToUpper() == "AKTIF" ? "success" : "secondary")">@Model.Abone.Durum</span>
+                        <span class="badge bg-@(Model.Sozlesmeler.Any() ? "primary" : "danger")">
+                            <i class="bi bi-file-earmark-text"></i> @(Model.Sozlesmeler.Any() ? "Sözleşmesi Var" : "Sözleşmesi Yok")
+                        </span>
                     </div>
                 </div>
             </div>
@@ -111,3 +121,4 @@
         });
     </script>
 }
+

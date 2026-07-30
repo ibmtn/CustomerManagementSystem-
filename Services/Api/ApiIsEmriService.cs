@@ -207,8 +207,31 @@ namespace KcetasWeb.Services.Api
 
         public async Task<IsEmri> EkleAsync(IsEmri isEmri)
         {
+            // Öncelik alanını veritabanının beklediği formata (büyük harf, ingilizce karakter) çeviriyoruz
+            if (string.IsNullOrEmpty(isEmri.oncelik)) {
+                isEmri.oncelik = "NORMAL";
+            } else {
+                isEmri.oncelik = isEmri.oncelik.ToUpperInvariant()
+                    .Replace("Ü", "U").Replace("Ş", "S")
+                    .Replace("Ö", "O").Replace("Ç", "C")
+                    .Replace("İ", "I").Replace("Ğ", "G");
+            }
+            
+            // EF Core'un yeni bir TuketimNoktasi eklemeye çalışıp "Primary Key Constraint" hatası
+            // fırlatmaması için navigasyon property'sini null bırakıyoruz. Zaten tuketim_noktasi_id gönderiliyor.
+            isEmri.TuketimNoktasi = null;
+
+            var jsonPayload = System.Text.Json.JsonSerializer.Serialize(isEmri, _jsonOptions);
+            System.IO.File.WriteAllText("api_payload.txt", jsonPayload);
+
             var response = await _httpClient.PostAsJsonAsync("/api/IsEmirleri", isEmri, _jsonOptions);
-            response.EnsureSuccessStatusCode();
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var err = await response.Content.ReadAsStringAsync();
+                System.IO.File.WriteAllText("api_error.txt", err);
+                throw new Exception($"API Hatası: {response.StatusCode} - İş Emri oluşturulurken hata oluştu. Detay: {err}");
+            }
             
             var result = await response.Content.ReadFromJsonAsync<IsEmri>(_jsonOptions);
             _cache.Remove("IsEmri_GetAll"); _cache.Remove("IsEmri_TotalCount");

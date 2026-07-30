@@ -44,10 +44,10 @@
                 <label class="form-label fw-bold">Durum</label>
                 <select data-control="select2" name="FiltreDurum" class="form-select">
                     <option value="">Tümü</option>
-                    <option value="Aktif" selected="@(Model.FiltreDurum == "Aktif" ? "selected" : null)">Aktif</option>
+                    <option value="AKTIF" selected="@(Model.FiltreDurum ?.ToUpper() == "AKTIF" ? "selected" : null)">AKTIF</option>
                     <option value="Güvence Bekliyor" selected="@(Model.FiltreDurum == "Güvence Bekliyor" ? "selected" : null)">Güvence Bekliyor</option>
                     <option value="Feshedildi" selected="@(Model.FiltreDurum == "Feshedildi" ? "selected" : null)">Feshedildi</option>
-                    <option value="Pasif" selected="@(Model.FiltreDurum == "Pasif" ? "selected" : null)">Pasif</option>
+                    <option value="PASIF" selected="@(Model.FiltreDurum ?.ToUpper() == "PASIF" ? "selected" : null)">PASIF</option>
                 </select>
             </div>
             <div class="col-md-3 d-flex gap-2">
@@ -105,7 +105,7 @@
                                 <td class="fw-bold">@item.guvence_bedeli.ToString("C")</td>
                                 <td>@item.baslangic_tarihi.ToString("dd.MM.yyyy") / @(item.bitis_tarihi.HasValue ? item.bitis_tarihi.Value.ToString("dd.MM.yyyy") : "Devam Ediyor")</td>
                                 <td>
-                                    <span class="badge bg-@(item.statu == "Aktif" ? "success" : (item.statu == "Güvence Bekliyor" ? "warning text-dark" : "danger"))">
+                                    <span class="badge bg-@(item.statu ?.ToUpper() == "AKTIF" ? "success" : (item.statu == "Güvence Bekliyor" ? "warning text-dark" : "danger"))">
                                         @item.statu
                                     </span>
                                 </td>
@@ -156,4 +156,5 @@
         </nav>
     </div>
 }
+
 

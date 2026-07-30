@@ -5,6 +5,7 @@ namespace KcetasWeb.Models
     public class TuketimNoktasi
     {
         [System.Text.Json.Serialization.JsonPropertyName("tuketimNoktasiId")]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public int tuketim_noktasi_id { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("tekilKod")]
@@ -38,13 +39,14 @@ namespace KcetasWeb.Models
         public string tuketici_grubu { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("baglantiDurumu")]
+        
         public KcetasWeb.Models.Enums.BaglantiDurumu? baglanti_durumu { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("status")]
         public string? status { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public DateTime crated_at { get; set; }
+        public DateTime created_at { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("updatedAt")]
         public DateTime? updated_at { get; set; }

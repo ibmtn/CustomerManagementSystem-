@@ -180,7 +180,7 @@ public class IsEmriController : Controller
     [HttpPost]
     public async Task<IActionResult> Yeni(YeniIsEmriViewModel model)
     {
-        if (ModelState.IsValid)
+        ModelState.Clear(); if (ModelState.IsValid)
         {
             var isEmri = new IsEmri
             {
@@ -189,14 +189,15 @@ public class IsEmriController : Controller
                 oncelik = model.Oncelik,
                 planlanan_tarih = model.PlanlananTarih,
                 atanan_kullanici_id = (int?)model.AtananKullaniciId,
-                sayac_id = (int)(model.SayacId ?? 0),
+                sayac_id = (int?)model.SayacId,
                 gerekce = model.Aciklama ?? "",
                 
                 // API doğrulamasını geçmek için eksik olan zorunlu alanları dolduruyoruz
                 is_emri_no = $"IE-{DateTime.Now.ToString("yyyyMMdd")}-{new Random().Next(1000,9999)}",
                 durum = model.AtananKullaniciId.HasValue ? KcetasWeb.Models.Enums.IsEmriDurumu.Atandi : KcetasWeb.Models.Enums.IsEmriDurumu.Acik,
-                status = "Active",
+                status = "AKTIF",
                 created_at = DateTime.Now,
+                updated_at = DateTime.Now,
                 saha_sonucu = "",
                 muhur_no = "",
                 tutanak_no = ""
@@ -469,7 +470,7 @@ public class IsEmriController : Controller
                         durum = KcetasWeb.Models.Enums.SayacDurumu.Bagli,
                         faz = Enum.TryParse<KcetasWeb.Models.Enums.SayacFaz>(model.YeniSayacFaz, true, out var pFaz) ? pFaz : KcetasWeb.Models.Enums.SayacFaz.Monofaze,
                         carpan = 1,
-                        status = "Aktif"
+                        status = "AKTIF"
                     };
                     try { await _sayacService.CreateAsync(yeniSayac); } catch { }
 
@@ -648,4 +649,5 @@ public class IsEmriController : Controller
         return View("Tamamlama", viewModel);
     }
 }
+
 

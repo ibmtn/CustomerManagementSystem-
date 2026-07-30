@@ -5,8 +5,11 @@ namespace KcetasWeb.Models
     public class Abone
     {
         [System.Text.Json.Serialization.JsonPropertyName("aboneId")]
+        [System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
         public int abone_id { get; set; }
+        [System.Text.Json.Serialization.JsonPropertyName("aboneNo")]
         public string abone_no { get; set; }
+        [System.Text.Json.Serialization.JsonPropertyName("aboneTipi")]
         public KcetasWeb.Models.Enums.AboneTipi? abone_tipi { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("ad")]
@@ -108,7 +111,8 @@ namespace KcetasWeb.Models
         public string Telefon { get => telefon; set => telefon = value; }
         [System.Text.Json.Serialization.JsonIgnore]
         public string EPosta { get => e_posta; set => e_posta = value; }
-        public string Durum { get; set; } = "Aktif";
+        [System.Text.Json.Serialization.JsonPropertyName("status")]
+        public string Durum { get; set; } = "AKTIF";
         
     }
 }

@@ -1,12 +1,12 @@
 @model KcetasWeb.ViewModels.AboneListeViewModel
 @{
-    ViewData["Title"] = "Aboneler (MÃ¼ÅŸteriler)";
+    ViewData["Title"] = "Aboneler (Müþteriler)";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
     <div>
         <h2 class="h4 text-primary fw-bold d-inline-block me-3">
-            <i class="bi bi-people-fill me-2"></i> Abone & MÃ¼ÅŸteri YÃ¶netimi
+            <i class="bi bi-people-fill me-2"></i> Abone & Müþteri Yönetimi
         </h2>
         <span class="badge bg-secondary bg-opacity-10 text-dark border fs-6">
             Toplam: @Model.TotalItems (Sayfa @Model.CurrentPage / @Model.TotalPages)
@@ -33,13 +33,13 @@
                 <input name="FiltreTCKNVKN" value="@Model.FiltreTCKNVKN" type="text" class="form-control" placeholder="Kimlik veya Vergi No..." />
             </div>
             <div class="col-md-3">
-                <label class="form-label fw-bold">Ad Soyad / Ãœnvan</label>
-                <input name="FiltreAdSoyadUnvan" value="@Model.FiltreAdSoyadUnvan" type="text" class="form-control" placeholder="Abone adÄ± veya Ã¼nvanÄ±..." />
+                <label class="form-label fw-bold">Ad Soyad / Ünvan</label>
+                <input name="FiltreAdSoyadUnvan" value="@Model.FiltreAdSoyadUnvan" type="text" class="form-control" placeholder="Abone adý veya ünvaný..." />
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-bold">Abone Tipi</label>
                 <select data-control="select2" name="FiltreAboneTipi" class="form-select">
-                    <option value="">TÃ¼mÃ¼</option>
+                    <option value="">Tümü</option>
                     <option value="BIREYSEL" selected="@(Model.FiltreAboneTipi == "BIREYSEL" ? "selected" : null)">Bireysel</option>
                     <option value="KURUMSAL" selected="@(Model.FiltreAboneTipi == "KURUMSAL" ? "selected" : null)">Kurumsal</option>
                 </select>
@@ -70,13 +70,13 @@
                 <thead class="table-light">
                     <tr>
                         <th class="ps-4">Abone No</th>
-                        <th>Ad Soyad / Ãœnvan</th>
+                        <th>Ad Soyad / Ünvan</th>
                         <th>TCKN / VKN</th>
                         <th>Telefon</th>
                         <th>Mail</th>
                         <th>Tip</th>
                         <th>Durum</th>
-                        <th class="pe-4 text-end">Ä°ÅŸlemler</th>
+                        <th class="pe-4 text-end">Ýþlemler</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -96,7 +96,7 @@
                                 }
                             </td>
                             <td>
-                                @if (item.Durum == "Aktif")
+                                @if (item.Durum ?.ToUpper() == "AKTIF")
                                 {
                                     <span class="badge bg-success">@item.Durum</span>
                                 }
@@ -108,15 +108,15 @@
                             <td class="pe-4 text-end">
                                 <div class="dropdown">
                                     <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown">
-                                        Ä°ÅŸlem <i class="bi bi-chevron-down ms-1"></i>
+                                        Ýþlem <i class="bi bi-chevron-down ms-1"></i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">
                                         <li><a class="dropdown-item fw-semibold" href="/Abone/Detay/@item.AboneId"><i class="bi bi-eye text-primary me-2"></i> Detay</a></li>
-                                        <li><a class="dropdown-item fw-semibold" href="/Abone/Detay/@item.AboneId#sozlesme"><i class="bi bi-journal-text text-info me-2"></i> SÃ¶zleÅŸmeleri GÃ¶r</a></li>
+                                        <li><a class="dropdown-item fw-semibold" href="/Abone/Detay/@item.AboneId#sozlesme"><i class="bi bi-journal-text text-info me-2"></i> Sözleþmeleri Gör</a></li>
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item fw-semibold" href="/Abone/Duzenle/@item.AboneId"><i class="bi bi-pencil text-warning me-2"></i> DÃ¼zenle</a></li>
+                                        <li><a class="dropdown-item fw-semibold" href="/Abone/Duzenle/@item.AboneId"><i class="bi bi-pencil text-warning me-2"></i> Düzenle</a></li>
                                         <li>
-                                            <form action="/Abone/Sil/@item.AboneId" method="post" onsubmit="return confirm('Bu aboneyi silmek istediÄŸinize emin misiniz?');">
+                                            <form action="/Abone/Sil/@item.AboneId" method="post" onsubmit="return confirm('Bu aboneyi silmek istediðinize emin misiniz?');">
                                                 <button type="submit" class="dropdown-item fw-semibold text-danger"><i class="bi bi-trash text-danger me-2"></i> Sil</button>
                                             </form>
                                         </li>
@@ -128,7 +128,7 @@
                     @if (!Model.Aboneler.Any())
                     {
                         <tr>
-                            <td colspan="8" class="text-center py-5 text-muted">Sistemde kayÄ±tlÄ± abone bulunamadÄ±.</td>
+                            <td colspan="8" class="text-center py-5 text-muted">Sistemde kayýtlý abone bulunamadý.</td>
                         </tr>
                     }
                 </tbody>
@@ -141,7 +141,7 @@
     <nav>
         <ul class="pagination pagination-sm shadow-sm">
             <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
-                <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage > 1) { document.getElementById('CurrentPage').value = @(Model.CurrentPage - 1); document.getElementById('filterForm').submit(); } return false;">&laquo; Ã–nceki Sayfa</a>
+                <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage > 1) { document.getElementById('CurrentPage').value = @(Model.CurrentPage - 1); document.getElementById('filterForm').submit(); } return false;">&laquo; Önceki Sayfa</a>
             </li>
             <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
                 <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage < @Model.TotalPages) { document.getElementById('CurrentPage').value = @(Model.CurrentPage + 1); document.getElementById('filterForm').submit(); } return false;">Sonraki Sayfa &raquo;</a>
@@ -149,4 +149,5 @@
         </ul>
     </nav>
 </div>
+
 

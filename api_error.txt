@@ -1,0 +1,1 @@
+{"statusCode":500,"message":"Sistemde beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.","detailedError":"An error occurred while saving the entity changes. See the inner exception for details."}

@@ -1,4 +1,4 @@
-@model KcetasWeb.ViewModels.TutanakGirisViewModel
+﻿@model KcetasWeb.ViewModels.TutanakGirisViewModel
 @{
     ViewData["Title"] = "Tutanak Girişi - " + Model.IsEmriNo;
 }
@@ -26,7 +26,14 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label text-muted fw-semibold">İş Emri Tipi</label>
-                    <input type="text" class="form-control" value="@Model.Tip" readonly />
+                    @{
+                        var tipName = Model.Tip.ToString();
+                        var field = Model.Tip.GetType().GetField(tipName);
+                        var displayAttribute = field?.GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.DisplayAttribute), false).FirstOrDefault() as System.ComponentModel.DataAnnotations.DisplayAttribute;
+                        var displayName = displayAttribute?.Name ?? tipName;
+                    }
+                    <input type="text" class="form-control" value="@displayName" readonly />
+                    <input type="hidden" id="TipStr" value="@tipName" />
                 </div>
             </div>
 
@@ -153,7 +160,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             // Backend'den gelen iş emri tipini alıyoruz (Gizli inputtan)
-            var tip = document.getElementById("Tip").value.toUpperCase();
+            var tip = document.getElementById("TipStr").value.toUpperCase();
             
             // Bölüm Container'ları
             var sokmeTakmaBolumu = document.getElementById("sokmeTakmaBolumu");
