@@ -41,24 +41,39 @@ namespace KcetasWeb.Controllers
 
         public async Task<IActionResult> Index(TuketimNoktasiListeViewModel filtre)
         {
-            var data = (await _tuketimNoktasiService.GetAllAsync()).AsQueryable();
-
-            if (!string.IsNullOrEmpty(filtre.FiltreTekilKod))
-                data = data.Where(x => x.tekil_kod != null && x.tekil_kod.Contains(filtre.FiltreTekilKod, StringComparison.OrdinalIgnoreCase));
-
-            if (filtre.FiltreIlceId.HasValue)
-                data = data.Where(x => x.ilce_id == filtre.FiltreIlceId.Value);
-
-            if (!string.IsNullOrEmpty(filtre.FiltreTuketiciGrubu))
-                data = data.Where(x => x.tuketici_grubu != null && x.tuketici_grubu.Equals(filtre.FiltreTuketiciGrubu, StringComparison.OrdinalIgnoreCase));
-
-            var dataList = data.OrderByDescending(x => x.tuketim_noktasi_id).ToList();
-            int totalItems = dataList.Count;
-            
             filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
             filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
-            
-            var pagedData = dataList.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
+
+            List<TuketimNoktasi> pagedData;
+            int totalItems;
+
+            if (!filtre.FiltreIlceId.HasValue && string.IsNullOrEmpty(filtre.FiltreTuketiciGrubu))
+            {
+                var pagedResponse = await _tuketimNoktasiService.GetPagedAsync(
+                    filtre.CurrentPage,
+                    filtre.PageSize,
+                    filtre.FiltreTekilKod);
+
+                pagedData = pagedResponse.Data;
+                totalItems = pagedResponse.TotalCount;
+            }
+            else
+            {
+                var data = (await _tuketimNoktasiService.GetAllAsync()).AsQueryable();
+
+                if (!string.IsNullOrEmpty(filtre.FiltreTekilKod))
+                    data = data.Where(x => x.tekil_kod != null && x.tekil_kod.Contains(filtre.FiltreTekilKod, StringComparison.OrdinalIgnoreCase));
+
+                if (filtre.FiltreIlceId.HasValue)
+                    data = data.Where(x => x.ilce_id == filtre.FiltreIlceId.Value);
+
+                if (!string.IsNullOrEmpty(filtre.FiltreTuketiciGrubu))
+                    data = data.Where(x => x.tuketici_grubu != null && x.tuketici_grubu.Equals(filtre.FiltreTuketiciGrubu, StringComparison.OrdinalIgnoreCase));
+
+                var dataList = data.OrderByDescending(x => x.tuketim_noktasi_id).ToList();
+                totalItems = dataList.Count;
+                pagedData = dataList.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
+            }
 
             var viewModels = pagedData.Select(item => new KcetasWeb.ViewModels.TuketimNoktasiViewModels
             {

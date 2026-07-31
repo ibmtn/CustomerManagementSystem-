@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using KcetasWeb.Models;
 using System;
 using KcetasWeb.Models.entities;
+using KcetasWeb.Models.Enums;
 using System.Linq;
 
 namespace KcetasWeb.Controllers;
@@ -189,7 +190,7 @@ public class IsEmriController : Controller
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, $"İş emri oluşturulamadı. API detayı: {ex.Message}");
-                await PrepareYeniViewBagAsync();
+                await PrepareYeniViewBagAsync(model);
                 return View(model);
             }
             
@@ -198,9 +199,142 @@ public class IsEmriController : Controller
             return RedirectToAction("Index");
         }
 
-        await PrepareYeniViewBagAsync();
+        await PrepareYeniViewBagAsync(model);
 
         return View(model);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> TuketimNoktasiAra(string? q)
+    {
+        if (string.IsNullOrWhiteSpace(q) || q.Trim().Length < 2)
+        {
+            return Json(new { results = Array.Empty<object>() });
+        }
+
+        var response = await _tuketimNoktasiService.GetPagedAsync(1, 20, q);
+        var results = response.Data
+            .Select(t => new
+            {
+                id = t.tuketim_noktasi_id,
+                text = FormatTuketimNoktasiSecim(t, t.tuketim_noktasi_id),
+                tuketimNoktasiId = t.tuketim_noktasi_id,
+                tekilKod = t.tekil_kod,
+                adres = t.acik_adres
+            })
+            .ToList();
+
+        return Json(new { results });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> SozlesmeAra(string? q)
+    {
+        if (string.IsNullOrWhiteSpace(q) || q.Trim().Length < 2)
+        {
+            return Json(new { results = Array.Empty<object>() });
+        }
+
+        var response = await _sozlesmeService.GetPagedAsync(1, 20, q);
+        var results = response.Data
+            .Select(s => new
+            {
+                id = s.sozlesme_id,
+                text = FormatSozlesmeSecim(s),
+                sozlesmeId = s.sozlesme_id,
+                tuketimNoktasiId = s.tuketim_noktasi_id,
+                sozlesmeNo = s.sozlesme_no,
+                tekilKod = s.tekil_kod
+            })
+            .ToList();
+
+        return Json(new { results });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> SayacAra(string? q, long? tuketimNoktasiId)
+    {
+        if ((!tuketimNoktasiId.HasValue || tuketimNoktasiId.Value <= 0) &&
+            (string.IsNullOrWhiteSpace(q) || q.Trim().Length < 2))
+        {
+            return Json(new { results = Array.Empty<object>() });
+        }
+
+        var response = await _sayacService.GetPagedAsync(
+            1,
+            20,
+            string.IsNullOrWhiteSpace(q) ? null : q.Trim(),
+            null,
+            tuketimNoktasiId);
+
+        var results = response.Data
+            .Select(s => new
+            {
+                id = s.sayac_id,
+                text = FormatSayacSecim(s),
+                sayacId = s.sayac_id,
+                seriNo = s.seri_no,
+                tuketimNoktasiId = s.tuketim_noktasi_id
+            })
+            .ToList();
+
+        return Json(new { results });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> SecimBilgisi(long? tuketimNoktasiId, long? sozlesmeId, long? sayacId)
+    {
+        Sozlesme? sozlesme = null;
+        Sayac? sayac = null;
+
+        if (sozlesmeId.HasValue && sozlesmeId.Value > 0)
+        {
+            sozlesme = await _sozlesmeService.GetByIdAsync(sozlesmeId.Value);
+            if (sozlesme != null && sozlesme.tuketim_noktasi_id > 0)
+            {
+                tuketimNoktasiId = sozlesme.tuketim_noktasi_id;
+            }
+        }
+
+        if (sayacId.HasValue && sayacId.Value > 0)
+        {
+            sayac = await _sayacService.GetByIdAsync(sayacId.Value);
+            if ((!tuketimNoktasiId.HasValue || tuketimNoktasiId.Value <= 0) &&
+                sayac?.tuketim_noktasi_id.HasValue == true &&
+                sayac.tuketim_noktasi_id.Value > 0)
+            {
+                tuketimNoktasiId = sayac.tuketim_noktasi_id.Value;
+            }
+        }
+
+        if (!tuketimNoktasiId.HasValue || tuketimNoktasiId.Value <= 0)
+        {
+            return Json(new { basarili = false, mesaj = "Tüketim noktası bilgisi bulunamadı." });
+        }
+
+        var tn = await _tuketimNoktasiService.GetByIdAsync(tuketimNoktasiId.Value);
+
+        if (sozlesme == null)
+        {
+            sozlesme = await FindSozlesmeForTuketimNoktasiAsync(tuketimNoktasiId.Value);
+        }
+
+        if (sayac == null)
+        {
+            sayac = await _sayacService.GetByTuketimNoktasiIdAsync(tuketimNoktasiId.Value);
+        }
+
+        return Json(new
+        {
+            basarili = true,
+            tuketimNoktasiId = tuketimNoktasiId.Value,
+            tuketimNoktasiText = FormatTuketimNoktasiSecim(tn, tuketimNoktasiId.Value),
+            sozlesmeId = sozlesme?.sozlesme_id,
+            sozlesmeText = sozlesme != null ? FormatSozlesmeSecim(sozlesme) : "",
+            sayacId = sayac?.sayac_id,
+            sayacText = sayac != null ? FormatSayacSecim(sayac) : "",
+            mesaj = sayac == null ? "Tüketim noktası seçildi; bağlı sayaç bulunamadı." : ""
+        });
     }
 
         public async Task<IActionResult> Detay(long id)
@@ -278,7 +412,7 @@ public class IsEmriController : Controller
             kullaniciId: mockUserId
         );
 
-        TempData["Mesaj"] = $"İş emri durumu '{yeniDurum.ToString()}' olarak güncellendi.";
+        TempData["Mesaj"] = $"İş emri durumu '{IsEmriListeViewModel.GetDurumAd(yeniDurum)}' olarak güncellendi.";
         TempData["MesajTip"] = "success";
         return RedirectToAction("Detay", new { id = id });
     }
@@ -635,53 +769,91 @@ public class IsEmriController : Controller
             model.SayacId = null;
     }
 
-    private async Task PrepareYeniViewBagAsync()
+    private async Task PrepareYeniViewBagAsync(YeniIsEmriViewModel? model = null)
     {
-        var tuketimNoktalariTask = _tuketimNoktasiService.GetAllAsync();
-        var personellerTask = _kullaniciDeposu.ListeleAsync();
-        var sozlesmelerTask = _sozlesmeService.GetAllAsync();
-        var sayaclarTask = _sayacService.GetAllAsync();
-
-        await Task.WhenAll(tuketimNoktalariTask, personellerTask, sozlesmelerTask, sayaclarTask);
-
-        var tuketimNoktalari = await tuketimNoktalariTask;
-        var personeller = await personellerTask;
-        var sozlesmeler = await sozlesmelerTask;
-        var sayaclar = await sayaclarTask;
-
-        ViewBag.TuketimNoktalari = tuketimNoktalari
-            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.tuketim_noktasi_id.ToString(), Text = $"{x.tekil_kod}" })
-            .ToList();
+        var personeller = await _kullaniciDeposu.ListeleAsync();
 
         ViewBag.Personeller = personeller
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.kullanici_id.ToString(), Text = x.ad_soyad })
             .ToList();
 
-        ViewBag.Sozlesmeler = sozlesmeler
-            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sozlesme_id.ToString(), Text = $"{x.sozlesme_no} - {x.sozlesme_tipi}" })
-            .ToList();
+        if (model == null)
+        {
+            return;
+        }
 
-        ViewBag.Sayaclar = sayaclar
-            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sayac_id.ToString(), Text = $"{x.seri_no} - {x.marka} {x.model}" })
-            .ToList();
+        if (model.TuketimNoktasiId > 0)
+        {
+            var tn = await _tuketimNoktasiService.GetByIdAsync(model.TuketimNoktasiId);
+            ViewBag.SelectedTuketimNoktasiText = FormatTuketimNoktasiSecim(tn, model.TuketimNoktasiId);
+        }
 
-        var sayacMap = sayaclar
-            .Where(s => s.tuketim_noktasi_id != null && s.tuketim_noktasi_id > 0)
-            .GroupBy(s => s.tuketim_noktasi_id.Value.ToString())
-            .ToDictionary(g => g.Key, g => g.First().sayac_id);
+        if (model.SozlesmeId.HasValue && model.SozlesmeId.Value > 0)
+        {
+            var sozlesme = await _sozlesmeService.GetByIdAsync(model.SozlesmeId.Value);
+            ViewBag.SelectedSozlesmeText = sozlesme != null ? FormatSozlesmeSecim(sozlesme) : $"Sözleşme {model.SozlesmeId.Value}";
+        }
 
-        var sozlesmeMap = sozlesmeler
-            .Where(s => s.tuketim_noktasi_id > 0)
-            .GroupBy(s => s.tuketim_noktasi_id.ToString())
-            .ToDictionary(g => g.Key, g => g.First().sozlesme_id);
+        if (model.SayacId.HasValue && model.SayacId.Value > 0)
+        {
+            var sayac = await _sayacService.GetByIdAsync(model.SayacId.Value);
+            ViewBag.SelectedSayacText = sayac != null ? FormatSayacSecim(sayac) : $"Sayaç {model.SayacId.Value}";
+        }
+    }
 
-        var sozlesmeToTnMap = sozlesmeler
-            .Where(s => s.tuketim_noktasi_id > 0)
-            .GroupBy(s => s.sozlesme_id.ToString())
-            .ToDictionary(g => g.Key, g => g.First().tuketim_noktasi_id.ToString());
+    private async Task<Sozlesme?> FindSozlesmeForTuketimNoktasiAsync(long tuketimNoktasiId)
+    {
+        var response = await _sozlesmeService.GetPagedAsync(1, 20, tuketimNoktasiId.ToString());
+        return response.Data
+            .Where(s => s.tuketim_noktasi_id == tuketimNoktasiId)
+            .OrderByDescending(s => s.durum == SozlesmeDurumu.Aktif)
+            .ThenByDescending(s => s.sozlesme_id)
+            .FirstOrDefault();
+    }
 
-        ViewBag.SayacMapJson = System.Text.Json.JsonSerializer.Serialize(sayacMap);
-        ViewBag.SozlesmeMapJson = System.Text.Json.JsonSerializer.Serialize(sozlesmeMap);
-        ViewBag.SozlesmeToTnMapJson = System.Text.Json.JsonSerializer.Serialize(sozlesmeToTnMap);
+    private static string FormatTuketimNoktasiSecim(TuketimNoktasi? tuketimNoktasi, long fallbackId)
+    {
+        var kod = !string.IsNullOrWhiteSpace(tuketimNoktasi?.tekil_kod)
+            ? tuketimNoktasi.tekil_kod
+            : $"TN-{fallbackId}";
+        var adres = Shorten(tuketimNoktasi?.acik_adres, 80);
+
+        return string.IsNullOrWhiteSpace(adres) ? kod : $"{kod} - {adres}";
+    }
+
+    private static string FormatSozlesmeSecim(Sozlesme sozlesme)
+    {
+        var no = !string.IsNullOrWhiteSpace(sozlesme.sozlesme_no)
+            ? sozlesme.sozlesme_no
+            : $"Sözleşme {sozlesme.sozlesme_id}";
+        var tuketimNoktasi = !string.IsNullOrWhiteSpace(sozlesme.tekil_kod)
+            ? sozlesme.tekil_kod
+            : $"TN-{sozlesme.tuketim_noktasi_id}";
+        var durum = sozlesme.durum?.ToString();
+
+        return string.IsNullOrWhiteSpace(durum)
+            ? $"{no} - {tuketimNoktasi}"
+            : $"{no} - {tuketimNoktasi} - {durum}";
+    }
+
+    private static string FormatSayacSecim(Sayac sayac)
+    {
+        var seriNo = !string.IsNullOrWhiteSpace(sayac.seri_no)
+            ? sayac.seri_no
+            : $"Sayaç {sayac.sayac_id}";
+        var markaModel = string.Join(" ", new[] { sayac.marka, sayac.model }.Where(x => !string.IsNullOrWhiteSpace(x)));
+
+        return string.IsNullOrWhiteSpace(markaModel) ? seriNo : $"{seriNo} - {markaModel}";
+    }
+
+    private static string Shorten(string? value, int maxLength)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "";
+        }
+
+        var trimmed = value.Trim();
+        return trimmed.Length <= maxLength ? trimmed : $"{trimmed[..maxLength]}...";
     }
 }

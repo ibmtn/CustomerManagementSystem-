@@ -11,9 +11,11 @@ namespace KcetasWeb.Services.Interfaces
             int page, 
             int pageSize, 
             string? seriNo, 
-            int? durum);
+            int? durum,
+            long? tuketimNoktasiId = null);
 
         Task<Sayac?> GetByIdAsync(long id);
+        Task<Sayac?> GetByTuketimNoktasiIdAsync(long tuketimNoktasiId);
         Task CreateAsync(Sayac sayac);
         Task UpdateAsync(Sayac sayac);
         Task DeleteAsync(long id);

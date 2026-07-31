@@ -27,14 +27,26 @@ namespace KcetasWeb.ViewModels
 
         public static string GetDurumRenk(KcetasWeb.Models.Enums.IsEmriDurumu durum) => durum switch
         {
-            KcetasWeb.Models.Enums.IsEmriDurumu.Acik => "danger",
-            KcetasWeb.Models.Enums.IsEmriDurumu.Atandi => "primary",
-            KcetasWeb.Models.Enums.IsEmriDurumu.Yolda => "dark",
-            KcetasWeb.Models.Enums.IsEmriDurumu.Sahada => "warning",
-            KcetasWeb.Models.Enums.IsEmriDurumu.Tamamlandi => "success",
-            KcetasWeb.Models.Enums.IsEmriDurumu.Iptal => "dark",
-            KcetasWeb.Models.Enums.IsEmriDurumu.Basarisiz => "danger",
-            _ => "secondary"
+            KcetasWeb.Models.Enums.IsEmriDurumu.Acik => "bg-light-primary text-primary border border-primary",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Atandi => "bg-light-info text-info border border-info",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Yolda => "bg-light-dark text-dark border border-dark",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Sahada => "bg-light-warning text-warning border border-warning",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Tamamlandi => "bg-light-success text-success border border-success",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Iptal => "bg-danger text-white border border-danger",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Basarisiz => "bg-light-danger text-danger border border-danger",
+            _ => "bg-light-secondary text-secondary border border-secondary"
+        };
+
+        public static string GetDurumAd(KcetasWeb.Models.Enums.IsEmriDurumu durum) => durum switch
+        {
+            KcetasWeb.Models.Enums.IsEmriDurumu.Acik => "Açık",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Atandi => "Atandı",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Yolda => "Yolda",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Sahada => "Sahada",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Tamamlandi => "Tamamlandı",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Iptal => "İptal",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Basarisiz => "Başarısız",
+            _ => durum.ToString()
         };
 
         public static string GetTipAd(KcetasWeb.Models.Enums.IsEmriTipi tip) => tip switch

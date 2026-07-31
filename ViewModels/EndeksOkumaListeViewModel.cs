@@ -12,6 +12,7 @@ namespace KcetasWeb.ViewModels
         public string? AramaMetni { get; set; }
         
         public string? FiltreSayacId { get; set; }
+        public string? FiltreTuketimNoktasi { get; set; }
         public string? FiltreDonem { get; set; }
         public string? FiltreDogrulamaDurumu { get; set; }
 

@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using KcetasWeb.Helpers;
 using KcetasWeb.Models;
 using KcetasWeb.Services.Interfaces;
@@ -46,7 +47,8 @@ namespace KcetasWeb.Services.Api
             int page, 
             int pageSize, 
             string? seriNo, 
-            int? durum)
+            int? durum,
+            long? tuketimNoktasiId = null)
         {
             try
             {
@@ -58,6 +60,7 @@ namespace KcetasWeb.Services.Api
 
                 if (!string.IsNullOrEmpty(seriNo)) queryParams.Add($"seriNo={Uri.EscapeDataString(seriNo)}");
                 if (durum.HasValue) queryParams.Add($"durum={durum.Value}");
+                if (tuketimNoktasiId.HasValue) queryParams.Add($"tuketimNoktasiId={tuketimNoktasiId.Value}");
 
                 string url = $"/api/Sayaclar/Paged?{string.Join("&", queryParams)}";
                 
@@ -80,6 +83,58 @@ namespace KcetasWeb.Services.Api
             {
                 return null;
             }
+        }
+
+        public async Task<Sayac?> GetByTuketimNoktasiIdAsync(long tuketimNoktasiId)
+        {
+            try
+            {
+                var sayaclar = await GetPagedAsync(1, 10, null, null, tuketimNoktasiId);
+                var eslesenSayac = sayaclar.Data.FirstOrDefault(s => s.durum == KcetasWeb.Models.Enums.SayacDurumu.Bagli || s.durum == KcetasWeb.Models.Enums.SayacDurumu.Takili)
+                    ?? sayaclar.Data.FirstOrDefault();
+
+                if (eslesenSayac != null)
+                {
+                    return eslesenSayac;
+                }
+
+                var detaylar = await GetTuketimNoktasiDetaylariAsync();
+                var detay = detaylar.FirstOrDefault(x => x.TuketimNoktasiId == tuketimNoktasiId);
+                return !string.IsNullOrWhiteSpace(detay?.AktifSayacSeriNo)
+                    ? (await GetPagedAsync(1, 10, detay.AktifSayacSeriNo, null)).Data.FirstOrDefault()
+                    : null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private async Task<List<TuketimNoktasiDetayDto>> GetTuketimNoktasiDetaylariAsync()
+        {
+            return await _cache.GetOrCreateAsync("TuketimNoktasi_GetWithDetails_ForSayac", async entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
+
+                try
+                {
+                    var result = await _httpClient.GetFromJsonAsync<List<TuketimNoktasiDetayDto>>("/api/TuketimNoktasi/GetWithDetails", _jsonOptions);
+                    return result ?? new List<TuketimNoktasiDetayDto>();
+                }
+                catch
+                {
+                    return new List<TuketimNoktasiDetayDto>();
+                }
+            }) ?? new List<TuketimNoktasiDetayDto>();
+        }
+
+        private class TuketimNoktasiDetayDto
+        {
+            [JsonPropertyName("tuketimNoktasiId")]
+            public long TuketimNoktasiId { get; set; }
+
+            [JsonPropertyName("aktifSayacSeriNo")]
+            public string? AktifSayacSeriNo { get; set; }
         }
 
         public async Task CreateAsync(Sayac sayac)

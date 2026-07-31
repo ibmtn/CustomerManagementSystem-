@@ -51,17 +51,30 @@ namespace KcetasWeb.Controllers
             filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
             filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
 
-            var pagedResponse = await _sozlesmeService.GetPagedAsync(filtre.CurrentPage, filtre.PageSize);
-            var sozlesmeler = pagedResponse.Data.AsQueryable();
+            List<Sozlesme> pagedData;
+            int totalItems;
 
-            if (!string.IsNullOrEmpty(filtre.FiltreSozlesmeNo))
-                sozlesmeler = sozlesmeler.Where(x => x.sozlesme_no != null && x.sozlesme_no.Contains(filtre.FiltreSozlesmeNo, StringComparison.OrdinalIgnoreCase));
-
-            if (!string.IsNullOrEmpty(filtre.FiltreDurum) && Enum.TryParse<KcetasWeb.Models.Enums.SozlesmeDurumu>(filtre.FiltreDurum, out var seciliDurum))
-                sozlesmeler = sozlesmeler.Where(x => x.durum == seciliDurum);
-
-            if (!string.IsNullOrEmpty(filtre.FiltreTuketiciGrubu))
+            if (string.IsNullOrEmpty(filtre.FiltreTuketiciGrubu))
             {
+                var pagedResponse = await _sozlesmeService.GetPagedAsync(
+                    filtre.CurrentPage,
+                    filtre.PageSize,
+                    filtre.FiltreSozlesmeNo,
+                    filtre.FiltreDurum);
+
+                pagedData = pagedResponse.Data;
+                totalItems = pagedResponse.TotalCount;
+            }
+            else
+            {
+                var sozlesmeler = (await _sozlesmeService.GetAllAsync()).AsQueryable();
+
+                if (!string.IsNullOrEmpty(filtre.FiltreSozlesmeNo))
+                    sozlesmeler = sozlesmeler.Where(x => x.sozlesme_no != null && x.sozlesme_no.Contains(filtre.FiltreSozlesmeNo, StringComparison.OrdinalIgnoreCase));
+
+                if (!string.IsNullOrEmpty(filtre.FiltreDurum) && Enum.TryParse<KcetasWeb.Models.Enums.SozlesmeDurumu>(filtre.FiltreDurum, out var seciliDurum))
+                    sozlesmeler = sozlesmeler.Where(x => x.durum == seciliDurum);
+
                 int tarifeId = filtre.FiltreTuketiciGrubu switch
                 {
                     "Mesken" => 1,
@@ -75,16 +88,21 @@ namespace KcetasWeb.Controllers
                 {
                     sozlesmeler = sozlesmeler.Where(x => x.tarife_id == tarifeId);
                 }
-            }
 
-            var pagedData = sozlesmeler.ToList();
+                var filteredData = sozlesmeler.OrderByDescending(x => x.sozlesme_id).ToList();
+                totalItems = filteredData.Count;
+                pagedData = filteredData.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
+            }
             
-            filtre.TotalItems = pagedResponse.TotalCount;
+            filtre.TotalItems = totalItems;
 
             var aboneIds = pagedData.Where(x => x.abone_id.HasValue).Select(x => x.abone_id.Value).Distinct();
             var aboneTasks = aboneIds.Select(id => _aboneService.GetByIdAsync(id));
 
-            var tuketimNoktasiTask = _tuketimNoktasiService.GetAllAsync();
+            var needsTuketimNoktasiLookup = pagedData.Any(s => string.IsNullOrWhiteSpace(s.tekil_kod));
+            var tuketimNoktasiTask = needsTuketimNoktasiLookup
+                ? _tuketimNoktasiService.GetAllAsync()
+                : Task.FromResult(new List<TuketimNoktasi>());
             var aboneSonuclarTask = Task.WhenAll(aboneTasks);
             
             await Task.WhenAll(tuketimNoktasiTask, aboneSonuclarTask);
@@ -127,7 +145,7 @@ namespace KcetasWeb.Controllers
                     guvence_bedeli = s.guvence_bedeli ?? 0m,
                     created_at = s.created_at,
                     updated_at = s.updated_at,
-                    tekil_kod = tuketimNoktasi?.tekil_kod ?? "Bilinmiyor"
+                    tekil_kod = !string.IsNullOrWhiteSpace(s.tekil_kod) ? s.tekil_kod : tuketimNoktasi?.tekil_kod ?? "Bilinmiyor"
                 };
             }).ToList();
 
@@ -360,4 +378,3 @@ namespace KcetasWeb.Controllers
         }
     }
 }
-

@@ -22,8 +22,8 @@
                 <h3 class="fw-bold text-dark mb-1">@Model.IsEmriNo</h3>
                 <p class="fs-6 fw-bold text-dark mb-0">@(Model.PlanlananTarih.HasValue ? Model.PlanlananTarih.Value.ToString("dd.MM.yyyy") : "Planlanmadı")</p>
                 <span class="badge bg-info bg-opacity-10 text-info border border-info me-1">@KcetasWeb.ViewModels.IsEmriListeViewModel.GetTipAd(Model.Tip)</span>
-                <span class="badge bg-@Model.DurumRenk me-1">@Model.Durum</span>
-                <span class="badge bg-secondary bg-opacity-10 text-secondary border">@Model.Oncelik</span>
+                <span class="badge @Model.DurumRenk me-1">@KcetasWeb.ViewModels.IsEmriListeViewModel.GetDurumAd(Model.Durum)</span>
+                <span class="badge bg-secondary bg-opacity-10 text-secondary border">@KcetasWeb.ViewModels.IsEmriListeViewModel.GetOncelikAd(Model.Oncelik)</span>
             </div>
             <div class="d-flex align-items-center gap-2">
                 @if (User.IsInRole("BTYoneticisi") || User.IsInRole("SahaOperasyonAmiri") || User.IsInRole("Denetci"))
@@ -83,8 +83,8 @@
                 <table class="table table-borderless mb-0">
                     <tr><td class="text-muted fw-semibold" style="width:40%">İş Emri No</td><td><strong>@(Model.IsEmriNo ?? "-")</strong></td></tr>
                     <tr><td class="text-muted fw-semibold">Tip</td><td>@KcetasWeb.ViewModels.IsEmriListeViewModel.GetTipAd(Model.Tip)</td></tr>
-                    <tr><td class="text-muted fw-semibold">Durum</td><td>@Model.Durum</td></tr>
-                    <tr><td class="text-muted fw-semibold">Öncelik</td><td>@(Model.Oncelik ?? "-")</td></tr>
+                    <tr><td class="text-muted fw-semibold">Durum</td><td>@KcetasWeb.ViewModels.IsEmriListeViewModel.GetDurumAd(Model.Durum)</td></tr>
+                    <tr><td class="text-muted fw-semibold">Öncelik</td><td>@KcetasWeb.ViewModels.IsEmriListeViewModel.GetOncelikAd(Model.Oncelik)</td></tr>
                     <tr><td class="text-muted fw-semibold">Açıklama / Not</td><td>@(string.IsNullOrEmpty(Model.Gerekce) ? "-" : Model.Gerekce)</td></tr>
                 </table>
             </div>
@@ -187,4 +187,3 @@ else if (Model.Durum != KcetasWeb.Models.Enums.IsEmriDurumu.Tamamlandi && Model.
         </div>
     </div>
 }
-

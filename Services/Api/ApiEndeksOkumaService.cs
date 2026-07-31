@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using KcetasWeb.Helpers;
 using KcetasWeb.Models;
+using KcetasWeb.Models.Dtos;
 using KcetasWeb.Models.entities;
 using KcetasWeb.Services.Interfaces;
 
@@ -95,9 +96,10 @@ namespace KcetasWeb.Services.Api
                 if (baslangic.HasValue) queryParams.Add($"baslangic={baslangic.Value.ToString("yyyy-MM-ddTHH:mm:ss")}");
                 if (bitis.HasValue) queryParams.Add($"bitis={bitis.Value.ToString("yyyy-MM-ddTHH:mm:ss")}");
                 if (!string.IsNullOrEmpty(aramaMetni)) queryParams.Add($"arama={Uri.EscapeDataString(aramaMetni)}");
-                if (!string.IsNullOrEmpty(sayacId)) queryParams.Add($"sayacId={Uri.EscapeDataString(sayacId)}");
+                if (!string.IsNullOrEmpty(sayacId)) queryParams.Add($"seriNo={Uri.EscapeDataString(sayacId)}");
                 if (!string.IsNullOrEmpty(donem)) queryParams.Add($"donem={Uri.EscapeDataString(donem)}");
-                if (!string.IsNullOrEmpty(dogrulamaDurumu)) queryParams.Add($"dogrulamaDurumu={Uri.EscapeDataString(dogrulamaDurumu)}");
+                var normalizedDogrulamaDurumu = NormalizeDogrulamaDurumu(dogrulamaDurumu);
+                if (!string.IsNullOrEmpty(normalizedDogrulamaDurumu)) queryParams.Add($"dogrulamaDurumu={Uri.EscapeDataString(normalizedDogrulamaDurumu)}");
 
                 string url = $"/api/EndeksOkuma/Paged?{string.Join("&", queryParams)}";
                 
@@ -107,6 +109,25 @@ namespace KcetasWeb.Services.Api
             catch
             {
                 return new PagedResponse<EndeksOkuma>();
+            }
+        }
+
+        public async System.Threading.Tasks.Task<List<YeniOkumaSecimDto>> YeniOkumaSecimAraAsync(string q)
+        {
+            if (string.IsNullOrWhiteSpace(q) || q.Trim().Length < 2)
+            {
+                return new List<YeniOkumaSecimDto>();
+            }
+
+            try
+            {
+                var url = $"/api/EndeksOkuma/YeniOkumaSecimAra?q={Uri.EscapeDataString(q.Trim())}";
+                var result = await _httpClient.GetFromJsonAsync<List<YeniOkumaSecimDto>>(url, _jsonOptions);
+                return result ?? new List<YeniOkumaSecimDto>();
+            }
+            catch
+            {
+                return new List<YeniOkumaSecimDto>();
             }
         }
 
@@ -143,10 +164,21 @@ namespace KcetasWeb.Services.Api
 
         public async System.Threading.Tasks.Task CreateAsync(EndeksOkuma model)
         {
-            var jsonString = System.Text.Json.JsonSerializer.Serialize(model, _jsonOptions);
-            System.IO.File.WriteAllText("debug_json.txt", jsonString);
+            var dto = new
+            {
+                sayacId = model.sayac_id,
+                isEmriId = model.is_emri_id,
+                sozlesmeId = model.sozlesme_id,
+                yeniEndeks = model.yeni_endeks ?? 0m,
+                oncekiEndeks = model.onceki_endeks,
+                okumaTipi = model.okuma_tipi,
+                okumaKaynagi = model.okuma_kaynagi,
+                donem = model.donem,
+                okumaZamani = model.okuma_zamani,
+                kullaniciId = model.kullanici_id
+            };
 
-            var response = await _httpClient.PostAsJsonAsync("/api/EndeksOkuma", model, _jsonOptions);
+            var response = await _httpClient.PostAsJsonAsync("/api/EndeksOkuma", dto, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
@@ -172,6 +204,23 @@ namespace KcetasWeb.Services.Api
                 throw new Exception($"API Hatası: {response.StatusCode} - Endeks okuması silinemedi. Detay: {errorContent}");
             }
         }
+
+        private static string? NormalizeDogrulamaDurumu(string? dogrulamaDurumu)
+        {
+            if (string.IsNullOrWhiteSpace(dogrulamaDurumu))
+            {
+                return null;
+            }
+
+            var trimmed = dogrulamaDurumu.Trim();
+            if (int.TryParse(trimmed, out _))
+            {
+                return trimmed;
+            }
+
+            return Enum.TryParse<KcetasWeb.Models.Enums.DogrulamaDurumu>(trimmed, ignoreCase: true, out var parsed)
+                ? ((int)parsed).ToString()
+                : trimmed;
+        }
     }
 }
-

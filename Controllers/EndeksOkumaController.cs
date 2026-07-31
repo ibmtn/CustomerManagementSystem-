@@ -3,6 +3,7 @@ using KcetasWeb.Models;
 using Microsoft.AspNetCore.Authorization;
 using KcetasWeb.Services.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -42,22 +43,6 @@ namespace KcetasWeb.Controllers
             filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
             filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
 
-            var response = await _endeksOkumaService.GetPagedAsync(
-                filtre.CurrentPage,
-                filtre.PageSize,
-                filtre.FiltreKaynak,
-                filtre.FiltreDurum,
-                filtre.BaslangicTarih,
-                filtre.BitisTarih,
-                filtre.AramaMetni,
-                filtre.FiltreSayacId,
-                filtre.FiltreDonem,
-                filtre.FiltreDogrulamaDurumu
-            );
-
-            var pagedData = response.Data;
-            int totalItems = response.TotalCount;
-
             var sozlesmeTask = _sozlesmeService.GetAllAsync();
             var aboneTask = _aboneService.GetAllAsync();
             var isEmriTask = _isEmriService.GetAllAsync();
@@ -71,6 +56,42 @@ namespace KcetasWeb.Controllers
             var isEmirleri = (await isEmriTask);
             var tuketimNoktalari = (await tuketimNoktasiTask);
             var sayaclar = (await sayacTask);
+
+            List<EndeksOkuma> pagedData;
+            int totalItems;
+
+            if (!string.IsNullOrWhiteSpace(filtre.FiltreTuketimNoktasi))
+            {
+                var tumOkumalar = await _endeksOkumaService.GetAllAsync();
+                var filtrelenmisOkumalar = ApplyLocalEndeksFilters(tumOkumalar, filtre, sozlesmeler, tuketimNoktalari, sayaclar, isEmirleri)
+                    .OrderBy(o => o.dogrulama_durumu == KcetasWeb.Models.Enums.DogrulamaDurumu.Onaylandi ? 1 : 0)
+                    .ThenByDescending(o => o.okuma_zamani ?? DateTime.MinValue)
+                    .ToList();
+
+                totalItems = filtrelenmisOkumalar.Count;
+                pagedData = filtrelenmisOkumalar
+                    .Skip((filtre.CurrentPage - 1) * filtre.PageSize)
+                    .Take(filtre.PageSize)
+                    .ToList();
+            }
+            else
+            {
+                var response = await _endeksOkumaService.GetPagedAsync(
+                    filtre.CurrentPage,
+                    filtre.PageSize,
+                    filtre.FiltreKaynak,
+                    filtre.FiltreDurum,
+                    filtre.BaslangicTarih,
+                    filtre.BitisTarih,
+                    filtre.AramaMetni,
+                    filtre.FiltreSayacId,
+                    filtre.FiltreDonem,
+                    filtre.FiltreDogrulamaDurumu
+                );
+
+                pagedData = response.Data;
+                totalItems = response.TotalCount;
+            }
 
             var viewModels = pagedData.Select(o => {
                 var sozlesme = sozlesmeler.FirstOrDefault(s => s.sozlesme_id == o.sozlesme_id);
@@ -182,20 +203,92 @@ namespace KcetasWeb.Controllers
             return View(okuma);
         }
 
-        public async Task<IActionResult> Yeni()
+        public IActionResult Yeni()
         {
-            var tnTask = _tuketimNoktasiService.GetAllAsync();
-            var sycTask = _sayacService.GetAllAsync();
-            var szlTask = _sozlesmeService.GetAllAsync();
-            await Task.WhenAll(tnTask, sycTask, szlTask);
-            ViewBag.TuketimNoktalari = (await tnTask);
-            ViewBag.Sayaclar = (await sycTask);
-            ViewBag.Sozlesmeler = (await szlTask);
             return View();
         }
 
+        [HttpGet]
+        public async Task<IActionResult> SozlesmeAra(string? q)
+        {
+            if (string.IsNullOrWhiteSpace(q) || q.Trim().Length < 2)
+            {
+                return Json(new { results = Array.Empty<object>() });
+            }
+
+            var secimler = await _endeksOkumaService.YeniOkumaSecimAraAsync(q);
+
+            var results = secimler
+                .Take(20)
+                .Select(s => new
+                {
+                    id = s.SozlesmeId,
+                    text = $"{(!string.IsNullOrWhiteSpace(s.SozlesmeNo) ? s.SozlesmeNo : $"Sözleşme {s.SozlesmeId}")} - {(!string.IsNullOrWhiteSpace(s.TekilKod) ? s.TekilKod : $"TN: {s.TuketimNoktasiId}")} - Sayaç: {s.SayacSeriNo}",
+                    basarili = true,
+                    sozlesmeId = s.SozlesmeId,
+                    sozlesmeNo = s.SozlesmeNo,
+                    tuketimNoktasiId = s.TuketimNoktasiId,
+                    tuketimNoktasiKodu = s.TekilKod,
+                    adres = s.Adres,
+                    sayacId = s.SayacId,
+                    sayacSeriNo = s.SayacSeriNo,
+                    sayacMarkaModel = "",
+                    sonEndeksBasarili = s.SonEndeks.HasValue,
+                    sonEndeks = s.SonEndeks ?? 0m,
+                    donem = s.Donem
+                })
+                .ToList();
+
+            return Json(new { results });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SozlesmeSecimBilgisi(long sozlesmeId)
+        {
+            var sozlesme = await _sozlesmeService.GetByIdAsync(sozlesmeId);
+            if (sozlesme == null)
+            {
+                return Json(new { basarili = false, mesaj = "Sözleşme bulunamadı." });
+            }
+
+            var tuketimNoktasiTask = _tuketimNoktasiService.GetByIdAsync(sozlesme.tuketim_noktasi_id);
+            var sayacTask = _sayacService.GetByTuketimNoktasiIdAsync(sozlesme.tuketim_noktasi_id);
+            await Task.WhenAll(tuketimNoktasiTask, sayacTask);
+
+            var tuketimNoktasi = await tuketimNoktasiTask;
+            var sayac = await sayacTask;
+
+            if (sayac == null)
+            {
+                return Json(new
+                {
+                    basarili = false,
+                    mesaj = "Bu sözleşmenin tüketim noktasına bağlı aktif sayaç bulunamadı.",
+                    tuketimNoktasiId = sozlesme.tuketim_noktasi_id,
+                    tuketimNoktasiKodu = tuketimNoktasi?.tekil_kod ?? sozlesme.tuketim_noktasi_id.ToString()
+                });
+            }
+
+            var sonEndeks = await GetSonEndeksForSayacAsync(sayac.sayac_id, sayac.seri_no);
+
+            return Json(new
+            {
+                basarili = true,
+                sozlesmeId = sozlesme.sozlesme_id,
+                sozlesmeNo = sozlesme.sozlesme_no,
+                tuketimNoktasiId = sozlesme.tuketim_noktasi_id,
+                tuketimNoktasiKodu = tuketimNoktasi?.tekil_kod ?? sozlesme.tuketim_noktasi_id.ToString(),
+                adres = tuketimNoktasi?.acik_adres,
+                sayacId = sayac.sayac_id,
+                sayacSeriNo = sayac.seri_no,
+                sayacMarkaModel = $"{sayac.marka} {sayac.model}".Trim(),
+                sonEndeksBasarili = sonEndeks.Basarili,
+                sonEndeks = sonEndeks.Endeks
+            });
+        }
+
         [HttpPost]
-        public async Task<IActionResult> Yeni(long TuketimNoktasiId, long SayacId, string onceki_endeks, string yeni_endeks, string okuma_tipi, string okuma_kaynagi, string aciklama)
+        public async Task<IActionResult> Yeni(long SozlesmeId, long TuketimNoktasiId, long SayacId, string SayacSeriNo, string onceki_endeks, string yeni_endeks, string okuma_tipi, string okuma_kaynagi, string aciklama)
         {
             // Nokta/virgül hatasını önlemek için string olarak alıp güvenli dönüştürüyoruz
             decimal parsedOnceki = 0;
@@ -216,24 +309,19 @@ namespace KcetasWeb.Controllers
             decimal tuketim = parsedYeni - parsedOnceki;
             if (tuketim < 0) tuketim = 0; // Eğer negatifse (örneğin hatalı okuma veya sayaç sıfırlanması), şimdilik 0 kabul edelim
 
-            // İlgili tüketim noktasına ait sözleşmeyi bul
-            var sozlesmeler = (await _sozlesmeService.GetAllAsync()).Where(s => s.tuketim_noktasi_id == TuketimNoktasiId).ToList();
-            var aktifSozlesme = sozlesmeler.FirstOrDefault(s => s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi && s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Pasif) ?? sozlesmeler.FirstOrDefault();
+            var aktifSozlesme = SozlesmeId > 0 ? await _sozlesmeService.GetByIdAsync(SozlesmeId) : null;
+            if (aktifSozlesme == null || aktifSozlesme.tuketim_noktasi_id != TuketimNoktasiId)
+            {
+                var sozlesmeler = (await _sozlesmeService.GetAllAsync()).Where(s => s.tuketim_noktasi_id == TuketimNoktasiId).ToList();
+                aktifSozlesme = sozlesmeler.FirstOrDefault(s => s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi && s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Pasif) ?? sozlesmeler.FirstOrDefault();
+            }
 
             if (aktifSozlesme == null)
             {
                 TempData["OkumaMesaji"] = "HATA: Seçilen tüketim noktasına ait bir sözleşme bulunamadı! Endeks okuması ve faturalandırma yapılabilmesi için öncelikle bir sözleşme oluşturmalısınız.";
+                TempData["OkumaMesajTip"] = "danger";
                 return RedirectToAction("Yeni");
             }
-            
-            string tarifeGrubu = aktifSozlesme != null ? 
-                (aktifSozlesme.tarife_id == 1 ? "Mesken" : 
-                 aktifSozlesme.tarife_id == 2 ? "Sanayi" : 
-                 aktifSozlesme.tarife_id == 3 ? "Ticarethane" : 
-                 aktifSozlesme.tarife_id == 4 ? "Tarımsal Sulama" : "Aydınlatma") : "Mesken";
-            
-            // Fatura hesaplamasını yap
-            var hesaplama = await _faturaService.SimulasyonHesaplaAsync(tarifeGrubu, tuketim);
 
             KcetasWeb.Models.Enums.OkumaTipi parsedOkumaTipi = KcetasWeb.Models.Enums.OkumaTipi.RutinDonem;
             if (int.TryParse(okuma_tipi, out int tipId))
@@ -270,13 +358,12 @@ namespace KcetasWeb.Controllers
 
             try
             {
-                // Önce bu sayaç ve dönem için daha önce okuma yapılmış mı kontrol et
-                var oncekiOkumalar = await _endeksOkumaService.GetAllAsync();
-                bool okumaZatenVar = oncekiOkumalar.Any(x => x.sayac_id == yeniOkuma.sayac_id && x.donem == yeniOkuma.donem);
+                bool okumaZatenVar = await OkumaDonemKaydiVarAsync(SayacId, SayacSeriNo, yeniOkuma.donem);
 
                 if (okumaZatenVar)
                 {
                     TempData["OkumaMesaji"] = $"HATA: Bu sayaç için {yeniOkuma.donem} döneminde zaten bir endeks okuması kaydı bulunmaktadır. Aynı döneme birden fazla okuma girilemez.";
+                    TempData["OkumaMesajTip"] = "danger";
                     return RedirectToAction("Yeni");
                 }
 
@@ -286,8 +373,7 @@ namespace KcetasWeb.Controllers
             {
                 // BAZI DURUMLARDA BACKEND API KAYDI BAŞARIYLA YAPIYOR ANCAK İKİNCİL BİR İŞLEMDE 
                 // HATA VERİP 500 DÖNDÜRÜYOR. BU YÜZDEN KAYDİ GERÇEKTEN YAPIP YAPMADIĞINI KONTROL EDELİM.
-                var okumalarSonrasi = await _endeksOkumaService.GetAllAsync();
-                bool gercektenKaydetti = okumalarSonrasi.Any(x => x.sayac_id == yeniOkuma.sayac_id && x.donem == yeniOkuma.donem);
+                bool gercektenKaydetti = await OkumaDonemKaydiVarAsync(SayacId, SayacSeriNo, yeniOkuma.donem);
 
                 if (!gercektenKaydetti)
                 {
@@ -295,67 +381,28 @@ namespace KcetasWeb.Controllers
                 }
             }
 
-            var tn = (await _tuketimNoktasiService.GetAllAsync()).FirstOrDefault(t => t.tuketim_noktasi_id == TuketimNoktasiId);
-
-            var yeniFatura = new Fatura
-            {
-                fatura_no = $"FAT-{DateTime.Now.Year}-{new Random().Next(1000, 9999)}",
-                sozlesme_id = aktifSozlesme?.sozlesme_id ?? 1000,
-                tekil_kod = tn != null ? tn.tekil_kod : TuketimNoktasiId.ToString(),
-                fatura_tipi = KcetasWeb.Models.Enums.FaturaTipi.Donem,
-                fatura_tarihi = DateOnly.FromDateTime(DateTime.Now),
-                son_odeme_tarihi = DateOnly.FromDateTime(DateTime.Now.AddDays(15)),
-                donem = DateTime.Now.ToString("yyyy-MM"),
-                ilk_endeks = parsedOnceki,
-                son_endeks = parsedYeni,
-                tuketim_kwh = tuketim,
-                carpan = 1,
-                enerji_bedeli = hesaplama.EnerjiBedeli,
-                dagatim_bedeli = hesaplama.DagitimBedeli,
-                vergi_fon_toplam = hesaplama.TrtPayi + hesaplama.EnerjiFonu + hesaplama.KdvTutari,
-                toplam_tutar = hesaplama.ToplamTutar,
-                reaktif_enduktif = 0m,
-                reaktif_kapasitif = 0m,
-                hizmet_bedeli = 0m,
-                kesme_baglama_bedeli = 0m,
-                durum = "HESAPLANDI",
-                status = "AKTIF",
-                created_at = DateTime.Now,
-                kullanici_id = 1
-            };
-
-            try
-            {
-                await _faturaService.EkleAsync(yeniFatura);
-            }
-            catch (Exception ex)
-            {
-                apiHataMesaji += $"Fatura API Hatası: {ex.Message}";
-            }
-
             if (!string.IsNullOrEmpty(apiHataMesaji))
             {
                 TempData["OkumaMesaji"] = "Kayıt sırasında hata oluştu: " + apiHataMesaji;
+                TempData["OkumaMesajTip"] = "danger";
             }
             else
             {
-                TempData["OkumaMesaji"] = "Endeks okuması alındı ve otomatik olarak yeni fatura oluşturuldu. (Fatura No: " + yeniFatura.fatura_no + " - Tutar: " + yeniFatura.toplam_tutar?.ToString("C2") + ")";
+                TempData["OkumaMesaji"] = "Endeks okuması alındı ve onay bekliyor. Fatura oluşturmak için listeden onaylayınız.";
+                TempData["OkumaMesajTip"] = "success";
             }
             
             return RedirectToAction("Index");
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetSonEndeks(long sayacId)
+        public async Task<IActionResult> GetSonEndeks(long sayacId, string? seriNo)
         {
-            var okumalar = (await _endeksOkumaService.GetAllAsync()).Where(x => x.sayac_id == sayacId)
-                .OrderByDescending(x => x.okuma_zamani)
-                .ToList();
+            var sonEndeks = await GetSonEndeksForSayacAsync(sayacId, seriNo);
 
-            if (okumalar.Any())
+            if (sonEndeks.Basarili)
             {
-                // En son okunan yeni endeks, sıradaki okumanın "önceki_endeksi" olur.
-                return Json(new { basarili = true, endeks = okumalar.First().yeni_endeks });
+                return Json(new { basarili = true, endeks = sonEndeks.Endeks });
             }
 
             return Json(new { basarili = false, endeks = 0 });
@@ -365,35 +412,66 @@ namespace KcetasWeb.Controllers
         public async Task<IActionResult> OnaylaVeFaturalandir(long id)
         {
             var okuma = await _endeksOkumaService.GetByIdAsync((int)id);
-            if (okuma == null || okuma.dogrulama_durumu == KcetasWeb.Models.Enums.DogrulamaDurumu.Onaylandi)
+            if (okuma == null)
+            {
+                TempData["OkumaMesaji"] = "HATA: Onaylanacak endeks okuması bulunamadı.";
+                TempData["OkumaMesajTip"] = "danger";
                 return RedirectToAction("Index");
+            }
 
-            // 2. Fatura Oluştur
+            if (okuma.dogrulama_durumu == KcetasWeb.Models.Enums.DogrulamaDurumu.Onaylandi)
+            {
+                TempData["OkumaMesaji"] = "Bu endeks okuması zaten onaylanmış.";
+                TempData["OkumaMesajTip"] = "success";
+                return RedirectToAction("Index");
+            }
+
             decimal tuketim = (okuma.yeni_endeks ?? 0) - (okuma.onceki_endeks ?? 0);
             if (tuketim < 0) tuketim = 0;
 
-            var sozlesmeler = (await _sozlesmeService.GetAllAsync()).Where(s => s.sozlesme_id == okuma.sozlesme_id).ToList();
-            var aktifSozlesme = sozlesmeler.FirstOrDefault();
-            
-            string tarifeGrubu = aktifSozlesme != null ? 
-                (aktifSozlesme.tarife_id == 1 ? "Mesken" : 
-                 aktifSozlesme.tarife_id == 2 ? "Sanayi" : 
-                 aktifSozlesme.tarife_id == 3 ? "Ticarethane" : 
-                 aktifSozlesme.tarife_id == 4 ? "Tarımsal Sulama" : "Aydınlatma") : "Mesken";
-            
-            var hesaplama = await _faturaService.SimulasyonHesaplaAsync(tarifeGrubu, tuketim);
+            var sozlesmeTask = _sozlesmeService.GetAllAsync();
+            var tuketimNoktasiTask = _tuketimNoktasiService.GetAllAsync();
+            var sayacTask = _sayacService.GetAllAsync();
+            var isEmriTask = _isEmriService.GetAllAsync();
+            await Task.WhenAll(sozlesmeTask, tuketimNoktasiTask, sayacTask, isEmriTask);
 
-            var tn = aktifSozlesme != null ? (await _tuketimNoktasiService.GetAllAsync()).FirstOrDefault(t => t.tuketim_noktasi_id == aktifSozlesme.tuketim_noktasi_id) : null;
+            var sozlesmeler = await sozlesmeTask;
+            var tuketimNoktalari = await tuketimNoktasiTask;
+            var sayaclar = await sayacTask;
+            var isEmirleri = await isEmriTask;
+
+            var aktifSozlesme = ResolveSozlesmeForOkuma(okuma, sozlesmeler, sayaclar, isEmirleri);
+            if (aktifSozlesme == null)
+            {
+                TempData["OkumaMesaji"] = "HATA: Bu okuma için bağlı sözleşme bulunamadı. Fatura oluşturulamadı.";
+                TempData["OkumaMesajTip"] = "danger";
+                return RedirectToAction("Index");
+            }
+            
+            string tarifeGrubu = GetTarifeGrubu(aktifSozlesme.tarife_id);
+            var hesaplama = await _faturaService.SimulasyonHesaplaAsync(tarifeGrubu, tuketim);
+            var tn = tuketimNoktalari.FirstOrDefault(t => t.tuketim_noktasi_id == aktifSozlesme.tuketim_noktasi_id);
+            var donem = okuma.donem ?? DateTime.Now.ToString("yyyy-MM");
+            var mevcutFaturalar = (await _faturaService.GetPagedAsync(1, 100, sozlesmeId: aktifSozlesme.sozlesme_id)).Data ?? new List<Fatura>();
+            var mevcutOkumaFaturasi = mevcutFaturalar.FirstOrDefault(f => f.okuma_id == okuma.okuma_id)
+                ?? mevcutFaturalar.FirstOrDefault(f =>
+                    f.donem == donem &&
+                    f.sozlesme_id == aktifSozlesme.sozlesme_id &&
+                    SameAmount(f.ilk_endeks, okuma.onceki_endeks) &&
+                    SameAmount(f.son_endeks, okuma.yeni_endeks));
+
+            var faturaNo = mevcutOkumaFaturasi?.fatura_no;
+            var faturaToplam = mevcutOkumaFaturasi?.toplam_tutar;
 
             var yeniFatura = new Fatura
             {
-                fatura_no = $"FAT-{DateTime.Now.Year}-{new Random().Next(1000, 9999)}",
-                sozlesme_id = okuma.sozlesme_id ?? 1000,
-                tekil_kod = tn != null ? tn.tekil_kod : "BILINMIYOR",
+                fatura_no = $"FAT-{DateTime.Now:yyyyMMddHHmmss}-{okuma.okuma_id}",
+                sozlesme_id = aktifSozlesme.sozlesme_id,
+                tekil_kod = tn != null ? tn.tekil_kod : aktifSozlesme.tuketim_noktasi_id.ToString(),
                 fatura_tipi = KcetasWeb.Models.Enums.FaturaTipi.Donem,
                 fatura_tarihi = DateOnly.FromDateTime(DateTime.Now),
                 son_odeme_tarihi = DateOnly.FromDateTime(DateTime.Now.AddDays(15)),
-                donem = okuma.donem ?? DateTime.Now.ToString("yyyy-MM"),
+                donem = donem,
                 okuma_id = okuma.okuma_id,
                 ilk_endeks = okuma.onceki_endeks,
                 son_endeks = okuma.yeni_endeks,
@@ -415,17 +493,28 @@ namespace KcetasWeb.Controllers
 
             try
             {
-                await _faturaService.EkleAsync(yeniFatura);
-                
-                // Artık faturaya bağlandığı için okuma durumunu ONAYLANDI yapmalıyız
+                if (mevcutOkumaFaturasi == null)
+                {
+                    var olusanFatura = await _faturaService.EkleAsync(yeniFatura);
+                    faturaNo = !string.IsNullOrWhiteSpace(olusanFatura.fatura_no)
+                        ? olusanFatura.fatura_no
+                        : yeniFatura.fatura_no;
+                    faturaToplam = olusanFatura.toplam_tutar ?? yeniFatura.toplam_tutar;
+                }
+
                 okuma.dogrulama_durumu = KcetasWeb.Models.Enums.DogrulamaDurumu.Onaylandi;
+                okuma.updated_at = DateTime.UtcNow;
                 await _endeksOkumaService.UpdateAsync(okuma);
 
-                TempData["OkumaMesaji"] = $"Endeks okuması başarıyla onaylandı ve yeni fatura oluşturuldu. (Fatura No: {yeniFatura.fatura_no} - Tutar: {yeniFatura.toplam_tutar?.ToString("C2")})";
+                TempData["OkumaMesaji"] = mevcutOkumaFaturasi == null
+                    ? $"Endeks okuması başarıyla onaylandı ve yeni fatura oluşturuldu. (Fatura No: {faturaNo} - Tutar: {faturaToplam?.ToString("C2")})"
+                    : $"Endeks okuması başarıyla onaylandı. Bu okuma için daha önce oluşturulmuş fatura kullanılacak. (Fatura No: {faturaNo})";
+                TempData["OkumaMesajTip"] = "success";
             }
             catch (Exception ex)
             {
-                TempData["OkumaMesaji"] = $"Okuma onaylama aşamasında fatura kesilirken hata oluştu: {ex.Message}";
+                TempData["OkumaMesaji"] = $"HATA: Okuma onaylama ve fatura oluşturma sırasında hata oluştu: {ex.Message}";
+                TempData["OkumaMesajTip"] = "danger";
                 return RedirectToAction("Index");
             }
 
@@ -459,8 +548,247 @@ namespace KcetasWeb.Controllers
 
             return RedirectToAction("Index");
         }
+
+        private static IEnumerable<EndeksOkuma> ApplyLocalEndeksFilters(
+            IEnumerable<EndeksOkuma> okumalar,
+            KcetasWeb.ViewModels.EndeksOkumaListeViewModel filtre,
+            List<Sozlesme> sozlesmeler,
+            List<TuketimNoktasi> tuketimNoktalari,
+            List<Sayac> sayaclar,
+            List<IsEmri> isEmirleri)
+        {
+            var query = okumalar.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(filtre.FiltreDonem))
+            {
+                query = query.Where(o => string.Equals(o.donem, filtre.FiltreDonem.Trim(), StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (TryParseDogrulamaDurumu(filtre.FiltreDogrulamaDurumu, out var dogrulamaDurumu))
+            {
+                query = query.Where(o => o.dogrulama_durumu == dogrulamaDurumu);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filtre.FiltreSayacId))
+            {
+                var sayacSearch = NormalizeForSearch(filtre.FiltreSayacId);
+                query = query.Where(o =>
+                    o.sayac_id.HasValue &&
+                    (o.sayac_id.Value.ToString().Contains(sayacSearch, StringComparison.OrdinalIgnoreCase) ||
+                     sayaclar.Any(s => s.sayac_id == o.sayac_id.Value && NormalizeForSearch(s.seri_no).Contains(sayacSearch, StringComparison.OrdinalIgnoreCase))));
+            }
+
+            if (!string.IsNullOrWhiteSpace(filtre.FiltreTuketimNoktasi))
+            {
+                var tuketimSearch = NormalizeForSearch(filtre.FiltreTuketimNoktasi);
+                var eslesenTuketimNoktasiIdleri = tuketimNoktalari
+                    .Where(t => NormalizeForSearch(t.tekil_kod).Contains(tuketimSearch, StringComparison.OrdinalIgnoreCase) ||
+                                NormalizeForSearch(t.acik_adres).Contains(tuketimSearch, StringComparison.OrdinalIgnoreCase) ||
+                                NormalizeForSearch(t.mahalle).Contains(tuketimSearch, StringComparison.OrdinalIgnoreCase))
+                    .Select(t => t.tuketim_noktasi_id)
+                    .ToHashSet();
+
+                var eslesenSozlesmeIdleri = sozlesmeler
+                    .Where(s => eslesenTuketimNoktasiIdleri.Contains(s.tuketim_noktasi_id))
+                    .Select(s => s.sozlesme_id)
+                    .ToHashSet();
+
+                query = query.Where(o => EndeksOkumaMatchesTuketimNoktasi(o, eslesenTuketimNoktasiIdleri, eslesenSozlesmeIdleri, sayaclar, isEmirleri));
+            }
+
+            return query;
+        }
+
+        private static bool EndeksOkumaMatchesTuketimNoktasi(
+            EndeksOkuma okuma,
+            HashSet<int> tuketimNoktasiIdleri,
+            HashSet<int> sozlesmeIdleri,
+            List<Sayac> sayaclar,
+            List<IsEmri> isEmirleri)
+        {
+            if (okuma.sozlesme_id.HasValue && sozlesmeIdleri.Contains(okuma.sozlesme_id.Value))
+            {
+                return true;
+            }
+
+            if (okuma.is_emri_id.HasValue)
+            {
+                var isEmri = isEmirleri.FirstOrDefault(ie => ie.is_emri_id == okuma.is_emri_id.Value);
+                if (isEmri != null && tuketimNoktasiIdleri.Contains(isEmri.tuketim_noktasi_id))
+                {
+                    return true;
+                }
+            }
+
+            if (okuma.sayac_id.HasValue)
+            {
+                var sayac = sayaclar.FirstOrDefault(s => s.sayac_id == okuma.sayac_id.Value);
+                if (sayac?.tuketim_noktasi_id != null && tuketimNoktasiIdleri.Contains(sayac.tuketim_noktasi_id.Value))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static Sozlesme? ResolveSozlesmeForOkuma(
+            EndeksOkuma okuma,
+            List<Sozlesme> sozlesmeler,
+            List<Sayac> sayaclar,
+            List<IsEmri> isEmirleri)
+        {
+            if (okuma.sozlesme_id.HasValue)
+            {
+                var sozlesme = sozlesmeler.FirstOrDefault(s => s.sozlesme_id == okuma.sozlesme_id.Value);
+                if (sozlesme != null)
+                {
+                    return sozlesme;
+                }
+            }
+
+            int? tuketimNoktasiId = null;
+            if (okuma.is_emri_id.HasValue)
+            {
+                tuketimNoktasiId = isEmirleri.FirstOrDefault(ie => ie.is_emri_id == okuma.is_emri_id.Value)?.tuketim_noktasi_id;
+            }
+
+            if (!tuketimNoktasiId.HasValue && okuma.sayac_id.HasValue)
+            {
+                tuketimNoktasiId = sayaclar.FirstOrDefault(s => s.sayac_id == okuma.sayac_id.Value)?.tuketim_noktasi_id;
+            }
+
+            if (!tuketimNoktasiId.HasValue)
+            {
+                return null;
+            }
+
+            return sozlesmeler
+                .Where(s => s.tuketim_noktasi_id == tuketimNoktasiId.Value)
+                .OrderByDescending(s => s.durum == KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif)
+                .ThenByDescending(s => s.durum == KcetasWeb.Models.Enums.SozlesmeDurumu.GuvenceBekliyor)
+                .ThenByDescending(s => s.sozlesme_id)
+                .FirstOrDefault();
+        }
+
+        private static string GetTarifeGrubu(int? tarifeId) => tarifeId switch
+        {
+            2 => "Sanayi",
+            3 => "Ticarethane",
+            4 => "Tarımsal Sulama",
+            5 => "Aydınlatma",
+            _ => "Mesken"
+        };
+
+        private static bool TryParseDogrulamaDurumu(string? value, out KcetasWeb.Models.Enums.DogrulamaDurumu dogrulamaDurumu)
+        {
+            dogrulamaDurumu = default;
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+
+            var trimmed = value.Trim();
+            if (int.TryParse(trimmed, out var intValue) && Enum.IsDefined(typeof(KcetasWeb.Models.Enums.DogrulamaDurumu), intValue))
+            {
+                dogrulamaDurumu = (KcetasWeb.Models.Enums.DogrulamaDurumu)intValue;
+                return true;
+            }
+
+            return Enum.TryParse(trimmed, ignoreCase: true, out dogrulamaDurumu);
+        }
+
+        private async Task<(bool Basarili, decimal Endeks)> GetSonEndeksForSayacAsync(long sayacId, string? seriNo)
+        {
+            if (!string.IsNullOrWhiteSpace(seriNo))
+            {
+                var sonOkumaResponse = await _endeksOkumaService.GetPagedAsync(
+                    1,
+                    1,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    seriNo,
+                    null,
+                    null);
+
+                var sonOkuma = sonOkumaResponse.Data
+                    .OrderByDescending(x => x.okuma_zamani)
+                    .FirstOrDefault();
+
+                if (sonOkuma?.yeni_endeks != null)
+                {
+                    return (true, sonOkuma.yeni_endeks.Value);
+                }
+
+                return (false, 0m);
+            }
+
+            var okumalar = (await _endeksOkumaService.GetAllAsync()).Where(x => x.sayac_id == sayacId)
+                .OrderByDescending(x => x.okuma_zamani)
+                .ToList();
+
+            if (okumalar.Any() && okumalar.First().yeni_endeks != null)
+            {
+                return (true, okumalar.First().yeni_endeks!.Value);
+            }
+
+            return (false, 0m);
+        }
+
+        private async Task<bool> OkumaDonemKaydiVarAsync(long sayacId, string? seriNo, string? donem)
+        {
+            if (!string.IsNullOrWhiteSpace(seriNo) && !string.IsNullOrWhiteSpace(donem))
+            {
+                var response = await _endeksOkumaService.GetPagedAsync(
+                    1,
+                    5,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    seriNo,
+                    donem,
+                    null);
+
+                if (response.Data.Any(x => x.sayac_id == sayacId && x.donem == donem))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            var okumalar = await _endeksOkumaService.GetAllAsync();
+            return okumalar.Any(x => x.sayac_id == sayacId && x.donem == donem);
+        }
+
+        private static bool SameAmount(decimal? left, decimal? right)
+        {
+            return Math.Abs((left ?? 0m) - (right ?? 0m)) < 0.0001m;
+        }
+
+        private static string NormalizeForSearch(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return string.Empty;
+            }
+
+            return value.Trim()
+                .ToLowerInvariant()
+                .Replace('ç', 'c')
+                .Replace('ğ', 'g')
+                .Replace('ı', 'i')
+                .Replace('ö', 'o')
+                .Replace('ş', 's')
+                .Replace('ü', 'u')
+                .Replace('â', 'a')
+                .Replace('î', 'i')
+                .Replace('û', 'u');
+        }
     }
 }
-
-
-

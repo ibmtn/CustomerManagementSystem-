@@ -1,4 +1,5 @@
 using KcetasWeb.Models;
+using KcetasWeb.Models.Dtos;
 using System;
 using System.Collections.Generic;
 
@@ -43,6 +44,8 @@ public interface IEndeksOkumaService
         string? sayacId,
         string? donem,
         string? dogrulamaDurumu);
+
+    System.Threading.Tasks.Task<List<YeniOkumaSecimDto>> YeniOkumaSecimAraAsync(string q);
 
     System.Threading.Tasks.Task<(int Toplam, int Manuel, int OSOS, int Anomali, decimal OrtalamaTuketim)>
         GetIstatistiklerAsync(string? donem = null);

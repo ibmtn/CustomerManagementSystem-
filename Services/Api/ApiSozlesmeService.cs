@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using KcetasWeb.Helpers;
 using KcetasWeb.Models;
 using KcetasWeb.Services.Interfaces;
@@ -23,6 +24,7 @@ namespace KcetasWeb.Services.Api
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
                 PropertyNameCaseInsensitive = true
             };
+            _jsonOptions.Converters.Add(new JsonStringEnumConverter());
         }
 
         public async Task<int> GetTotalCountAsync()
@@ -32,24 +34,49 @@ namespace KcetasWeb.Services.Api
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
                 try
                 {
-                    var jsonStr = await _httpClient.GetStringAsync("/api/Sozlesmeler?page=1&pageSize=1");
-                    using var doc = JsonDocument.Parse(jsonStr);
-                    
-                    if (doc.RootElement.ValueKind == JsonValueKind.Array) return doc.RootElement.GetArrayLength();
-                    if (doc.RootElement.TryGetProperty("totalCount", out var tc)) return tc.GetInt32();
-                    if (doc.RootElement.TryGetProperty("data", out var data) && data.ValueKind == JsonValueKind.Array) return data.GetArrayLength();
-                    
-                    return 0;
+                    var response = await GetPagedAsync(1, 1);
+                    return response.TotalCount;
                 }
                 catch { return 0; }
             });
         }
 
-        public async Task<PaginatedResponse<Sozlesme>> GetPagedAsync(int page, int pageSize)
+        public async Task<PaginatedResponse<Sozlesme>> GetPagedAsync(int page, int pageSize, string? q = null, string? durum = null)
         {
             try
             {
+                var queryParams = new List<string>
+                {
+                    $"page={page}",
+                    $"pageSize={pageSize}"
+                };
+
+                if (!string.IsNullOrWhiteSpace(q)) queryParams.Add($"q={Uri.EscapeDataString(q.Trim())}");
+                if (!string.IsNullOrWhiteSpace(durum)) queryParams.Add($"durum={Uri.EscapeDataString(durum.Trim())}");
+
+                var url = $"/api/Sozlesmeler/Paged?{string.Join("&", queryParams)}";
+                var result = await _httpClient.GetFromJsonAsync<PaginatedResponse<Sozlesme>>(url, _jsonOptions);
+                return result ?? new PaginatedResponse<Sozlesme> { CurrentPage = page, PageSize = pageSize };
+            }
+            catch
+            {
                 var allData = await GetAllAsync();
+                if (!string.IsNullOrWhiteSpace(q))
+                {
+                    var search = q.Trim();
+                    allData = allData.Where(s =>
+                        (s.sozlesme_no?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                        (s.tekil_kod?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                        s.sozlesme_id.ToString().Contains(search) ||
+                        s.tuketim_noktasi_id.ToString().Contains(search)).ToList();
+                }
+
+                if (!string.IsNullOrWhiteSpace(durum) &&
+                    Enum.TryParse<KcetasWeb.Models.Enums.SozlesmeDurumu>(durum, ignoreCase: true, out var parsedDurum))
+                {
+                    allData = allData.Where(s => s.durum == parsedDurum).ToList();
+                }
+
                 var count = allData.Count;
                 var pagedData = allData.OrderByDescending(x => x.sozlesme_id).Skip((page - 1) * pageSize).Take(pageSize).ToList();
                 return new PaginatedResponse<Sozlesme>
@@ -57,13 +84,8 @@ namespace KcetasWeb.Services.Api
                     Data = pagedData,
                     TotalCount = count,
                     CurrentPage = page,
-                    PageSize = pageSize,
-                    TotalPages = (int)Math.Ceiling(count / (double)pageSize)
+                    PageSize = pageSize
                 };
-            }
-            catch
-            {
-                return new PaginatedResponse<Sozlesme> { CurrentPage = page, PageSize = pageSize };
             }
         }
 
@@ -74,7 +96,7 @@ namespace KcetasWeb.Services.Api
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
                 try
                 {
-                    var jsonElement = await _httpClient.GetFromJsonAsync<JsonElement>("/api/Sozlesmeler?page=1&pageSize=2000", _jsonOptions);
+                    var jsonElement = await _httpClient.GetFromJsonAsync<JsonElement>("/api/Sozlesmeler/Paged?page=1&pageSize=50000", _jsonOptions);
                     if (jsonElement.ValueKind == JsonValueKind.Array)
                     {
                         var result = jsonElement.Deserialize<List<Sozlesme>>(_jsonOptions);
@@ -98,8 +120,21 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var all = await GetAllAsync();
-                return all.FirstOrDefault(x => x.sozlesme_no == sozlesmeNo);
+                var response = await GetPagedAsync(1, 5, sozlesmeNo);
+                return response.Data.FirstOrDefault(x => x.sozlesme_no == sozlesmeNo)
+                    ?? response.Data.FirstOrDefault();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<Sozlesme?> GetByIdAsync(long id)
+        {
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<Sozlesme>($"/api/Sozlesmeler/{id}", _jsonOptions);
             }
             catch
             {
@@ -136,4 +171,3 @@ namespace KcetasWeb.Services.Api
         }
     }
 }
-

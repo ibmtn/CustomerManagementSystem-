@@ -69,24 +69,50 @@ namespace KcetasWeb.Controllers
                 };
             }
 
-            // Not: SozlesmeNo üzerinden SozlesmeId'yi bulup API'ye parametre olarak geçebiliriz,
-            // ancak şimdilik FaturaNo ve Durum API tarafında filtrelenecek, diğerleri client tarafında.
-            var faturaTask = _faturaService.GetPagedAsync(
+            long? sozlesmeIdParam = null;
+            if (!string.IsNullOrWhiteSpace(filtre.FiltreSozlesmeNo))
+            {
+                var sozlesmeArama = await _sozlesmeService.GetPagedAsync(1, 10, filtre.FiltreSozlesmeNo);
+                var eslesenSozlesme = sozlesmeArama.Data.FirstOrDefault(s =>
+                        string.Equals(s.sozlesme_no, filtre.FiltreSozlesmeNo, StringComparison.OrdinalIgnoreCase))
+                    ?? sozlesmeArama.Data.FirstOrDefault();
+
+                if (eslesenSozlesme == null)
+                {
+                    filtre.TotalItems = 0;
+                    filtre.Faturalar = new List<KcetasWeb.ViewModels.FaturaSimulasyonViewModel>();
+                    return View(filtre);
+                }
+
+                sozlesmeIdParam = eslesenSozlesme.sozlesme_id;
+            }
+
+            var pagedResponse = await _faturaService.GetPagedAsync(
                 filtre.CurrentPage, 
                 filtre.PageSize, 
                 filtre.FiltreFaturaNo, 
                 durumParam, 
-                null);
+                sozlesmeIdParam);
 
-            var sozlesmeTask = _sozlesmeService.GetAllAsync();
-            var tuketimNoktasiTask = _tuketimNoktasiService.GetAllAsync();
-            
-            await Task.WhenAll(faturaTask, sozlesmeTask, tuketimNoktasiTask);
-
-            var pagedResponse = (await faturaTask);
             var faturalar = pagedResponse.Data;
-            var sozlesmeler = (await sozlesmeTask).GroupBy(s => s.sozlesme_id).ToDictionary(g => g.Key, g => g.First());
-            var tuketimNoktalari = (await tuketimNoktasiTask).GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
+            var sozlesmeTasks = faturalar
+                .Select(f => f.sozlesme_id)
+                .Distinct()
+                .Select(id => _sozlesmeService.GetByIdAsync((long)id));
+            var sozlesmeSonuclari = await Task.WhenAll(sozlesmeTasks);
+            var sozlesmeler = sozlesmeSonuclari
+                .Where(s => s != null)
+                .GroupBy(s => s!.sozlesme_id)
+                .ToDictionary(g => g.Key, g => g.First()!);
+
+            var tuketimNoktasiTasks = sozlesmeler.Values
+                .Where(s => s.tuketim_noktasi_id > 0 && string.IsNullOrWhiteSpace(s.tekil_kod))
+                .Select(s => _tuketimNoktasiService.GetByIdAsync((long)s.tuketim_noktasi_id));
+            var tuketimNoktasiSonuclari = await Task.WhenAll(tuketimNoktasiTasks);
+            var tuketimNoktalari = tuketimNoktasiSonuclari
+                .Where(t => t != null)
+                .GroupBy(t => t!.tuketim_noktasi_id)
+                .ToDictionary(g => g.Key, g => g.First()!);
             
             var viewModels = faturalar.Select(f => {
                 string gercekTekilKod = f.tekil_kod ?? "";
@@ -95,7 +121,11 @@ namespace KcetasWeb.Controllers
                 {
                     var sozlesme = sozlesmeler[f.sozlesme_id];
                     sozlesmeNo = sozlesme.sozlesme_no ?? "";
-                    if (sozlesme.tuketim_noktasi_id > 0 && tuketimNoktalari.ContainsKey(sozlesme.tuketim_noktasi_id))
+                    if (!string.IsNullOrWhiteSpace(sozlesme.tekil_kod))
+                    {
+                        gercekTekilKod = sozlesme.tekil_kod;
+                    }
+                    else if (sozlesme.tuketim_noktasi_id > 0 && tuketimNoktalari.ContainsKey(sozlesme.tuketim_noktasi_id))
                     {
                         gercekTekilKod = tuketimNoktalari[sozlesme.tuketim_noktasi_id].tekil_kod;
                     }
@@ -136,9 +166,6 @@ namespace KcetasWeb.Controllers
             
             if (!string.IsNullOrEmpty(filtre.FiltreDonem))
                 viewModels = viewModels.Where(x => x.donem != null && x.donem.Contains(filtre.FiltreDonem, StringComparison.OrdinalIgnoreCase)).ToList();
-
-            if (!string.IsNullOrEmpty(filtre.FiltreSozlesmeNo))
-                viewModels = viewModels.Where(x => x.sozlesme_no != null && x.sozlesme_no.Contains(filtre.FiltreSozlesmeNo, StringComparison.OrdinalIgnoreCase)).ToList();
 
             viewModels = viewModels
                 .OrderBy(x => x.durum?.Equals("ONAYLANDI", StringComparison.OrdinalIgnoreCase) == true ? 1 : 0)
@@ -182,11 +209,11 @@ namespace KcetasWeb.Controllers
                 }
             }
             
-            await _faturaService.EkleAsync(fatura);
+            var olusanFatura = await _faturaService.EkleAsync(fatura);
             
-            await _auditLogService.EkleAsync("Fatura", fatura.fatura_id, "CREATE", "", fatura.fatura_no, fatura.kullanici_id ?? 1, "Manuel Yeni Fatura Kesildi");
+            await _auditLogService.EkleAsync("Fatura", olusanFatura.fatura_id, "CREATE", "", olusanFatura.fatura_no, fatura.kullanici_id ?? 1, "Manuel Yeni Fatura Kesildi");
             
-            TempData["BasariMesaji"] = fatura.fatura_no + " numaralı fatura başarıyla oluşturuldu.";
+            TempData["BasariMesaji"] = olusanFatura.fatura_no + " numaralı fatura başarıyla oluşturuldu.";
             return RedirectToAction("Index");
         }
 
@@ -309,5 +336,3 @@ namespace KcetasWeb.Controllers
         }
     }
 }
-
-

@@ -22,8 +22,12 @@
                 </div>
                 <div class="col-md-6">
                     <label asp-for="TuketimNoktasiId" class="form-label fw-bold">Tüketim Noktası (Abone) <span class="text-danger">*</span></label>
-                    <select data-control="select2" asp-for="TuketimNoktasiId" asp-items="ViewBag.TuketimNoktalari" class="form-select">
-                        <option value="">-- Tüketim Noktası Seçiniz --</option>
+                    <select asp-for="TuketimNoktasiId" id="TuketimNoktasiId" class="form-select">
+                        <option value="">TK kodu veya adres yazın...</option>
+                        @if (Model.TuketimNoktasiId > 0 && ViewBag.SelectedTuketimNoktasiText != null)
+                        {
+                            <option value="@Model.TuketimNoktasiId" selected>@ViewBag.SelectedTuketimNoktasiText</option>
+                        }
                     </select>
                     <span asp-validation-for="TuketimNoktasiId" class="text-danger small"></span>
                 </div>
@@ -32,16 +36,27 @@
             <div class="row mb-4">
                 <div class="col-md-6">
                     <label asp-for="SozlesmeId" class="form-label fw-bold">Sözleşme Bilgisi</label>
-                    <select data-control="select2" asp-for="SozlesmeId" asp-items="ViewBag.Sozlesmeler" class="form-select">
-                        <option value="">-- İsteğe Bağlı Seçiniz --</option>
+                    <select asp-for="SozlesmeId" id="SozlesmeId" class="form-select">
+                        <option value="">Sözleşme no veya TK kodu yazın...</option>
+                        @if (Model.SozlesmeId.HasValue && Model.SozlesmeId.Value > 0 && ViewBag.SelectedSozlesmeText != null)
+                        {
+                            <option value="@Model.SozlesmeId.Value" selected>@ViewBag.SelectedSozlesmeText</option>
+                        }
                     </select>
                 </div>
                 <div class="col-md-6">
                     <label asp-for="SayacId" class="form-label fw-bold">Sayaç Bilgisi</label>
-                    <select data-control="select2" asp-for="SayacId" asp-items="ViewBag.Sayaclar" class="form-select">
-                        <option value="">-- İsteğe Bağlı Seçiniz --</option>
+                    <select asp-for="SayacId" id="SayacId" class="form-select">
+                        <option value="">Sayaç seri no yazın...</option>
+                        @if (Model.SayacId.HasValue && Model.SayacId.Value > 0 && ViewBag.SelectedSayacText != null)
+                        {
+                            <option value="@Model.SayacId.Value" selected>@ViewBag.SelectedSayacText</option>
+                        }
                     </select>
                 </div>
+            </div>
+            <div class="mb-4">
+                <small id="secimMesaj" class="text-muted"></small>
             </div>
 
             <div class="row mb-4">
@@ -106,50 +121,131 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
-        var sayacMap = @Html.Raw(ViewBag.SayacMapJson ?? "{}");
-        var sozlesmeMap = @Html.Raw(ViewBag.SozlesmeMapJson ?? "{}");
-        var sozlesmeToTnMap = @Html.Raw(ViewBag.SozlesmeToTnMapJson ?? "{}");
-
-        var tnSelect = document.getElementById("TuketimNoktasiId");
-        var sayacSelect = document.getElementById("SayacId");
-        var sozlesmeSelect = document.getElementById("SozlesmeId");
-
-        tnSelect.addEventListener("change", function() {
-            var tnId = this.value;
-            
-            if (tnId) {
-                if (sayacMap[tnId]) {
-                    sayacSelect.value = sayacMap[tnId];
-                } else {
-                    sayacSelect.value = "";
-                }
-                
-                if (sozlesmeMap[tnId]) {
-                    sozlesmeSelect.value = sozlesmeMap[tnId];
-                } else {
-                    sozlesmeSelect.value = "";
-                }
-            } else {
-                sayacSelect.value = "";
-                sozlesmeSelect.value = "";
+        document.addEventListener('DOMContentLoaded', function () {
+            if (!window.jQuery || !$.fn.select2) {
+                return;
             }
-        });
 
-        sozlesmeSelect.addEventListener("change", function() {
-            var sozlesmeId = this.value;
-            
-            if (sozlesmeId) {
-                if (sozlesmeToTnMap[sozlesmeId]) {
-                    var tnId = sozlesmeToTnMap[sozlesmeId];
-                    tnSelect.value = tnId;
-                    
-                    if (sayacMap[tnId]) {
-                        sayacSelect.value = sayacMap[tnId];
-                    } else {
-                        sayacSelect.value = "";
-                    }
-                }
+            const $tuketimNoktasi = $('#TuketimNoktasiId');
+            const $sozlesme = $('#SozlesmeId');
+            const $sayac = $('#SayacId');
+            const secimMesaj = document.getElementById('secimMesaj');
+
+            function setMessage(message, className) {
+                secimMesaj.textContent = message || '';
+                secimMesaj.className = className || 'text-muted';
             }
+
+            function select2Language() {
+                return {
+                    inputTooShort: function () { return 'Aramak için en az 2 karakter yazın'; },
+                    noResults: function () { return 'Kayıt bulunamadı'; },
+                    searching: function () { return 'Aranıyor...'; }
+                };
+            }
+
+            function initAjaxSelect($element, url, placeholder, minimumInputLength, dataBuilder) {
+                $element.select2({
+                    ajax: {
+                        url: url,
+                        dataType: 'json',
+                        delay: 300,
+                        data: function (params) {
+                            const payload = dataBuilder ? dataBuilder(params) : {};
+                            payload.q = params.term || '';
+                            return payload;
+                        },
+                        processResults: function (data) {
+                            return data;
+                        }
+                    },
+                    allowClear: true,
+                    minimumInputLength: minimumInputLength,
+                    placeholder: placeholder,
+                    width: '100%',
+                    language: select2Language()
+                });
+            }
+
+            function setSelectOption($select, id, text) {
+                if (!id) {
+                    clearSelect($select);
+                    return;
+                }
+
+                const value = id.toString();
+                $select.find('option').filter(function () {
+                    return this.value === value;
+                }).remove();
+                $select.append(new Option(text || value, value, true, true)).trigger('change.select2');
+            }
+
+            function clearSelect($select) {
+                $select.val(null).trigger('change.select2');
+            }
+
+            function loadSecimBilgisi(params) {
+                setMessage('Seçim bilgileri getiriliyor...', 'text-muted');
+
+                $.getJSON('/IsEmri/SecimBilgisi', params)
+                    .done(function (data) {
+                        if (!data || !data.basarili) {
+                            setMessage((data && data.mesaj) || 'Seçim bilgisi alınamadı.', 'text-danger');
+                            return;
+                        }
+
+                        setSelectOption($tuketimNoktasi, data.tuketimNoktasiId, data.tuketimNoktasiText);
+
+                        if (data.sozlesmeId) {
+                            setSelectOption($sozlesme, data.sozlesmeId, data.sozlesmeText);
+                        } else {
+                            clearSelect($sozlesme);
+                        }
+
+                        if (data.sayacId) {
+                            setSelectOption($sayac, data.sayacId, data.sayacText);
+                        } else {
+                            clearSelect($sayac);
+                        }
+
+                        setMessage(data.mesaj || '', data.mesaj ? 'text-warning' : 'text-muted');
+                    })
+                    .fail(function () {
+                        setMessage('Seçim bilgileri alınırken hata oluştu.', 'text-danger');
+                    });
+            }
+
+            initAjaxSelect($tuketimNoktasi, '/IsEmri/TuketimNoktasiAra', 'TK kodu veya adres yazın...', 2);
+            initAjaxSelect($sozlesme, '/IsEmri/SozlesmeAra', 'Sözleşme no veya TK kodu yazın...', 2);
+            initAjaxSelect($sayac, '/IsEmri/SayacAra', 'Sayaç seri no yazın...', 0, function () {
+                const tuketimNoktasiId = $tuketimNoktasi.val();
+                return tuketimNoktasiId ? { tuketimNoktasiId: tuketimNoktasiId } : {};
+            });
+
+            $tuketimNoktasi.on('select2:select', function (event) {
+                loadSecimBilgisi({ tuketimNoktasiId: event.params.data.id });
+            });
+
+            $tuketimNoktasi.on('select2:clear', function () {
+                clearSelect($sozlesme);
+                clearSelect($sayac);
+                setMessage('', 'text-muted');
+            });
+
+            $sozlesme.on('select2:select', function (event) {
+                loadSecimBilgisi({ sozlesmeId: event.params.data.id });
+            });
+
+            $sayac.on('select2:select', function (event) {
+                const data = event.params.data;
+                const params = { sayacId: data.id };
+
+                if (data.tuketimNoktasiId) {
+                    params.tuketimNoktasiId = data.tuketimNoktasiId;
+                }
+
+                loadSecimBilgisi(params);
+            });
         });
     </script>
 }

@@ -18,65 +18,39 @@
             </div>
             
             <div class="card-body p-4">
-                <form action="/EndeksOkuma/Yeni" method="post">
+                <form action="/EndeksOkuma/Yeni" method="post" id="yeniOkumaForm">
                     @if (TempData["WarningMessage"] != null)
                     {
                         <div class="alert alert-warning">@TempData["WarningMessage"]</div>
+                    }
+                    @if (TempData["OkumaMesaji"] != null)
+                    {
+                        var mesajTipi = TempData["OkumaMesajTip"]?.ToString() ?? "info";
+                        <div class="alert alert-@mesajTipi">@TempData["OkumaMesaji"]</div>
                     }
 
                     <div class="row mb-4">
                         <div class="col-md-12 mb-3">
                             <label class="form-label fw-bold">Sözleşme Seçimi <span class="text-danger">*</span></label>
-                            <select data-control="select2" class="form-select form-select-lg border-primary" id="sozlesmeSelect" required>
-                                <option value="">Önce Sözleşme Seçin...</option>
-                                @if (ViewBag.Sozlesmeler != null && ViewBag.TuketimNoktalari != null)
-                                {
-                                    var sozlesmeler = (IEnumerable<KcetasWeb.Models.Sozlesme>)ViewBag.Sozlesmeler;
-                                    var tnler = ((IEnumerable<KcetasWeb.Models.TuketimNoktasi>)ViewBag.TuketimNoktalari).GroupBy(x => x.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
-                                    var sayaclar = ViewBag.Sayaclar != null ? ((IEnumerable<KcetasWeb.Models.Sayac>)ViewBag.Sayaclar).Where(s => s.tuketim_noktasi_id != null).GroupBy(x => x.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.FirstOrDefault()?.sayac_id ?? 0) : new Dictionary<int?, int>();
-
-                                    foreach (var sozlesme in sozlesmeler.Where(s => s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi && s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Pasif))
-                                    {
-                                        if (tnler.TryGetValue(sozlesme.tuketim_noktasi_id, out var tn))
-                                        {
-                                            var sayacId = sayaclar.TryGetValue(tn.tuketim_noktasi_id, out var sId) ? sId : 0;
-                                            <option value="@sozlesme.sozlesme_id" data-tn="@tn.tuketim_noktasi_id" data-sayac="@sayacId">
-                                                Sözleşme No: @sozlesme.sozlesme_id - Tesisat: @tn.tekil_kod
-                                            </option>
-                                        }
-                                    }
-                                }
+                            <input type="hidden" name="SozlesmeId" id="sozlesmeId" />
+                            <select class="form-select form-select-lg border-primary" id="sozlesmeSelect" required>
+                                <option value="">Sözleşme no, tekil kod veya sayaç no yazın...</option>
                             </select>
-                            <small class="text-muted">Sözleşme seçildiğinde Tüketim Noktası ve Sayaç otomatik doldurulacaktır.</small>
+                            <small class="text-muted">En az 2 karakter yazın. Seçimden sonra tüketim noktası, sayaç ve önceki endeks otomatik doldurulur.</small>
                         </div>
                     </div>
 
                     <div class="row mb-4">
                         <div class="col-md-6 mb-3 mb-md-0">
                             <label class="form-label fw-bold">Tüketim Noktası (Abone) <span class="text-danger">*</span></label>
-                            <select data-control="select2" class="form-select form-select-lg text-muted" name="TuketimNoktasiId" required style="pointer-events: none; background-color: #e9ecef;" tabindex="-1">
-                                <option value="">Sözleşme seçildiğinde otomatik dolar...</option>
-                                @if (ViewBag.TuketimNoktalari != null)
-                                {
-                                    foreach (var tn in (IEnumerable<KcetasWeb.Models.TuketimNoktasi>)ViewBag.TuketimNoktalari)
-                                    {
-                                        <option value="@tn.tuketim_noktasi_id">@tn.tekil_kod</option>
-                                    }
-                                }
-                            </select>
+                            <input type="hidden" name="TuketimNoktasiId" id="tuketimNoktasiId" />
+                            <input type="text" class="form-control form-control-lg bg-light" id="tuketimNoktasiDisplay" value="Sözleşme seçildiğinde otomatik dolar..." readonly />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Sayaç Seri No <span class="text-danger">*</span></label>
-                            <select data-control="select2" class="form-select form-select-lg text-muted" name="SayacId" required style="pointer-events: none; background-color: #e9ecef;" tabindex="-1">
-                                <option value="">Sözleşme seçildiğinde otomatik dolar...</option>
-                                @if (ViewBag.Sayaclar != null)
-                                {
-                                    foreach (var sayac in (IEnumerable<KcetasWeb.Models.Sayac>)ViewBag.Sayaclar)
-                                    {
-                                        <option value="@sayac.sayac_id">@sayac.seri_no (@sayac.marka)</option>
-                                    }
-                                }
-                            </select>
+                            <input type="hidden" name="SayacId" id="sayacId" />
+                            <input type="hidden" name="SayacSeriNo" id="sayacSeriNo" />
+                            <input type="text" class="form-control form-control-lg bg-light" id="sayacDisplay" value="Sözleşme seçildiğinde otomatik dolar..." readonly />
                         </div>
                     </div>
 
@@ -119,7 +93,7 @@
 
                     <div class="d-flex justify-content-end gap-2">
                         <a href="/EndeksOkuma" class="btn btn-light border px-4 py-2">İptal</a>
-                        <button type="submit" class="btn btn-primary px-4 py-2 fw-bold shadow-sm">
+                        <button type="submit" class="btn btn-primary px-4 py-2 fw-bold shadow-sm" id="kaydetButton" disabled>
                             <i class="bi bi-check-lg me-1"></i> Kaydet ve Kapat
                         </button>
                     </div>
@@ -131,78 +105,95 @@
 
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', function () {const sayacSelect = document.querySelector('select[name="SayacId"]');
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('yeniOkumaForm');
+            const sozlesmeIdInput = document.getElementById('sozlesmeId');
+            const tuketimNoktasiIdInput = document.getElementById('tuketimNoktasiId');
+            const tuketimNoktasiDisplay = document.getElementById('tuketimNoktasiDisplay');
+            const sayacIdInput = document.getElementById('sayacId');
+            const sayacSeriNoInput = document.getElementById('sayacSeriNo');
+            const sayacDisplay = document.getElementById('sayacDisplay');
             const oncekiEndeksInput = document.getElementById('onceki_endeks');
             const endeksMesaj = document.getElementById('endeks_mesaj');
+            const kaydetButton = document.getElementById('kaydetButton');
 
-            sayacSelect.addEventListener('change', function () {
-                const sayacId = this.value;
-                if (!sayacId) {
-                    oncekiEndeksInput.value = '';
-                    endeksMesaj.textContent = 'Sayaç seçildiğinde otomatik doldurulur.';
-                    endeksMesaj.className = 'text-muted';
+            function resetDetails(message) {
+                sozlesmeIdInput.value = '';
+                tuketimNoktasiIdInput.value = '';
+                sayacIdInput.value = '';
+                sayacSeriNoInput.value = '';
+                oncekiEndeksInput.value = '';
+                tuketimNoktasiDisplay.value = message || 'Sözleşme seçildiğinde otomatik dolar...';
+                sayacDisplay.value = message || 'Sözleşme seçildiğinde otomatik dolar...';
+                endeksMesaj.textContent = 'Sayaç seçildiğinde otomatik doldurulur.';
+                endeksMesaj.className = 'text-muted';
+                kaydetButton.disabled = true;
+            }
+
+            function setEndeks(data) {
+                if (data.sonEndeksBasarili) {
+                    oncekiEndeksInput.value = data.sonEndeks;
+                    endeksMesaj.textContent = data.donem
+                        ? `Sistemdeki son endeks (${data.donem}) otomatik getirildi.`
+                        : 'Sistemdeki son endeks otomatik getirildi.';
+                    endeksMesaj.className = 'text-success';
+                } else {
+                    oncekiEndeksInput.value = '0';
+                    endeksMesaj.textContent = 'Bu sayaca ait eski okuma bulunamadı, 0 olarak başlatıldı.';
+                    endeksMesaj.className = 'text-warning';
+                }
+            }
+
+            $('#sozlesmeSelect').select2({
+                ajax: {
+                    url: '/EndeksOkuma/SozlesmeAra',
+                    dataType: 'json',
+                    delay: 300,
+                    data: function (params) {
+                        return { q: params.term || '' };
+                    },
+                    processResults: function (data) {
+                        return data;
+                    }
+                },
+                minimumInputLength: 2,
+                width: '100%',
+                placeholder: 'Sözleşme no, tekil kod veya sayaç no yazın...',
+                language: {
+                    inputTooShort: function () { return 'Aramak için en az 2 karakter yazın'; },
+                    noResults: function () { return 'Kayıt bulunamadı'; },
+                    searching: function () { return 'Aranıyor...'; }
+                }
+            });
+
+            $('#sozlesmeSelect').on('select2:select', function (event) {
+                const data = event.params.data;
+                resetDetails('Bilgiler getiriliyor...');
+
+                if (!data.basarili || !data.sayacId) {
+                    resetDetails(data.mesaj || 'Bu seçim için aktif sayaç bilgisi alınamadı.');
+                    endeksMesaj.textContent = data.mesaj || 'Bu seçim için aktif sayaç bilgisi alınamadı.';
+                    endeksMesaj.className = 'text-danger';
                     return;
                 }
 
-                endeksMesaj.textContent = 'Son endeks getiriliyor...';
-                endeksMesaj.className = 'text-info';
-
-                fetch(`/EndeksOkuma/GetSonEndeks?sayacId=${sayacId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.basarili) {
-                            oncekiEndeksInput.value = data.endeks;
-                            endeksMesaj.textContent = 'Sistemdeki son endeks otomatik getirildi.';
-                            endeksMesaj.className = 'text-success';
-                        } else {
-                            oncekiEndeksInput.value = '0';
-                            endeksMesaj.textContent = 'Bu sayaca ait eski okuma bulunamadı, 0 olarak başlatıldı.';
-                            endeksMesaj.className = 'text-warning';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Hata:', error);
-                        endeksMesaj.textContent = 'Endeks alınırken bir hata oluştu!';
-                        endeksMesaj.className = 'text-danger';
-                    });
+                tuketimNoktasiIdInput.value = data.tuketimNoktasiId;
+                sozlesmeIdInput.value = data.sozlesmeId;
+                sayacIdInput.value = data.sayacId;
+                sayacSeriNoInput.value = data.sayacSeriNo || '';
+                tuketimNoktasiDisplay.value = `${data.tuketimNoktasiKodu || data.tuketimNoktasiId} - ${data.adres || 'Adres bilgisi yok'}`;
+                sayacDisplay.value = `${data.sayacSeriNo || data.sayacId} ${data.sayacMarkaModel ? '(' + data.sayacMarkaModel + ')' : ''}`;
+                setEndeks(data);
+                kaydetButton.disabled = false;
             });
 
-            // Akıllı Form Mantığı: Sözleşme değişince diğerlerini seç
-            const tuketimNoktasiSelect = document.querySelector('select[name="TuketimNoktasiId"]');
-
-            // Select2 change event triggers jQuery 'select2:select' or 'change'. 
-            // We hook into jQuery change.
-            $('#sozlesmeSelect').on('change', function () {
-                const selectedOption = this.options[this.selectedIndex];
-                const tnId = selectedOption.getAttribute('data-tn');
-                const sayacId = selectedOption.getAttribute('data-sayac');
-
-                if (tnId) {
-                    $(tuketimNoktasiSelect).val(tnId).trigger('change'); // Select2 UI'ını güncelle
-                    
-                    // Trigger flash effect
-                    tuketimNoktasiSelect.classList.add('bg-warning', 'bg-opacity-25');
-                    setTimeout(() => tuketimNoktasiSelect.classList.remove('bg-warning', 'bg-opacity-25'), 1000);
-                } else {
-                    $(tuketimNoktasiSelect).val('').trigger('change');
-                }
-
-                if (sayacId && sayacId !== "0") {
-                    $(sayacSelect).val(sayacId).trigger('change'); // Select2 UI'ını güncelle
-                    
-                    sayacSelect.classList.add('bg-warning', 'bg-opacity-25');
-                    setTimeout(() => sayacSelect.classList.remove('bg-warning', 'bg-opacity-25'), 1000);
-                    
-                    // Manually trigger change event to fetch previous index
-                    sayacSelect.dispatchEvent(new Event('change'));
-                } else {
-                    $(sayacSelect).val('').trigger('change'); // Select2 UI'ını güncelle
-                    sayacSelect.dispatchEvent(new Event('change'));
+            form.addEventListener('submit', function (event) {
+                if (!tuketimNoktasiIdInput.value || !sayacIdInput.value) {
+                    event.preventDefault();
+                    endeksMesaj.textContent = 'Kaydetmeden önce geçerli bir sözleşme seçmelisiniz.';
+                    endeksMesaj.className = 'text-danger';
                 }
             });
         });
     </script>
 }
-
-
-

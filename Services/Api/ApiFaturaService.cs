@@ -135,7 +135,32 @@ namespace KcetasWeb.Services.Api
         public async Task<Fatura> EkleAsync(Fatura fatura)
         {
             var response = await _httpClient.PostAsJsonAsync("/api/Fatura", fatura, _jsonOptions);
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new Exception($"API Hatası: {response.StatusCode} - Fatura oluşturulamadı. Detay: {errorContent}");
+            }
+
+            var created = await response.Content.ReadFromJsonAsync<Fatura>(_jsonOptions);
+            if (created != null && (created.fatura_id > 0 || !string.IsNullOrWhiteSpace(created.fatura_no)))
+            {
+                return created;
+            }
+
+            if (fatura.okuma_id.HasValue || fatura.sozlesme_id > 0)
+            {
+                var mevcutlar = await GetPagedAsync(1, 100, sozlesmeId: fatura.sozlesme_id);
+                var eslesenFatura = mevcutlar.Data
+                    .Where(x => !fatura.okuma_id.HasValue || x.okuma_id == fatura.okuma_id)
+                    .OrderByDescending(x => x.created_at ?? DateTime.MinValue)
+                    .FirstOrDefault();
+
+                if (eslesenFatura != null)
+                {
+                    return eslesenFatura;
+                }
+            }
+
             return fatura;
         }
 
@@ -154,4 +179,3 @@ namespace KcetasWeb.Services.Api
 
     }
 }
-
