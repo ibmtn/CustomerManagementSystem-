@@ -55,13 +55,15 @@ public class IsEmriController : Controller
         // Tüm Tüketim Noktalarını ve Kullanıcıları (Personelleri) API'den 1 kez çekip Dictionary (Sözlük) yapıyoruz.
         // Böylece aşağıdaki Select döngüsü içinde binlerce kez API'ye istek atmaktan kurtuluyoruz.
         var kullaniciTask = _kullaniciDeposu.ListeleAsync();
-        var tuketimNoktasiTask = _tuketimNoktasiService.GetAllAsync();
-
-        await Task.WhenAll(isEmirleriTask, kullaniciTask, tuketimNoktasiTask);
+        await Task.WhenAll(isEmirleriTask, kullaniciTask);
 
         var isEmirleri = (await isEmirleriTask).OrderByDescending(x => x.created_at).ToList();
         var tumKullanicilar = (await kullaniciTask).GroupBy(k => k.kullanici_id).ToDictionary(g => g.Key, g => g.First());
-        var tumTuketimNoktalari = (await tuketimNoktasiTask).GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
+
+        var tnIds = isEmirleri.Select(ie => ie.tuketim_noktasi_id).Distinct().ToList();
+        var tnTasks = tnIds.Select(id => _tuketimNoktasiService.GetByIdAsync(id));
+        var tnList = (await Task.WhenAll(tnTasks)).Where(t => t != null).ToList();
+        var tumTuketimNoktalari = tnList.GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
 
         filtre.IsEmirleri = isEmirleri.Select(ie => {
             var kullanici = ie.atanan_kullanici_id.HasValue && tumKullanicilar.ContainsKey((int)ie.atanan_kullanici_id.Value) 
@@ -343,8 +345,13 @@ public class IsEmriController : Controller
             if (isEmri == null)
                 return NotFound();
 
-            var tn = (await _tuketimNoktasiService.GetAllAsync()).FirstOrDefault(t => t.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
-            var sozlesme = (await _sozlesmeService.GetAllAsync()).OrderByDescending(s => s.sozlesme_id).FirstOrDefault(s => s.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
+            var tn = await _tuketimNoktasiService.GetByIdAsync(isEmri.tuketim_noktasi_id);
+            KcetasWeb.Models.Sozlesme? sozlesme = null;
+            if (tn != null)
+            {
+                var pagedSozlesme = await _sozlesmeService.GetPagedAsync(1, 1, null, null, tn.tekil_kod);
+                sozlesme = pagedSozlesme.Data.FirstOrDefault();
+            }
             var abone = sozlesme?.abone_id.HasValue == true ? await _aboneService.GetByIdAsync(sozlesme.abone_id.Value) : null;
 
             var viewModel = new IsEmriDetayViewModel
@@ -583,7 +590,13 @@ public class IsEmriController : Controller
                         }
 
                         // 2. İlgili Sözleşmeyi Bul ve Aktif Et
-                        var tnSozlesmeler = (await _sozlesmeService.GetAllAsync()).Where(s => s.tuketim_noktasi_id == tIsEmri.tuketim_noktasi_id).ToList();
+                        var tn = await _tuketimNoktasiService.GetByIdAsync(tIsEmri.tuketim_noktasi_id);
+                        List<KcetasWeb.Models.Sozlesme> tnSozlesmeler = new();
+                        if (tn != null)
+                        {
+                            var pagedSozlesmeler = await _sozlesmeService.GetPagedAsync(1, 10, null, null, tn.tekil_kod);
+                            tnSozlesmeler = pagedSozlesmeler.Data;
+                        }
                         var bekleyenSozlesme = tnSozlesmeler.OrderByDescending(s => s.sozlesme_id).FirstOrDefault();
                         if (bekleyenSozlesme != null)
                         {
@@ -632,7 +645,13 @@ public class IsEmriController : Controller
                 if (tIsEmri != null)
                 {
                     // 1. İlgili Sözleşmeyi Bul (Tarife grubunu almak için)
-                    var tumSozlesmeler = (await _sozlesmeService.GetAllAsync()).Where(s => s.tuketim_noktasi_id == tIsEmri.tuketim_noktasi_id).ToList();
+                    var tn = await _tuketimNoktasiService.GetByIdAsync(tIsEmri.tuketim_noktasi_id);
+                    List<KcetasWeb.Models.Sozlesme> tumSozlesmeler = new();
+                    if (tn != null)
+                    {
+                        var pagedSozlesmeler = await _sozlesmeService.GetPagedAsync(1, 10, null, null, tn.tekil_kod);
+                        tumSozlesmeler = pagedSozlesmeler.Data;
+                    }
                     var aktifSozlesme = tumSozlesmeler.Where(s => s.durum == KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif).OrderByDescending(s => s.sozlesme_id).FirstOrDefault() 
                                      ?? tumSozlesmeler.OrderByDescending(s => s.sozlesme_id).FirstOrDefault();
                         
@@ -640,7 +659,8 @@ public class IsEmriController : Controller
                     int sozlesmeId = aktifSozlesme != null ? aktifSozlesme.sozlesme_id : 1; // Fallback to 1 to avoid FK error
                     
                     // 2. İlk Endeksi Bul (Önceki Faturalardan veya 0)
-                    var oncekiFaturalar = (await _faturaService.GetAllAsync()).Where(f => f.sozlesme_id == sozlesmeId).ToList();
+                    var pagedFaturalar = await _faturaService.GetPagedAsync(1, 10, sozlesmeId: sozlesmeId);
+                    var oncekiFaturalar = pagedFaturalar.Data;
                     decimal ilkEndeks = 0;
                     if (oncekiFaturalar.Any())
                     {
@@ -707,7 +727,7 @@ public class IsEmriController : Controller
         if (isEmri == null || string.IsNullOrEmpty(isEmri.tutanak_no))
             return NotFound();
 
-        var tn = (await _tuketimNoktasiService.GetAllAsync()).FirstOrDefault(t => t.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
+        var tn = await _tuketimNoktasiService.GetByIdAsync(isEmri.tuketim_noktasi_id);
 
         var viewModel = new IsEmriDetayViewModel
         {
@@ -736,8 +756,13 @@ public class IsEmriController : Controller
         if (isEmri == null)
             return NotFound();
 
-        var tn = (await _tuketimNoktasiService.GetAllAsync()).FirstOrDefault(t => t.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
-        var sozlesme = (await _sozlesmeService.GetAllAsync()).OrderByDescending(s => s.sozlesme_id).FirstOrDefault(s => s.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
+        var tn = await _tuketimNoktasiService.GetByIdAsync(isEmri.tuketim_noktasi_id);
+        KcetasWeb.Models.Sozlesme? sozlesme = null;
+        if (tn != null)
+        {
+            var pagedSozlesme = await _sozlesmeService.GetPagedAsync(1, 1, null, null, tn.tekil_kod);
+            sozlesme = pagedSozlesme.Data.FirstOrDefault();
+        }
         var abone = sozlesme?.abone_id.HasValue == true ? await _aboneService.GetByIdAsync(sozlesme.abone_id.Value) : null;
 
         var viewModel = new IsEmriDetayViewModel

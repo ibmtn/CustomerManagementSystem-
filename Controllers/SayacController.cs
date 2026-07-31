@@ -65,7 +65,11 @@ namespace KcetasWeb.Controllers
             filtre.TotalItems = response.TotalCount;
             filtre.Sayaclar = pagedData;
 
-            ViewBag.TuketimNoktalari = await _tuketimNoktasiService.GetAllAsync();
+            var tnIds = pagedData.Where(s => s.tuketim_noktasi_id != null).Select(s => s.tuketim_noktasi_id.Value).Distinct();
+            var tnTasks = tnIds.Select(id => _tuketimNoktasiService.GetByIdAsync(id));
+            var tnList = (await Task.WhenAll(tnTasks)).Where(t => t != null).ToList();
+            ViewBag.TuketimNoktalari = tnList;
+            
             return View(filtre);
         }
 
@@ -234,17 +238,20 @@ namespace KcetasWeb.Controllers
             if (sayac == null)
                 return NotFound();
 
-            ViewBag.TuketimNoktalari = await _tuketimNoktasiService.GetAllAsync();
+            var tnList = new List<KcetasWeb.Models.TuketimNoktasi>();
+            if (sayac.tuketim_noktasi_id != null)
+            {
+                var tn = await _tuketimNoktasiService.GetByIdAsync((int)sayac.tuketim_noktasi_id.Value);
+                if (tn != null) tnList.Add(tn);
+            }
+            ViewBag.TuketimNoktalari = tnList;
 
-            ViewBag.IsEmirleri = (await _isEmriService
-                .GetAllAsync())
+            ViewBag.IsEmirleri = (await _isEmriService.GetAllAsync())
                 .Where(x => x.sayac_id == sayac.sayac_id)
                 .ToList();
-ViewBag.Endeksler = (await _endeksOkumaService
-    .GetAllAsync())
-    .Where(x => x.sayac_id == sayac.sayac_id)
-    .OrderByDescending(x => x.okuma_zamani)
-    .ToList();
+
+            var endeksPaged = await _endeksOkumaService.GetPagedAsync(1, 100, null, null, null, null, null, sayac.sayac_id.ToString(), null, null, null, null, null);
+            ViewBag.Endeksler = endeksPaged.Data.OrderByDescending(x => x.okuma_zamani).ToList();
             return View(sayac);
         }
     }

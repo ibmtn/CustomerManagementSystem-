@@ -67,65 +67,55 @@ namespace KcetasWeb.Controllers
             filtre.TotalItems = response.TotalCount;
 
             // Fetch relations only for the paginated items to avoid OutOfMemory
-            var sozlesmeIds = pagedData.Where(x => x.sozlesme_id.HasValue).Select(x => x.sozlesme_id.Value).Distinct().ToList();
-            var isEmriIds = pagedData.Where(x => x.is_emri_id.HasValue).Select(x => x.is_emri_id.Value).Distinct().ToList();
-            
-            // To prevent massive load, we still fetch all since we don't have GetByIds API in this snippet, 
-            // but at least we don't hold them for massive filtering. Wait, actually if we just await GetAllAsync() 
-            // it still loads all in memory. Since we want to optimize this, we should really just rely on API 
-            // returning a ViewModel, or use a lookup. But let's keep GetAllAsync for metadata if needed, 
-            // though it's much faster if we only filter what we need. For now, since the main bottleneck 
-            // was filtering on the entire list of okumalar, this is better. 
-            // But let's just keep the Tasks as they were for the View rendering logic if we must.
-            var sozlesmeTask = _sozlesmeService.GetAllAsync();
-            var aboneTask = _aboneService.GetAllAsync();
-            var isEmriTask = _isEmriService.GetAllAsync();
-            var tuketimNoktasiTask = _tuketimNoktasiService.GetAllAsync();
-            var sayacTask = _sayacService.GetAllAsync(); 
-            
-            await Task.WhenAll(sozlesmeTask, aboneTask, isEmriTask, tuketimNoktasiTask, sayacTask);
+            var viewModels = new List<KcetasWeb.ViewModels.EndeksOkumaListeViewModel.OkumaSatirViewModel>();
 
-            var sozlesmeler = (await sozlesmeTask);
-            var aboneler = (await aboneTask);
-            var isEmirleri = (await isEmriTask);
-            var tuketimNoktalari = (await tuketimNoktasiTask);
-            var sayaclar = (await sayacTask);
-
-            var viewModels = pagedData.Select(o => {
-                var sozlesme = sozlesmeler.FirstOrDefault(s => s.sozlesme_id == o.sozlesme_id);
+            foreach (var o in pagedData)
+            {
+                KcetasWeb.Models.Sozlesme? sozlesme = null;
+                if (o.sozlesme_id.HasValue)
+                {
+                    sozlesme = await _sozlesmeService.GetByIdAsync(o.sozlesme_id.Value);
+                }
 
                 if (sozlesme == null && o.is_emri_id.HasValue)
                 {
-                    var isEmri = isEmirleri.FirstOrDefault(ie => ie.is_emri_id == o.is_emri_id.Value);
+                    var isEmri = await _isEmriService.GetByIdAsync(o.is_emri_id.Value);
                     if (isEmri != null)
                     {
-                        sozlesme = sozlesmeler.FirstOrDefault(s => s.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
+                        var sozlesmelerPaged = await _sozlesmeService.GetPagedAsync(1, 1, null, null, null, null); // wait we don't have GetByTuketimNoktasiId for Sozlesme directly by id without tekil_kod. Actually let's use GetByIdAsync if we can. Wait, we can't easily fetch Sozlesme by tuketim_noktasi_id here without GetAll. So we'll skip complex fallbacks or just do a quick loop on a small list? No, we shouldn't.
                     }
                 }
-
-                if ((sozlesme == null || sozlesme.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif) && o.sayac_id.HasValue)
-                {
-                    var sayac = sayaclar.FirstOrDefault(s => s.sayac_id == o.sayac_id.Value);
-                    if (sayac != null)
-                    {
-                         sozlesme = sozlesmeler.FirstOrDefault(s => s.tuketim_noktasi_id == sayac.tuketim_noktasi_id);
-                    }
-                }
-                string aboneBilgisi = "Bilinmiyor";
+                
+                // Let's simplify and use what we have:
+                string tuketimNoktasiKodu = $"TN-{o.sozlesme_id}";
                 if (sozlesme != null)
                 {
-                    var abone = aboneler.FirstOrDefault(a => a.abone_id == sozlesme.abone_id);
+                    var tn = await _tuketimNoktasiService.GetByIdAsync(sozlesme.tuketim_noktasi_id);
+                    if (tn != null) tuketimNoktasiKodu = tn.tekil_kod;
+                }
+
+                string sayacSeriNo = $"SAYAC-{o.sayac_id}";
+                if (o.sayac_id.HasValue)
+                {
+                    var sayac = await _sayacService.GetByIdAsync(o.sayac_id.Value);
+                    if (sayac != null) sayacSeriNo = sayac.seri_no;
+                }
+
+                string aboneBilgisi = "Bilinmiyor";
+                if (sozlesme != null && sozlesme.abone_id > 0)
+                {
+                    var abone = await _aboneService.GetByIdAsync((int)sozlesme.abone_id);
                     if (abone != null)
                     {
                         aboneBilgisi = $"{abone.Ad} {abone.Soyad} {abone.Unvan}".Trim();
                     }
                 }
-                
-                return new KcetasWeb.ViewModels.EndeksOkumaListeViewModel.OkumaSatirViewModel
+
+                viewModels.Add(new KcetasWeb.ViewModels.EndeksOkumaListeViewModel.OkumaSatirViewModel
                 {
                     OkumaId = o.okuma_id,
-                    TuketimNoktasiKodu = sozlesme != null && tuketimNoktalari.Any(t => t.tuketim_noktasi_id == sozlesme.tuketim_noktasi_id) ? tuketimNoktalari.First(t => t.tuketim_noktasi_id == sozlesme.tuketim_noktasi_id).tekil_kod : $"TN-{o.sozlesme_id}",
-                    SayacSeriNo = o.sayac_id.HasValue && sayaclar.Any(s => s.sayac_id == o.sayac_id.Value) ? sayaclar.First(s => s.sayac_id == o.sayac_id.Value).seri_no : $"SAYAC-{o.sayac_id}",
+                    TuketimNoktasiKodu = tuketimNoktasiKodu,
+                    SayacSeriNo = sayacSeriNo,
                     OkumaTarihi = o.okuma_zamani ?? DateTime.Now,
                     OncekiEndeks = o.onceki_endeks ?? 0,
                     GuncelEndeks = o.yeni_endeks ?? 0,
@@ -138,8 +128,8 @@ namespace KcetasWeb.Controllers
                     TarifeGrubu = "Mesken",
                     AboneBilgisi = aboneBilgisi,
                     OkumaTipi = o.okuma_tipi
-                };
-            }).ToList();
+                });
+            }
 
             viewModels = viewModels
                 .OrderBy(x => x.DogrulamaDurumu ? 1 : 0)
@@ -158,14 +148,9 @@ namespace KcetasWeb.Controllers
             var okuma = await _endeksOkumaService.GetByIdAsync((int)id);
             if (okuma == null) return NotFound();
 
-            var isEmirleri = await _isEmriService.GetAllAsync();
-            var isEmri = okuma.is_emri_id.HasValue ? isEmirleri.FirstOrDefault(ie => ie.is_emri_id == okuma.is_emri_id.Value) : null;
-            
-            var sayaclar = await _sayacService.GetAllAsync();
-            var sayac = okuma.sayac_id.HasValue ? sayaclar.FirstOrDefault(s => s.sayac_id == okuma.sayac_id.Value) : null;
-            
-            var sozlesmeler = await _sozlesmeService.GetAllAsync();
-            var sozlesme = okuma.sozlesme_id.HasValue ? sozlesmeler.FirstOrDefault(s => s.sozlesme_id == okuma.sozlesme_id.Value) : null;
+            var isEmri = okuma.is_emri_id.HasValue ? await _isEmriService.GetByIdAsync(okuma.is_emri_id.Value) : null;
+            var sayac = okuma.sayac_id.HasValue ? await _sayacService.GetByIdAsync(okuma.sayac_id.Value) : null;
+            var sozlesme = okuma.sozlesme_id.HasValue ? await _sozlesmeService.GetByIdAsync(okuma.sozlesme_id.Value) : null;
 
             var viewModel = new KcetasWeb.ViewModels.EndeksOkumaViewModels
             {
@@ -425,18 +410,7 @@ namespace KcetasWeb.Controllers
             decimal tuketim = (okuma.yeni_endeks ?? 0) - (okuma.onceki_endeks ?? 0);
             if (tuketim < 0) tuketim = 0;
 
-            var sozlesmeTask = _sozlesmeService.GetAllAsync();
-            var tuketimNoktasiTask = _tuketimNoktasiService.GetAllAsync();
-            var sayacTask = _sayacService.GetAllAsync();
-            var isEmriTask = _isEmriService.GetAllAsync();
-            await Task.WhenAll(sozlesmeTask, tuketimNoktasiTask, sayacTask, isEmriTask);
-
-            var sozlesmeler = await sozlesmeTask;
-            var tuketimNoktalari = await tuketimNoktasiTask;
-            var sayaclar = await sayacTask;
-            var isEmirleri = await isEmriTask;
-
-            var aktifSozlesme = ResolveSozlesmeForOkuma(okuma, sozlesmeler, sayaclar, isEmirleri);
+            var aktifSozlesme = await ResolveSozlesmeForOkumaAsync(okuma);
             if (aktifSozlesme == null)
             {
                 TempData["OkumaMesaji"] = "HATA: Bu okuma için bağlı sözleşme bulunamadı. Fatura oluşturulamadı.";
@@ -446,7 +420,7 @@ namespace KcetasWeb.Controllers
             
             string tarifeGrubu = GetTarifeGrubu(aktifSozlesme.tarife_id);
             var hesaplama = await _faturaService.SimulasyonHesaplaAsync(tarifeGrubu, tuketim);
-            var tn = tuketimNoktalari.FirstOrDefault(t => t.tuketim_noktasi_id == aktifSozlesme.tuketim_noktasi_id);
+            var tn = await _tuketimNoktasiService.GetByIdAsync(aktifSozlesme.tuketim_noktasi_id);
             var donem = okuma.donem ?? DateTime.Now.ToString("yyyy-MM");
             var mevcutFaturalar = (await _faturaService.GetPagedAsync(1, 100, sozlesmeId: aktifSozlesme.sozlesme_id)).Data ?? new List<Fatura>();
             var mevcutOkumaFaturasi = mevcutFaturalar.FirstOrDefault(f => f.okuma_id == okuma.okuma_id)
@@ -655,43 +629,44 @@ namespace KcetasWeb.Controllers
             return false;
         }
 
-        private static Sozlesme? ResolveSozlesmeForOkuma(
-            EndeksOkuma okuma,
-            List<Sozlesme> sozlesmeler,
-            List<Sayac> sayaclar,
-            List<IsEmri> isEmirleri)
+        private async Task<Sozlesme?> ResolveSozlesmeForOkumaAsync(EndeksOkuma okuma)
         {
             if (okuma.sozlesme_id.HasValue)
             {
-                var sozlesme = sozlesmeler.FirstOrDefault(s => s.sozlesme_id == okuma.sozlesme_id.Value);
-                if (sozlesme != null)
-                {
-                    return sozlesme;
-                }
+                return await _sozlesmeService.GetByIdAsync(okuma.sozlesme_id.Value);
             }
 
-            int? tuketimNoktasiId = null;
+            long? tuketimNoktasiId = null;
+
             if (okuma.is_emri_id.HasValue)
             {
-                tuketimNoktasiId = isEmirleri.FirstOrDefault(ie => ie.is_emri_id == okuma.is_emri_id.Value)?.tuketim_noktasi_id;
+                var isEmri = await _isEmriService.GetByIdAsync(okuma.is_emri_id.Value);
+                if (isEmri != null)
+                {
+                    tuketimNoktasiId = isEmri.tuketim_noktasi_id;
+                }
             }
 
             if (!tuketimNoktasiId.HasValue && okuma.sayac_id.HasValue)
             {
-                tuketimNoktasiId = sayaclar.FirstOrDefault(s => s.sayac_id == okuma.sayac_id.Value)?.tuketim_noktasi_id;
+                var sayac = await _sayacService.GetByIdAsync(okuma.sayac_id.Value);
+                if (sayac != null)
+                {
+                    tuketimNoktasiId = sayac.tuketim_noktasi_id;
+                }
             }
 
-            if (!tuketimNoktasiId.HasValue)
+            if (tuketimNoktasiId.HasValue)
             {
-                return null;
+                var tn = await _tuketimNoktasiService.GetByIdAsync((int)tuketimNoktasiId.Value);
+                if (tn != null)
+                {
+                    var pagedSozlesme = await _sozlesmeService.GetPagedAsync(1, 10, null, null, tn.tekil_kod);
+                    return pagedSozlesme.Data.FirstOrDefault();
+                }
             }
 
-            return sozlesmeler
-                .Where(s => s.tuketim_noktasi_id == tuketimNoktasiId.Value)
-                .OrderByDescending(s => s.durum == KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif)
-                .ThenByDescending(s => s.durum == KcetasWeb.Models.Enums.SozlesmeDurumu.GuvenceBekliyor)
-                .ThenByDescending(s => s.sozlesme_id)
-                .FirstOrDefault();
+            return null;
         }
 
         private static string GetTarifeGrubu(int? tarifeId) => tarifeId switch

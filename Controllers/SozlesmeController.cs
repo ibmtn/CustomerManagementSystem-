@@ -70,16 +70,16 @@ namespace KcetasWeb.Controllers
             var aboneIds = pagedData.Where(x => x.abone_id.HasValue).Select(x => x.abone_id.Value).Distinct();
             var aboneTasks = aboneIds.Select(id => _aboneService.GetByIdAsync(id));
 
-            var needsTuketimNoktasiLookup = pagedData.Any(s => string.IsNullOrWhiteSpace(s.tekil_kod));
-            var tuketimNoktasiTask = needsTuketimNoktasiLookup
-                ? _tuketimNoktasiService.GetAllAsync()
-                : Task.FromResult(new List<TuketimNoktasi>());
-            var aboneSonuclarTask = Task.WhenAll(aboneTasks);
+            var tnIds = pagedData.Where(s => string.IsNullOrWhiteSpace(s.tekil_kod)).Select(s => s.tuketim_noktasi_id).Distinct();
+            var tnTasks = tnIds.Select(id => _tuketimNoktasiService.GetByIdAsync(id));
             
-            await Task.WhenAll(tuketimNoktasiTask, aboneSonuclarTask);
+            var aboneSonuclarTask = Task.WhenAll(aboneTasks);
+            var tnSonuclarTask = Task.WhenAll(tnTasks);
+            
+            await Task.WhenAll(aboneSonuclarTask, tnSonuclarTask);
 
             var aboneler = (await aboneSonuclarTask).Where(a => a != null).GroupBy(a => a.abone_id).ToDictionary(g => g.Key, g => g.First());
-            var tuketimNoktalari = (await tuketimNoktasiTask).GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
+            var tuketimNoktalari = (await tnSonuclarTask).Where(t => t != null).GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
 
             var viewModels = pagedData.Select(s => {
                 var abone = aboneler.ContainsKey(s.abone_id ?? 0) ? aboneler[s.abone_id ?? 0] : null;
@@ -232,9 +232,19 @@ namespace KcetasWeb.Controllers
                 return NotFound();
             }
 
-            ViewBag.GecmisSozlesmeler = (await _sozlesmeService.GetAllAsync()).Where(s => s.tuketim_noktasi_id == item.tuketim_noktasi_id && s.sozlesme_id != item.sozlesme_id)
-                .OrderByDescending(s => s.baslangic_tarihi)
-                .ToList();
+            var tn = await _tuketimNoktasiService.GetByIdAsync(item.tuketim_noktasi_id);
+            if (tn != null)
+            {
+                var gecmisPaged = await _sozlesmeService.GetPagedAsync(1, 100, null, null, tn.tekil_kod);
+                ViewBag.GecmisSozlesmeler = gecmisPaged.Data
+                    .Where(s => s.sozlesme_id != item.sozlesme_id)
+                    .OrderByDescending(s => s.baslangic_tarihi)
+                    .ToList();
+            }
+            else
+            {
+                ViewBag.GecmisSozlesmeler = new List<Sozlesme>();
+            }
 
             var viewModel = new KcetasWeb.ViewModels.SozlesmeViewModels
             {

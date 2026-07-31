@@ -277,10 +277,14 @@ namespace KcetasWeb.Controllers
             };
 
             // İlişkili verilerin çekilmesi
-            var sayaclar = (await _sayacService.GetAllAsync()).Where(s => s.tuketim_noktasi_id == item.tuketim_noktasi_id).ToList();
+            var sayacPaged = await _sayacService.GetPagedAsync(1, 100, null, null, item.tuketim_noktasi_id);
+            var sayaclar = sayacPaged.Data;
             ViewBag.Sayaclar = sayaclar;
-            var sozlesmeler = (await _sozlesmeService.GetAllAsync()).Where(s => s.tuketim_noktasi_id == item.tuketim_noktasi_id).ToList();
+            
+            var sozlesmePaged = await _sozlesmeService.GetPagedAsync(1, 100, null, null, item.tekil_kod);
+            var sozlesmeler = sozlesmePaged.Data;
             ViewBag.Sozlesmeler = sozlesmeler;
+            
             ViewBag.IsEmirleri = (await _isEmriService.GetAllAsync()).Where(i => i.tuketim_noktasi_id == item.tuketim_noktasi_id).OrderByDescending(i => i.created_at).ToList();
 
             var aktifSozlesme = sozlesmeler.OrderByDescending(s => s.baslangic_tarihi).FirstOrDefault(s => s.durum == KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif);
@@ -300,10 +304,8 @@ namespace KcetasWeb.Controllers
             }
             
             var sayacIds = sayaclar.Select(s => s.sayac_id).ToList();
-            ViewBag.Endeksler = (await _endeksOkumaService.GetAllAsync())
-                .Where(e => e.sayac_id.HasValue && sayacIds.Contains(e.sayac_id.Value))
-                .OrderByDescending(e => e.okuma_zamani)
-                .ToList();
+            var endeksPaged = await _endeksOkumaService.GetPagedAsync(1, 100, null, null, null, null, null, null, null, null, item.tekil_kod, null, null);
+            ViewBag.Endeksler = endeksPaged.Data.OrderByDescending(e => e.okuma_zamani).ToList();
 
             return View(viewModel);
         }

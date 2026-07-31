@@ -198,10 +198,10 @@ namespace KcetasWeb.Controllers
 
             if (fatura.sozlesme_id > 0)
             {
-                var sozlesme = (await _sozlesmeService.GetAllAsync()).FirstOrDefault(s => s.sozlesme_id == fatura.sozlesme_id);
+                var sozlesme = await _sozlesmeService.GetByIdAsync(fatura.sozlesme_id);
                 if (sozlesme != null)
                 {
-                    var tn = (await _tuketimNoktasiService.GetAllAsync()).FirstOrDefault(t => t.tuketim_noktasi_id == sozlesme.tuketim_noktasi_id);
+                    var tn = await _tuketimNoktasiService.GetByIdAsync(sozlesme.tuketim_noktasi_id);
                     if (tn != null)
                     {
                         fatura.tekil_kod = tn.tekil_kod;
@@ -228,7 +228,7 @@ namespace KcetasWeb.Controllers
             string aboneBilgisi = "Abone Bilgisi Alınamadı";
             string gercekTekilKod = fatura.tekil_kod ?? "";
 
-            var sozlesme = (await _sozlesmeService.GetAllAsync()).FirstOrDefault(s => s.sozlesme_id == fatura.sozlesme_id);
+            var sozlesme = await _sozlesmeService.GetByIdAsync(fatura.sozlesme_id);
             if (sozlesme != null)
             {
                 if (sozlesme.abone_id > 0)
@@ -244,7 +244,7 @@ namespace KcetasWeb.Controllers
 
                 if (sozlesme.tuketim_noktasi_id > 0)
                 {
-                    var tn = (await _tuketimNoktasiService.GetAllAsync()).FirstOrDefault(t => t.tuketim_noktasi_id == sozlesme.tuketim_noktasi_id);
+                    var tn = await _tuketimNoktasiService.GetByIdAsync(sozlesme.tuketim_noktasi_id);
                     if (tn != null)
                     {
                         gercekTekilKod = tn.tekil_kod;
