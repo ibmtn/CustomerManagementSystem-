@@ -53,8 +53,10 @@ namespace KcetasWeb.ViewModels
     public class TuketimNoktasiListeViewModel : PaginationBaseViewModel
     {
         public string? FiltreTekilKod { get; set; }
+        public int? FiltreIlId { get; set; }
         public int? FiltreIlceId { get; set; }
         public string? FiltreTuketiciGrubu { get; set; }
+        public string? FiltreDurum { get; set; }
 
         public System.Collections.Generic.List<TuketimNoktasiViewModels> TuketimNoktalari { get; set; } = new();
     }

@@ -84,23 +84,6 @@
                             <label class="text-muted small fw-bold mb-1 text-uppercase">Ad Soyad / Ünvan</label>
                             <p class="fs-5 fw-bold text-dark mb-3">@(string.IsNullOrWhiteSpace(Model.Ad) && string.IsNullOrWhiteSpace(Model.Unvan) ? "Sözleşmesi Yok" : $"{Model.Ad} {Model.Soyad} {Model.Unvan}")</p>
                             
-                            <label class="text-muted small fw-bold mb-1 text-uppercase">TCKN / VKN</label>
-                            <p class="fs-5 fw-bold text-dark mb-3">
-                                @{
-                                    var tckn = Model.tckn;
-                                    var maskeliTc = !string.IsNullOrEmpty(tckn) && tckn.Length >= 4 ? "***" + tckn.Substring(tckn.Length - 4) : tckn;
-                                }
-                                @(string.IsNullOrWhiteSpace(maskeliTc) && string.IsNullOrWhiteSpace(Model.vkn) ? "-" : $"{maskeliTc} {(string.IsNullOrEmpty(Model.vkn) ? "" : "/ " + Model.vkn)}")
-                            </p>
-                            
-                            <label class="text-muted small fw-bold mb-1 text-uppercase">İletişim (Telefon - E-Posta)</label>
-                            <p class="fs-5 fw-bold text-dark mb-0">
-                                @{
-                                    var tel = Model.telefon;
-                                    var maskeliTel = !string.IsNullOrEmpty(tel) && tel.Length >= 4 ? "***" + tel.Substring(tel.Length - 4) : tel;
-                                }
-                                @(string.IsNullOrWhiteSpace(maskeliTel) ? "-" : maskeliTel) @(string.IsNullOrWhiteSpace(Model.e_posta) ? "" : $" - {Model.e_posta}")
-                            </p>
                         </div>
                     </div>
 
@@ -111,9 +94,25 @@
                             
                             <label class="text-muted small fw-bold mb-1 text-uppercase">Bağlantı Gücü</label>
                             <p class="fs-5 fw-bold text-dark mb-3">@Model.baglanti_gucu_kw kW</p>
+                                
+                    
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <label class="text-muted small fw-bold mb-1 text-uppercase">İl / İlçe</label>
+                                    <p class="fs-5 fw-bold text-dark mb-0">@Model.il_adi / @Model.ilce_adi</p>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="text-muted small fw-bold mb-1 text-uppercase">Mahalle</label>
+                                    <p class="fs-5 fw-bold text-dark mb-0">@(string.IsNullOrEmpty(Model.mahalle) ? "-" : Model.mahalle)</p>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <label class="text-muted small fw-bold mb-1 text-uppercase">Bina / Daire No</label>
+                                    <p class="fs-5 fw-bold text-dark mb-0">@(string.IsNullOrEmpty(Model.bina_no) ? "-" : Model.bina_no) / @(string.IsNullOrEmpty(Model.bagimsiz_bolum_no) ? "-" : Model.bagimsiz_bolum_no)</p>
+                                </div>
+                            </div>
                             
-                            <label class="text-muted small fw-bold mb-1 text-uppercase">Açık Adres</label>
-                            <p class="fs-5 fw-bold text-dark mb-0">@Model.acik_adres @(Model.ilce_adi) @(Model.il_adi)</p>
+                            <label class="text-muted small fw-bold mb-1 text-uppercase mt-2">Açık Adres Detayı</label>
+                            <p class="fs-6 fw-bold text-dark mb-0">@Model.acik_adres</p>
                         </div>
                     </div>
                 </div>

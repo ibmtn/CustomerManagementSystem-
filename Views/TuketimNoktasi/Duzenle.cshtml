@@ -36,6 +36,10 @@
                                 <option value="">Önce İl Seçin</option>
                             </select>
                         </div>
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label fw-bold">Mahalle <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="mahalle" value="@Model.mahalle" required />
+                        </div>
                         <div class="col-md-2 mb-3">
                             <label class="form-label fw-bold">Bina No</label>
                             <input type="text" class="form-control" name="bina_no" value="@Model.bina_no" />
@@ -46,12 +50,13 @@
                         </div>
                         
                         <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Açık Adres</label>
-                            <textarea class="form-control" name="acik_adres" rows="2">@Model.acik_adres</textarea>
+                            <label class="form-label fw-bold">Açık Adres <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="acik_adres" rows="2" required>@Model.acik_adres</textarea>
+                            <span asp-validation-for="acik_adres" class="text-danger small"></span>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Tüketici Grubu</label>
+                            <label class="form-label fw-bold">Tüketici Grubu <span class="text-danger">*</span></label>
                             <select data-control="select2" class="form-select" name="tuketici_grubu" required>
                                 <option value="MESKEN" selected="@(Model.tuketici_grubu == "MESKEN" || Model.tuketici_grubu == "Mesken")">MESKEN</option>
                                 <option value="TİCARETHANE" selected="@(Model.tuketici_grubu == "TİCARETHANE" || Model.tuketici_grubu == "Ticarethane")">TİCARETHANE</option>
@@ -70,8 +75,8 @@
                         </div>
 
                         <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Bağlantı Gücü (kW)</label>
-                            <input type="number" step="0.01" class="form-control" name="baglanti_gucu_kw" value="@Model.baglanti_gucu_kw" />
+                            <label class="form-label fw-bold">Bağlantı Gücü (kW) <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" class="form-control" name="baglanti_gucu_kw" value="@Model.baglanti_gucu_kw" required />
                         </div>
                     </div>
 

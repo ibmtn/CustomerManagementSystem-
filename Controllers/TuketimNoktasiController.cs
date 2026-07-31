@@ -47,33 +47,18 @@ namespace KcetasWeb.Controllers
             List<TuketimNoktasi> pagedData;
             int totalItems;
 
-            if (!filtre.FiltreIlceId.HasValue && string.IsNullOrEmpty(filtre.FiltreTuketiciGrubu))
-            {
-                var pagedResponse = await _tuketimNoktasiService.GetPagedAsync(
-                    filtre.CurrentPage,
-                    filtre.PageSize,
-                    filtre.FiltreTekilKod);
+            var pagedResponse = await _tuketimNoktasiService.GetPagedAsync(
+                filtre.CurrentPage,
+                filtre.PageSize,
+                filtre.FiltreTekilKod,
+                null, // baglantiDurumu if needed
+                null, // ilId removed
+                filtre.FiltreIlceId,
+                filtre.FiltreTuketiciGrubu,
+                filtre.FiltreDurum);
 
-                pagedData = pagedResponse.Data;
-                totalItems = pagedResponse.TotalCount;
-            }
-            else
-            {
-                var data = (await _tuketimNoktasiService.GetAllAsync()).AsQueryable();
-
-                if (!string.IsNullOrEmpty(filtre.FiltreTekilKod))
-                    data = data.Where(x => x.tekil_kod != null && x.tekil_kod.Contains(filtre.FiltreTekilKod, StringComparison.OrdinalIgnoreCase));
-
-                if (filtre.FiltreIlceId.HasValue)
-                    data = data.Where(x => x.ilce_id == filtre.FiltreIlceId.Value);
-
-                if (!string.IsNullOrEmpty(filtre.FiltreTuketiciGrubu))
-                    data = data.Where(x => x.tuketici_grubu != null && x.tuketici_grubu.Equals(filtre.FiltreTuketiciGrubu, StringComparison.OrdinalIgnoreCase));
-
-                var dataList = data.OrderByDescending(x => x.tuketim_noktasi_id).ToList();
-                totalItems = dataList.Count;
-                pagedData = dataList.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
-            }
+            pagedData = pagedResponse.Data;
+            totalItems = pagedResponse.TotalCount;
 
             var viewModels = pagedData.Select(item => new KcetasWeb.ViewModels.TuketimNoktasiViewModels
             {
@@ -271,6 +256,14 @@ namespace KcetasWeb.Controllers
                 TuketimNoktasiId = item.tuketim_noktasi_id,
                 tekil_kod = item.tekil_kod,
                 ilce_id = item.ilce_id,
+                il_adi = "Kayseri",
+                ilce_adi = item.ilce_id switch
+                {
+                    1 => "Melikgazi", 2 => "Kocasinan", 3 => "Talas", 4 => "Akkışla", 5 => "Bünyan",
+                    6 => "Develi", 7 => "Felahiye", 8 => "Hacılar", 9 => "İncesu", 10 => "Özvatan",
+                    11 => "Pınarbaşı", 12 => "Sarıoğlan", 13 => "Sarız", 14 => "Tomarza", 15 => "Yahyalı",
+                    16 => "Yeşilhisar", 99 => "Merkez İlçe", _ => "Bilinmeyen İlçe"
+                },
                 mahalle = item.mahalle,
                 bina_no = item.bina_no,
                 bagimsiz_bolum_no = item.bagimsiz_bolum_no,

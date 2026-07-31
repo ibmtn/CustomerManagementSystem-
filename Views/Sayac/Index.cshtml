@@ -28,11 +28,15 @@
 <div class="card shadow-sm border-0 mb-4 bg-light">
     <div class="card-body">
         <form asp-action="Index" method="get" class="row g-3 align-items-end">
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label fw-bold">Seri No (Arama)</label>
                 <input name="FiltreSeriNo" value="@Model.FiltreSeriNo" type="text" class="form-control" placeholder="Örn: 2026100..." />
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Mühür No</label>
+                <input name="FiltreMuhurNo" value="@Model.FiltreMuhurNo" type="text" class="form-control" placeholder="Örn: MHR-1234" />
+            </div>
+            <div class="col-md-2">
                 <label class="form-label fw-bold">Marka</label>
                 <select data-control="select2" name="FiltreMarka" class="form-select">
                     <option value="">Tümü</option>
@@ -42,7 +46,7 @@
                     <option value="Viko" selected="@(Model.FiltreMarka == "Viko" ? "selected" : null)">Viko</option>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label fw-bold">Durum</label>
                 <select data-control="select2" name="FiltreDurum" class="form-select">
                     <option value="">Tümü</option>
@@ -51,24 +55,40 @@
                     <option value="Arızalı" selected="@(Model.FiltreDurum == "Arızalı" ? "selected" : null)">Arızalı</option>
                 </select>
             </div>
-            <div class="col-md-3 d-flex gap-2">
-                <button type="submit" class="btn btn-primary flex-fill">
-                    <i class="bi bi-search"></i> Filtrele
-                </button>
-                <a href="/Sayac/Index" class="btn btn-outline-secondary" title="Temizle">
-                    <i class="bi bi-x-lg"></i>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Bağlı Nokta</label>
+                <input name="FiltreTuketimNoktasi" value="@Model.FiltreTuketimNoktasi" type="text" class="form-control" placeholder="Örn: TK-..." />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Faz</label>
+                <select data-control="select2" name="FiltreFaz" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="Monofaze" selected="@(Model.FiltreFaz == "Monofaze" ? "selected" : null)">Monofaze</option>
+                    <option value="Trifaze" selected="@(Model.FiltreFaz == "Trifaze" ? "selected" : null)">Trifaze</option>
+                </select>
+            </div>
+            <div class="col-12 mt-4 text-end">
+                <a href="/Sayac/Index" class="btn btn-outline-secondary px-4 me-2" title="Temizle">
+                    <i class="bi bi-x-lg me-1"></i> Temizle
                 </a>
+                <button type="submit" class="btn btn-primary px-5">
+                    <i class="bi bi-search me-1"></i> Filtrele
+                </button>
             </div>
         </form>
     </div>
 </div>
 
-<form id="filterForm" method="get" action="/Sayac/Index">
-    <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
-    <input type="hidden" name="FiltreSeriNo" value="@Model.FiltreSeriNo" />
-    <input type="hidden" name="FiltreMarka" value="@Model.FiltreMarka" />
-    <input type="hidden" name="FiltreDurum" value="@Model.FiltreDurum" />
-</form>
+    <form id="filterForm" method="get" action="/Sayac/Index">
+        <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
+        <input type="hidden" name="FiltreSeriNo" value="@Model.FiltreSeriNo" />
+        <input type="hidden" name="FiltreMuhurNo" value="@Model.FiltreMuhurNo" />
+        <input type="hidden" name="FiltreMarka" value="@Model.FiltreMarka" />
+        <input type="hidden" name="FiltreDurum" value="@Model.FiltreDurum" />
+        <input type="hidden" name="FiltreTuketimNoktasi" value="@Model.FiltreTuketimNoktasi" />
+        <input type="hidden" name="FiltreFaz" value="@Model.FiltreFaz" />
+    </form>
 
 <div class="card shadow-sm border-0 rounded-4 mb-4">
     <div class="card-body p-0">

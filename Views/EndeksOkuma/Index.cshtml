@@ -34,18 +34,26 @@
         <div class="card-body">
             <form asp-action="Index" method="get" class="row g-3 align-items-end">
                 <div class="col-md-3">
-                    <label class="form-label fw-bold">Sayaç Seri No (Arama)</label>
+                    <label class="form-label fw-bold">Okuma No</label>
+                    <input name="FiltreOkumaNo" value="@Model.FiltreOkumaNo" type="number" class="form-control" placeholder="Örn: 12345" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Sayaç Seri No</label>
                     <input name="FiltreSayacId" value="@Model.FiltreSayacId" type="text" class="form-control" placeholder="Sayaç No..." />
                 </div>
                 <div class="col-md-3">
                     <label class="form-label fw-bold">Tüketim Noktası</label>
                     <input name="FiltreTuketimNoktasi" value="@Model.FiltreTuketimNoktasi" type="text" class="form-control" placeholder="TK kodu veya adres..." />
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Abone</label>
+                    <input name="FiltreAbone" value="@Model.FiltreAbone" type="text" class="form-control" placeholder="Ad, Soyad, TC veya Ünvan..." />
+                </div>
+                <div class="col-md-3">
                     <label class="form-label fw-bold">Dönem</label>
                     <input name="FiltreDonem" value="@Model.FiltreDonem" type="text" class="form-control" placeholder="Örn: 2026-07" />
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label class="form-label fw-bold">Doğrulama Durumu</label>
                     <select data-control="select2" name="FiltreDogrulamaDurumu" class="form-select">
                         <option value="">Tümü</option>
@@ -53,13 +61,17 @@
                         <option value="DogrulamaBekliyor" selected="@(Model.FiltreDogrulamaDurumu == "DogrulamaBekliyor" ? "selected" : null)">Onay Bekliyor</option>
                     </select>
                 </div>
-                <div class="col-md-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary flex-fill">
-                        <i class="bi bi-search"></i> Filtrele
-                    </button>
-                    <a href="/EndeksOkuma/Index" class="btn btn-outline-secondary" title="Temizle">
-                        <i class="bi bi-x-lg"></i>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Okuma Tarihi</label>
+                    <input name="FiltreOkumaTarihi" value="@Model.FiltreOkumaTarihi?.ToString("yyyy-MM-dd")" type="date" class="form-control" />
+                </div>
+                <div class="col-md-3 d-flex justify-content-end gap-2">
+                    <a href="/EndeksOkuma/Index" class="btn btn-outline-secondary w-50" title="Temizle">
+                        <i class="bi bi-x-lg me-1"></i> Temizle
                     </a>
+                    <button type="submit" class="btn btn-primary w-50">
+                        <i class="bi bi-search me-1"></i> Filtrele
+                    </button>
                 </div>
             </form>
         </div>
@@ -67,10 +79,13 @@
 
     <form id="filterForm" method="get" action="/EndeksOkuma/Index">
         <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
+        <input type="hidden" name="FiltreOkumaNo" value="@Model.FiltreOkumaNo" />
         <input type="hidden" name="FiltreSayacId" value="@Model.FiltreSayacId" />
         <input type="hidden" name="FiltreTuketimNoktasi" value="@Model.FiltreTuketimNoktasi" />
+        <input type="hidden" name="FiltreAbone" value="@Model.FiltreAbone" />
         <input type="hidden" name="FiltreDonem" value="@Model.FiltreDonem" />
         <input type="hidden" name="FiltreDogrulamaDurumu" value="@Model.FiltreDogrulamaDurumu" />
+        <input type="hidden" name="FiltreOkumaTarihi" value="@Model.FiltreOkumaTarihi?.ToString("yyyy-MM-dd")" />
         <input type="hidden" name="kaynak" value="@ViewBag.Kaynak" />
         <input type="hidden" name="durum" value="@ViewBag.Durum" />
         <input type="hidden" name="baslangic" value="@ViewBag.Baslangic" />

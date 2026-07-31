@@ -8,7 +8,7 @@ namespace KcetasWeb.Services.Interfaces
     {
         Task<List<Sozlesme>> GetAllAsync();
         Task<int> GetTotalCountAsync();
-        Task<PaginatedResponse<Sozlesme>> GetPagedAsync(int page, int pageSize, string? q = null, string? durum = null);
+        Task<PaginatedResponse<Sozlesme>> GetPagedAsync(int page, int pageSize, string? q = null, string? durum = null, string? tekilKod = null, string? sozlesmeTipi = null);
         Task<Sozlesme?> GetByIdAsync(string sozlesmeNo);
         Task<Sozlesme?> GetByIdAsync(long id);
         Task CreateAsync(Sozlesme sozlesme);

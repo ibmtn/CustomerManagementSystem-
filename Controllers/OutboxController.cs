@@ -25,10 +25,14 @@ public class OutboxController : Controller
     }
 
     public async Task<IActionResult> Index(string? durum, string? hedefSistem,
-        DateTime? baslangicTarih, DateTime? bitisTarih, string? faturaNo, int CurrentPage = 1)
+        DateTime? olusturmaTarihi, string? faturaNo, long? kayitNo, DateTime? sonDenemeTarihi, int CurrentPage = 1)
     {
         int pageSize = 50;
-        var paginatedResult = await _outboxService.FiltreleAsync(durum, hedefSistem, baslangicTarih, bitisTarih, faturaNo, CurrentPage, pageSize);
+        
+        DateTime? bitisTarihi = olusturmaTarihi.HasValue ? olusturmaTarihi.Value.Date.AddDays(1).AddTicks(-1) : null;
+
+        // Pass olusturmaTarihi as baslangic and bitisTarihi as bitis to IOutboxService to filter for a single day
+        var paginatedResult = await _outboxService.FiltreleAsync(durum, hedefSistem, olusturmaTarihi, bitisTarihi, faturaNo, kayitNo, sonDenemeTarihi, CurrentPage, pageSize);
         var istatistikler = await _outboxService.GetIstatistiklerAsync();
 
         var viewModels = paginatedResult.Data.Select(k => new OutboxListeViewModel.OutboxSatirViewModel
@@ -56,8 +60,9 @@ public class OutboxController : Controller
             FiltreDurum = durum,
             FiltreHedefSistem = hedefSistem,
             FiltreFaturaNo = faturaNo,
-            BaslangicTarih = baslangicTarih,
-            BitisTarih = bitisTarih,
+            FiltreKayitNo = kayitNo,
+            OlusturmaTarihi = olusturmaTarihi,
+            SonDenemeTarihi = sonDenemeTarihi,
             ToplamKayit = istatistikler.Toplam,
             BekleyenSayisi = istatistikler.Bekleyen,
             GonderilmisSayisi = istatistikler.Gonderilmis,

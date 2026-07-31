@@ -81,7 +81,10 @@ namespace KcetasWeb.Services.Api
             string? aramaMetni,
             string? sayacId,
             string? donem,
-            string? dogrulamaDurumu)
+            string? dogrulamaDurumu,
+            string? tuketimNoktasi,
+            string? abone,
+            long? okumaNo)
         {
             try
             {
@@ -93,13 +96,15 @@ namespace KcetasWeb.Services.Api
 
                 if (!string.IsNullOrEmpty(okumaTipi)) queryParams.Add($"okumaTipi={Uri.EscapeDataString(okumaTipi)}");
                 if (!string.IsNullOrEmpty(durum)) queryParams.Add($"durum={Uri.EscapeDataString(durum)}");
-                if (baslangic.HasValue) queryParams.Add($"baslangic={baslangic.Value.ToString("yyyy-MM-ddTHH:mm:ss")}");
-                if (bitis.HasValue) queryParams.Add($"bitis={bitis.Value.ToString("yyyy-MM-ddTHH:mm:ss")}");
+                if (baslangic.HasValue) queryParams.Add($"baslangic={baslangic.Value:yyyy-MM-ddTHH:mm:ss}");
+                if (bitis.HasValue) queryParams.Add($"bitis={bitis.Value:yyyy-MM-ddTHH:mm:ss}");
                 if (!string.IsNullOrEmpty(aramaMetni)) queryParams.Add($"arama={Uri.EscapeDataString(aramaMetni)}");
-                if (!string.IsNullOrEmpty(sayacId)) queryParams.Add($"seriNo={Uri.EscapeDataString(sayacId)}");
+                if (!string.IsNullOrEmpty(sayacId)) queryParams.Add($"sayacId={Uri.EscapeDataString(sayacId)}");
                 if (!string.IsNullOrEmpty(donem)) queryParams.Add($"donem={Uri.EscapeDataString(donem)}");
-                var normalizedDogrulamaDurumu = NormalizeDogrulamaDurumu(dogrulamaDurumu);
-                if (!string.IsNullOrEmpty(normalizedDogrulamaDurumu)) queryParams.Add($"dogrulamaDurumu={Uri.EscapeDataString(normalizedDogrulamaDurumu)}");
+                if (!string.IsNullOrEmpty(dogrulamaDurumu)) queryParams.Add($"dogrulamaDurumu={Uri.EscapeDataString(dogrulamaDurumu)}");
+                if (!string.IsNullOrEmpty(tuketimNoktasi)) queryParams.Add($"tuketimNoktasi={Uri.EscapeDataString(tuketimNoktasi)}");
+                if (!string.IsNullOrEmpty(abone)) queryParams.Add($"abone={Uri.EscapeDataString(abone)}");
+                if (okumaNo.HasValue) queryParams.Add($"okumaNo={okumaNo.Value}");
 
                 string url = $"/api/EndeksOkuma/Paged?{string.Join("&", queryParams)}";
                 
@@ -112,18 +117,22 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public async System.Threading.Tasks.Task<List<YeniOkumaSecimDto>> YeniOkumaSecimAraAsync(string q)
+        public async System.Threading.Tasks.Task<List<YeniOkumaSecimDto>> YeniOkumaSecimAraAsync(string? q, int page = 1, int pageSize = 20)
         {
-            if (string.IsNullOrWhiteSpace(q) || q.Trim().Length < 2)
-            {
-                return new List<YeniOkumaSecimDto>();
-            }
-
             try
             {
-                var url = $"/api/EndeksOkuma/YeniOkumaSecimAra?q={Uri.EscapeDataString(q.Trim())}";
+                var url = $"/api/EndeksOkuma/YeniOkumaSecimAra?";
+                if (!string.IsNullOrWhiteSpace(q))
+                {
+                    url += $"q={Uri.EscapeDataString(q.Trim())}&";
+                }
+                url += $"page={page}&pageSize={pageSize}";
+
                 var result = await _httpClient.GetFromJsonAsync<List<YeniOkumaSecimDto>>(url, _jsonOptions);
-                return result ?? new List<YeniOkumaSecimDto>();
+                var secimler = result ?? new List<YeniOkumaSecimDto>();
+                
+                // If API doesn't respect pagination, we manually paginate on the client side
+                return secimler.Skip((page - 1) * pageSize).Take(pageSize).ToList();
             }
             catch
             {

@@ -41,7 +41,7 @@ namespace KcetasWeb.Services.Api
             });
         }
 
-        public async Task<PaginatedResponse<Sozlesme>> GetPagedAsync(int page, int pageSize, string? q = null, string? durum = null)
+        public async Task<PaginatedResponse<Sozlesme>> GetPagedAsync(int page, int pageSize, string? q = null, string? durum = null, string? tekilKod = null, string? sozlesmeTipi = null)
         {
             try
             {
@@ -53,6 +53,8 @@ namespace KcetasWeb.Services.Api
 
                 if (!string.IsNullOrWhiteSpace(q)) queryParams.Add($"q={Uri.EscapeDataString(q.Trim())}");
                 if (!string.IsNullOrWhiteSpace(durum)) queryParams.Add($"durum={Uri.EscapeDataString(durum.Trim())}");
+                if (!string.IsNullOrWhiteSpace(tekilKod)) queryParams.Add($"tekilKod={Uri.EscapeDataString(tekilKod.Trim())}");
+                if (!string.IsNullOrWhiteSpace(sozlesmeTipi)) queryParams.Add($"sozlesmeTipi={Uri.EscapeDataString(sozlesmeTipi.Trim())}");
 
                 var url = $"/api/Sozlesmeler/Paged?{string.Join("&", queryParams)}";
                 var result = await _httpClient.GetFromJsonAsync<PaginatedResponse<Sozlesme>>(url, _jsonOptions);
@@ -60,32 +62,7 @@ namespace KcetasWeb.Services.Api
             }
             catch
             {
-                var allData = await GetAllAsync();
-                if (!string.IsNullOrWhiteSpace(q))
-                {
-                    var search = q.Trim();
-                    allData = allData.Where(s =>
-                        (s.sozlesme_no?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                        (s.tekil_kod?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                        s.sozlesme_id.ToString().Contains(search) ||
-                        s.tuketim_noktasi_id.ToString().Contains(search)).ToList();
-                }
-
-                if (!string.IsNullOrWhiteSpace(durum) &&
-                    Enum.TryParse<KcetasWeb.Models.Enums.SozlesmeDurumu>(durum, ignoreCase: true, out var parsedDurum))
-                {
-                    allData = allData.Where(s => s.durum == parsedDurum).ToList();
-                }
-
-                var count = allData.Count;
-                var pagedData = allData.OrderByDescending(x => x.sozlesme_id).Skip((page - 1) * pageSize).Take(pageSize).ToList();
-                return new PaginatedResponse<Sozlesme>
-                {
-                    Data = pagedData,
-                    TotalCount = count,
-                    CurrentPage = page,
-                    PageSize = pageSize
-                };
+                return new PaginatedResponse<Sozlesme> { CurrentPage = page, PageSize = pageSize };
             }
         }
 

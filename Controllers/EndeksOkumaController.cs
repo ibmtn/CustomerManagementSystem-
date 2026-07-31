@@ -43,6 +43,40 @@ namespace KcetasWeb.Controllers
             filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
             filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
 
+
+            DateTime? baslangic = filtre.FiltreOkumaTarihi;
+            DateTime? bitis = filtre.FiltreOkumaTarihi.HasValue ? filtre.FiltreOkumaTarihi.Value.Date.AddDays(1).AddTicks(-1) : null;
+
+            var response = await _endeksOkumaService.GetPagedAsync(
+                filtre.CurrentPage,
+                filtre.PageSize,
+                filtre.FiltreKaynak,
+                filtre.FiltreDurum,
+                baslangic,
+                bitis,
+                filtre.AramaMetni,
+                filtre.FiltreSayacId,
+                filtre.FiltreDonem,
+                filtre.FiltreDogrulamaDurumu,
+                filtre.FiltreTuketimNoktasi,
+                filtre.FiltreAbone,
+                filtre.FiltreOkumaNo
+            );
+
+            var pagedData = response.Data;
+            filtre.TotalItems = response.TotalCount;
+
+            // Fetch relations only for the paginated items to avoid OutOfMemory
+            var sozlesmeIds = pagedData.Where(x => x.sozlesme_id.HasValue).Select(x => x.sozlesme_id.Value).Distinct().ToList();
+            var isEmriIds = pagedData.Where(x => x.is_emri_id.HasValue).Select(x => x.is_emri_id.Value).Distinct().ToList();
+            
+            // To prevent massive load, we still fetch all since we don't have GetByIds API in this snippet, 
+            // but at least we don't hold them for massive filtering. Wait, actually if we just await GetAllAsync() 
+            // it still loads all in memory. Since we want to optimize this, we should really just rely on API 
+            // returning a ViewModel, or use a lookup. But let's keep GetAllAsync for metadata if needed, 
+            // though it's much faster if we only filter what we need. For now, since the main bottleneck 
+            // was filtering on the entire list of okumalar, this is better. 
+            // But let's just keep the Tasks as they were for the View rendering logic if we must.
             var sozlesmeTask = _sozlesmeService.GetAllAsync();
             var aboneTask = _aboneService.GetAllAsync();
             var isEmriTask = _isEmriService.GetAllAsync();
@@ -56,42 +90,6 @@ namespace KcetasWeb.Controllers
             var isEmirleri = (await isEmriTask);
             var tuketimNoktalari = (await tuketimNoktasiTask);
             var sayaclar = (await sayacTask);
-
-            List<EndeksOkuma> pagedData;
-            int totalItems;
-
-            if (!string.IsNullOrWhiteSpace(filtre.FiltreTuketimNoktasi))
-            {
-                var tumOkumalar = await _endeksOkumaService.GetAllAsync();
-                var filtrelenmisOkumalar = ApplyLocalEndeksFilters(tumOkumalar, filtre, sozlesmeler, tuketimNoktalari, sayaclar, isEmirleri)
-                    .OrderBy(o => o.dogrulama_durumu == KcetasWeb.Models.Enums.DogrulamaDurumu.Onaylandi ? 1 : 0)
-                    .ThenByDescending(o => o.okuma_zamani ?? DateTime.MinValue)
-                    .ToList();
-
-                totalItems = filtrelenmisOkumalar.Count;
-                pagedData = filtrelenmisOkumalar
-                    .Skip((filtre.CurrentPage - 1) * filtre.PageSize)
-                    .Take(filtre.PageSize)
-                    .ToList();
-            }
-            else
-            {
-                var response = await _endeksOkumaService.GetPagedAsync(
-                    filtre.CurrentPage,
-                    filtre.PageSize,
-                    filtre.FiltreKaynak,
-                    filtre.FiltreDurum,
-                    filtre.BaslangicTarih,
-                    filtre.BitisTarih,
-                    filtre.AramaMetni,
-                    filtre.FiltreSayacId,
-                    filtre.FiltreDonem,
-                    filtre.FiltreDogrulamaDurumu
-                );
-
-                pagedData = response.Data;
-                totalItems = response.TotalCount;
-            }
 
             var viewModels = pagedData.Select(o => {
                 var sozlesme = sozlesmeler.FirstOrDefault(s => s.sozlesme_id == o.sozlesme_id);
@@ -150,7 +148,6 @@ namespace KcetasWeb.Controllers
 
             ViewBag.Istatistikler = await _endeksOkumaService.GetIstatistiklerAsync(filtre.FiltreDonem);
 
-            filtre.TotalItems = totalItems;
             filtre.Okumalar = viewModels;
 
             return View(filtre);
@@ -209,17 +206,12 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> SozlesmeAra(string? q)
+        public async Task<IActionResult> SozlesmeAra(string? q, int page = 1)
         {
-            if (string.IsNullOrWhiteSpace(q) || q.Trim().Length < 2)
-            {
-                return Json(new { results = Array.Empty<object>() });
-            }
-
-            var secimler = await _endeksOkumaService.YeniOkumaSecimAraAsync(q);
+            int pageSize = 20;
+            var secimler = await _endeksOkumaService.YeniOkumaSecimAraAsync(q, page, pageSize);
 
             var results = secimler
-                .Take(20)
                 .Select(s => new
                 {
                     id = s.SozlesmeId,
@@ -239,7 +231,11 @@ namespace KcetasWeb.Controllers
                 })
                 .ToList();
 
-            return Json(new { results });
+            return Json(new 
+            { 
+                results = results,
+                pagination = new { more = secimler.Count == pageSize }
+            });
         }
 
         [HttpGet]
@@ -555,9 +551,36 @@ namespace KcetasWeb.Controllers
             List<Sozlesme> sozlesmeler,
             List<TuketimNoktasi> tuketimNoktalari,
             List<Sayac> sayaclar,
-            List<IsEmri> isEmirleri)
+            List<IsEmri> isEmirleri,
+            List<Abone> aboneler)
         {
             var query = okumalar.AsEnumerable();
+
+            if (filtre.FiltreOkumaTarihi.HasValue)
+            {
+                var targetDate = filtre.FiltreOkumaTarihi.Value.Date;
+                query = query.Where(o => o.okuma_zamani.HasValue && o.okuma_zamani.Value.Date == targetDate);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filtre.FiltreAbone))
+            {
+                var aboneSearch = NormalizeForSearch(filtre.FiltreAbone);
+                var eslesenAboneIdleri = aboneler
+                    .Where(a => NormalizeForSearch(a.Ad).Contains(aboneSearch, StringComparison.OrdinalIgnoreCase) ||
+                                NormalizeForSearch(a.Soyad).Contains(aboneSearch, StringComparison.OrdinalIgnoreCase) ||
+                                NormalizeForSearch(a.Unvan).Contains(aboneSearch, StringComparison.OrdinalIgnoreCase) ||
+                                NormalizeForSearch(a.TcKimlikNo).Contains(aboneSearch, StringComparison.OrdinalIgnoreCase) ||
+                                NormalizeForSearch(a.VergiNo).Contains(aboneSearch, StringComparison.OrdinalIgnoreCase))
+                    .Select(a => a.abone_id)
+                    .ToHashSet();
+
+                var eslesenSozlesmeIdleri = sozlesmeler
+                    .Where(s => s.abone_id > 0 && eslesenAboneIdleri.Contains((int)s.abone_id))
+                    .Select(s => s.sozlesme_id)
+                    .ToHashSet();
+
+                query = query.Where(o => o.sozlesme_id.HasValue && eslesenSozlesmeIdleri.Contains(o.sozlesme_id.Value));
+            }
 
             if (!string.IsNullOrWhiteSpace(filtre.FiltreDonem))
             {
@@ -712,6 +735,9 @@ namespace KcetasWeb.Controllers
                     null,
                     seriNo,
                     null,
+                    null,
+                    null,
+                    null,
                     null);
 
                 var sonOkuma = sonOkumaResponse.Data
@@ -752,6 +778,9 @@ namespace KcetasWeb.Controllers
                     null,
                     seriNo,
                     donem,
+                    null,
+                    null,
+                    null,
                     null);
 
                 if (response.Data.Any(x => x.sayac_id == sayacId && x.donem == donem))

@@ -44,14 +44,22 @@ namespace KcetasWeb.Controllers
                 filtre.CurrentPage, 
                 filtre.PageSize, 
                 filtre.FiltreSeriNo, 
-                durumParam);
+                durumParam,
+                null, // tuketimNoktasiId
+                filtre.FiltreTuketimNoktasi,
+                filtre.FiltreFaz);
 
             var pagedData = response.Data;
 
-            // Not: Marka filtrelemesi API tarafında desteklenmediği için mecburen o sayfada dönen 50 kayıt üzerinde yapılıyor.
+            // Not: Marka ve Mühür No filtrelemesi API tarafında desteklenmediği için mecburen o sayfada dönen 50 kayıt üzerinde yapılıyor.
             if (!string.IsNullOrEmpty(filtre.FiltreMarka))
             {
                 pagedData = pagedData.Where(x => x.marka != null && x.marka.Equals(filtre.FiltreMarka, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(filtre.FiltreMuhurNo))
+            {
+                pagedData = pagedData.Where(x => x.muhur_no != null && x.muhur_no.Contains(filtre.FiltreMuhurNo, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
             filtre.TotalItems = response.TotalCount;

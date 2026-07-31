@@ -40,7 +40,7 @@ namespace KcetasWeb.Services.Api
             });
         }
 
-        public async Task<PaginatedResponse<TuketimNoktasi>> GetPagedAsync(int page, int pageSize, string? q = null, string? baglantiDurumu = null)
+        public async Task<PaginatedResponse<TuketimNoktasi>> GetPagedAsync(int page, int pageSize, string? q = null, string? baglantiDurumu = null, int? ilId = null, int? ilceId = null, string? tuketiciGrubu = null, string? durum = null)
         {
             try
             {
@@ -52,6 +52,10 @@ namespace KcetasWeb.Services.Api
 
                 if (!string.IsNullOrWhiteSpace(q)) queryParams.Add($"q={Uri.EscapeDataString(q.Trim())}");
                 if (!string.IsNullOrWhiteSpace(baglantiDurumu)) queryParams.Add($"baglantiDurumu={Uri.EscapeDataString(baglantiDurumu.Trim())}");
+                if (ilId.HasValue) queryParams.Add($"ilId={ilId.Value}");
+                if (ilceId.HasValue) queryParams.Add($"ilceId={ilceId.Value}");
+                if (!string.IsNullOrWhiteSpace(tuketiciGrubu)) queryParams.Add($"tuketiciGrubu={Uri.EscapeDataString(tuketiciGrubu.Trim())}");
+                if (!string.IsNullOrWhiteSpace(durum)) queryParams.Add($"durum={Uri.EscapeDataString(durum.Trim())}");
 
                 var url = $"/api/TuketimNoktasi/Paged?{string.Join("&", queryParams)}";
                 var result = await _httpClient.GetFromJsonAsync<PaginatedResponse<TuketimNoktasi>>(url, _jsonOptions);

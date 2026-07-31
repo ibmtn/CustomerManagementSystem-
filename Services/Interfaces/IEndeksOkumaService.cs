@@ -43,9 +43,12 @@ public interface IEndeksOkumaService
         string? aramaMetni,
         string? sayacId,
         string? donem,
-        string? dogrulamaDurumu);
+        string? dogrulamaDurumu,
+        string? tuketimNoktasi,
+        string? abone,
+        long? okumaNo);
 
-    System.Threading.Tasks.Task<List<YeniOkumaSecimDto>> YeniOkumaSecimAraAsync(string q);
+    System.Threading.Tasks.Task<List<YeniOkumaSecimDto>> YeniOkumaSecimAraAsync(string? q, int page = 1, int pageSize = 20);
 
     System.Threading.Tasks.Task<(int Toplam, int Manuel, int OSOS, int Anomali, decimal OrtalamaTuketim)>
         GetIstatistiklerAsync(string? donem = null);

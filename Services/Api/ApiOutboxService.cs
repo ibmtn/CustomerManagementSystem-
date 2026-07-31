@@ -54,7 +54,7 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public async Task<PaginatedResponse<EntegrasyonOutbox>> FiltreleAsync(string? durum, string? hedefSistem, DateTime? baslangic, DateTime? bitis, string? faturaNo = null, int page = 1, int pageSize = 50)
+        public async Task<PaginatedResponse<EntegrasyonOutbox>> FiltreleAsync(string? durum, string? hedefSistem, DateTime? baslangic, DateTime? bitis, string? faturaNo = null, long? kayitNo = null, DateTime? sonDenemeTarihi = null, int page = 1, int pageSize = 50)
         {
             try
             {
@@ -77,9 +77,17 @@ namespace KcetasWeb.Services.Api
 
                 if (!string.IsNullOrEmpty(hedefSistem)) queryParams.Add($"hedefSistem={Uri.EscapeDataString(hedefSistem)}");
                 if (!string.IsNullOrEmpty(faturaNo)) queryParams.Add($"faturaNo={Uri.EscapeDataString(faturaNo)}");
+                if (kayitNo.HasValue) queryParams.Add($"kayitNo={kayitNo.Value}");
                 
-                if (baslangic.HasValue) queryParams.Add($"baslangic={baslangic.Value:yyyy-MM-dd}");
-                if (bitis.HasValue) queryParams.Add($"bitis={bitis.Value:yyyy-MM-dd}");
+                if (baslangic.HasValue) queryParams.Add($"baslangic={baslangic.Value.ToUniversalTime():yyyy-MM-ddTHH:mm:ssZ}");
+                if (bitis.HasValue) queryParams.Add($"bitis={bitis.Value.ToUniversalTime():yyyy-MM-ddTHH:mm:ssZ}");
+                if (sonDenemeTarihi.HasValue)
+                {
+                    DateTime start = sonDenemeTarihi.Value.Date;
+                    DateTime end = start.AddDays(1).AddTicks(-1);
+                    queryParams.Add($"sonDenemeTarihiStart={start.ToUniversalTime():yyyy-MM-ddTHH:mm:ssZ}");
+                    queryParams.Add($"sonDenemeTarihiEnd={end.ToUniversalTime():yyyy-MM-ddTHH:mm:ssZ}");
+                }
 
                 var queryString = string.Join("&", queryParams);
                 var result = await _httpClient.GetFromJsonAsync<PaginatedResponse<EntegrasyonOutbox>>($"/api/EntegrasyonOutbox?{queryString}", _jsonOptions);

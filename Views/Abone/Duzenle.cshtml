@@ -61,19 +61,8 @@
                                 <span asp-validation-for="AdSoyadUnvan" class="text-danger small"></span>
                             </div>
 
-                            <!-- TCKN -->
-                            <div class="col-md-6" id="divTCKN">
-                                <label asp-for="TCKN" class="form-label fw-bold text-muted">
-                                    TC Kimlik No <span class="text-danger">*</span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0">
-                                        <i class="bi bi-credit-card-2-front text-primary"></i>
-                                    </span>
-                                    <input asp-for="TCKN" value="@Model.TCKN" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="11" class="form-control border-start-0 ps-0" placeholder="11 Haneli TC Kimlik No" />
-                                </div>
-                                <span asp-validation-for="TCKN" class="text-danger small"></span>
-                            </div>
+                            <!-- TCKN (Sadece veri bütünlüğü için gizli tutuluyor) -->
+                            <input asp-for="TCKN" type="hidden" id="TCKN" />
 
                             <!-- VKN -->
                             <div class="col-md-6" id="divVKN" style="display:none;">
@@ -150,9 +139,7 @@
         function toggleTip() {
             var isTuzel = document.getElementById('tipTuzel').checked;
             
-            var divTCKN = document.getElementById('divTCKN');
             var divVKN = document.getElementById('divVKN');
-            var inputTCKN = document.getElementById('TCKN');
             var inputVKN = document.getElementById('VKN');
             
             var lblAd = document.getElementById('lblAdSoyadUnvan');
@@ -160,24 +147,18 @@
 
             if (isTuzel) {
                 // Tüzel Kişi seçildi
-                divTCKN.style.display = 'none';
-                inputTCKN.removeAttribute('required');
+                if(divVKN) divVKN.style.display = 'block';
+                if(inputVKN) inputVKN.setAttribute('required', 'required');
                 
-                divVKN.style.display = 'block';
-                inputVKN.setAttribute('required', 'required');
-                
-                lblAd.innerHTML = 'Kurum Ünvanı <span class="text-danger">*</span>';
-                iconAd.className = 'bi bi-buildings text-primary';
+                if(lblAd) lblAd.innerHTML = 'Kurum Ünvanı <span class="text-danger">*</span>';
+                if(iconAd) iconAd.className = 'bi bi-buildings text-primary';
             } else {
                 // Gerçek Kişi seçildi
-                divVKN.style.display = 'none';
-                inputVKN.removeAttribute('required');
+                if(divVKN) divVKN.style.display = 'none';
+                if(inputVKN) inputVKN.removeAttribute('required');
                 
-                divTCKN.style.display = 'block';
-                inputTCKN.setAttribute('required', 'required');
-                
-                lblAd.innerHTML = 'Ad Soyad <span class="text-danger">*</span>';
-                iconAd.className = 'bi bi-person text-primary';
+                if(lblAd) lblAd.innerHTML = 'Ad Soyad <span class="text-danger">*</span>';
+                if(iconAd) iconAd.className = 'bi bi-person text-primary';
             }
         }
 

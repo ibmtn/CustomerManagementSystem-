@@ -36,7 +36,8 @@ public class SozlesmeViewModels
 public class SozlesmeListeViewModel : PaginationBaseViewModel
 {
     public string? FiltreSozlesmeNo { get; set; }
-    public string? FiltreTuketiciGrubu { get; set; }
+    public string? FiltreTekilKod { get; set; }
+    public string? FiltreSozlesmeTipi { get; set; }
     public string? FiltreDurum { get; set; }
 
     public System.Collections.Generic.List<SozlesmeViewModels> Sozlesmeler { get; set; } = new();

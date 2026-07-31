@@ -30,15 +30,8 @@
                 <input name="FiltreSozlesmeNo" value="@Model.FiltreSozlesmeNo" type="text" class="form-control" placeholder="Örn: SZL-10045" />
             </div>
             <div class="col-md-3">
-                <label class="form-label fw-bold">Tüketici Grubu</label>
-                <select data-control="select2" name="FiltreTuketiciGrubu" class="form-select">
-                    <option value="">Tümü</option>
-                    <option value="Mesken" selected="@(Model.FiltreTuketiciGrubu == "Mesken" ? "selected" : null)">Mesken</option>
-                    <option value="Ticarethane" selected="@(Model.FiltreTuketiciGrubu == "Ticarethane" ? "selected" : null)">Ticarethane</option>
-                    <option value="Sanayi" selected="@(Model.FiltreTuketiciGrubu == "Sanayi" ? "selected" : null)">Sanayi</option>
-                    <option value="Tarımsal Sulama" selected="@(Model.FiltreTuketiciGrubu == "Tarımsal Sulama" ? "selected" : null)">Tarımsal Sulama</option>
-                    <option value="Aydınlatma" selected="@(Model.FiltreTuketiciGrubu == "Aydınlatma" ? "selected" : null)">Aydınlatma</option>
-                </select>
+                <label class="form-label fw-bold">Tekil Kod (Arama)</label>
+                <input name="FiltreTekilKod" value="@Model.FiltreTekilKod" type="text" class="form-control" placeholder="Örn: TK-2026-001" />
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-bold">Durum</label>
@@ -50,7 +43,15 @@
                     <option value="PASIF" selected="@(Model.FiltreDurum ?.ToUpper() == "PASIF" ? "selected" : null)">PASIF</option>
                 </select>
             </div>
-            <div class="col-md-3 d-flex gap-2">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Sözleşme Tipi</label>
+                <select data-control="select2" name="FiltreSozlesmeTipi" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="Bireysel" selected="@(Model.FiltreSozlesmeTipi == "Bireysel" ? "selected" : null)">Bireysel</option>
+                    <option value="Kurumsal" selected="@(Model.FiltreSozlesmeTipi == "Kurumsal" ? "selected" : null)">Kurumsal</option>
+                </select>
+            </div>
+            <div class="col-md-6 d-flex justify-content-end gap-2">
                 <button type="submit" class="btn btn-primary flex-fill">
                     <i class="bi bi-search"></i> Filtrele
                 </button>
@@ -66,7 +67,8 @@
 <form id="filterForm" method="get" action="/Sozlesme/Index">
     <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
     <input type="hidden" name="FiltreSozlesmeNo" value="@Model.FiltreSozlesmeNo" />
-    <input type="hidden" name="FiltreTuketiciGrubu" value="@Model.FiltreTuketiciGrubu" />
+    <input type="hidden" name="FiltreTekilKod" value="@Model.FiltreTekilKod" />
+    <input type="hidden" name="FiltreSozlesmeTipi" value="@Model.FiltreSozlesmeTipi" />
     <input type="hidden" name="FiltreDurum" value="@Model.FiltreDurum" />
 </form>
 

@@ -8,8 +8,9 @@ namespace KcetasWeb.ViewModels
         public string? FiltreDurum { get; set; }
         public string? FiltreHedefSistem { get; set; }
         public string? FiltreFaturaNo { get; set; }
-        public DateTime? BaslangicTarih { get; set; }
-        public DateTime? BitisTarih { get; set; }
+        public long? FiltreKayitNo { get; set; }
+        public DateTime? OlusturmaTarihi { get; set; }
+        public DateTime? SonDenemeTarihi { get; set; }
 
         public List<OutboxSatirViewModel> Kayitlar { get; set; } = new();
 

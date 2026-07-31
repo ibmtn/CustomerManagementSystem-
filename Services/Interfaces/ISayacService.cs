@@ -12,7 +12,9 @@ namespace KcetasWeb.Services.Interfaces
             int pageSize, 
             string? seriNo, 
             int? durum,
-            long? tuketimNoktasiId = null);
+            long? tuketimNoktasiId = null,
+            string? tuketimNoktasi = null,
+            string? faz = null);
 
         Task<Sayac?> GetByIdAsync(long id);
         Task<Sayac?> GetByTuketimNoktasiIdAsync(long tuketimNoktasiId);

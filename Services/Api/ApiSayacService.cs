@@ -48,7 +48,9 @@ namespace KcetasWeb.Services.Api
             int pageSize, 
             string? seriNo, 
             int? durum,
-            long? tuketimNoktasiId = null)
+            long? tuketimNoktasiId = null,
+            string? tuketimNoktasi = null,
+            string? faz = null)
         {
             try
             {
@@ -58,9 +60,11 @@ namespace KcetasWeb.Services.Api
                     $"pageSize={pageSize}"
                 };
 
-                if (!string.IsNullOrEmpty(seriNo)) queryParams.Add($"seriNo={Uri.EscapeDataString(seriNo)}");
+                if (!string.IsNullOrWhiteSpace(seriNo)) queryParams.Add($"seriNo={Uri.EscapeDataString(seriNo.Trim())}");
                 if (durum.HasValue) queryParams.Add($"durum={durum.Value}");
                 if (tuketimNoktasiId.HasValue) queryParams.Add($"tuketimNoktasiId={tuketimNoktasiId.Value}");
+                if (!string.IsNullOrWhiteSpace(tuketimNoktasi)) queryParams.Add($"tuketimNoktasi={Uri.EscapeDataString(tuketimNoktasi.Trim())}");
+                if (!string.IsNullOrWhiteSpace(faz)) queryParams.Add($"faz={Uri.EscapeDataString(faz.Trim())}");
 
                 string url = $"/api/Sayaclar/Paged?{string.Join("&", queryParams)}";
                 

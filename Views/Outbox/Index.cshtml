@@ -92,7 +92,14 @@
             </div>
             <div class="col-md-4">
                 <label class="form-label fw-semibold text-muted small text-uppercase mb-1">Hedef Sistem</label>
-                <input name="hedefSistem" value="@Model.FiltreHedefSistem" type="text" class="form-control border-0 shadow-sm" placeholder="Örn: GIB_EFATURA" />
+                <select name="hedefSistem" class="form-select border-0 shadow-sm">
+                    <option value="">Tümü</option>
+                    <option value="1" selected="@(Model.FiltreHedefSistem == "1" ? "selected" : null)">GİB e-Fatura</option>
+                    <option value="2" selected="@(Model.FiltreHedefSistem == "2" ? "selected" : null)">GİB e-Arşiv</option>
+                    <option value="3" selected="@(Model.FiltreHedefSistem == "3" ? "selected" : null)">ERP Sistemi</option>
+                    <option value="4" selected="@(Model.FiltreHedefSistem == "4" ? "selected" : null)">CRM Bildirimi</option>
+                    <option value="5" selected="@(Model.FiltreHedefSistem == "5" ? "selected" : null)">Saha Yazıcı (Field Print)</option>
+                </select>
             </div>
             <div class="col-md-4">
                 <label class="form-label fw-semibold text-muted small text-uppercase mb-1">Fatura Adı/No</label>
@@ -102,20 +109,27 @@
                 </div>
             </div>
             <div class="col-md-4 mt-3">
-                <label class="form-label fw-semibold text-muted small text-uppercase mb-1">Başlangıç Tarihi</label>
-                <input name="baslangicTarih" value="@Model.BaslangicTarih?.ToString("yyyy-MM-dd")" type="date" class="form-control border-0 shadow-sm" />
+                <label class="form-label fw-semibold text-muted small text-uppercase mb-1">Kayıt No</label>
+                <div class="input-group shadow-sm">
+                    <span class="input-group-text bg-white border-0"><i class="bi bi-hash text-muted"></i></span>
+                    <input name="kayitNo" value="@Model.FiltreKayitNo" type="number" class="form-control border-0" placeholder="Örn: 12345" />
+                </div>
             </div>
             <div class="col-md-4 mt-3">
-                <label class="form-label fw-semibold text-muted small text-uppercase mb-1">Bitiş Tarihi</label>
-                <input name="bitisTarih" value="@Model.BitisTarih?.ToString("yyyy-MM-dd")" type="date" class="form-control border-0 shadow-sm" />
+                <label class="form-label fw-semibold text-muted small text-uppercase mb-1">Oluşturma Tarihi</label>
+                <input name="olusturmaTarihi" value="@Model.OlusturmaTarihi?.ToString("yyyy-MM-dd")" type="date" class="form-control border-0 shadow-sm" />
             </div>
-            <div class="col-md-4 mt-3 d-flex align-items-end gap-2">
-                <button type="submit" class="btn btn-primary px-4 shadow-sm fw-semibold flex-fill">
+            <div class="col-md-4 mt-3">
+                <label class="form-label fw-semibold text-muted small text-uppercase mb-1">Son Deneme Tarihi</label>
+                <input name="sonDenemeTarihi" value="@Model.SonDenemeTarihi?.ToString("yyyy-MM-dd")" type="date" class="form-control border-0 shadow-sm" />
+            </div>
+            <div class="col-12 mt-4 text-end">
+                <a asp-action="Index" class="btn btn-light px-4 shadow-sm text-dark border me-2" title="Temizle">
+                    <i class="bi bi-eraser-fill me-1"></i> Temizle
+                </a>
+                <button type="submit" class="btn btn-primary px-5 shadow-sm fw-semibold">
                     <i class="bi bi-search me-1"></i> Filtrele
                 </button>
-                <a asp-action="Index" class="btn btn-light px-3 shadow-sm text-dark border" title="Temizle">
-                    <i class="bi bi-eraser-fill me-1"></i>
-                </a>
             </div>
         </form>
     </div>
@@ -211,8 +225,9 @@
         <input type="hidden" name="durum" value="@Model.FiltreDurum" />
         <input type="hidden" name="hedefSistem" value="@Model.FiltreHedefSistem" />
         <input type="hidden" name="faturaNo" value="@Model.FiltreFaturaNo" />
-        <input type="hidden" name="baslangicTarih" value="@Model.BaslangicTarih?.ToString("yyyy-MM-dd")" />
-        <input type="hidden" name="bitisTarih" value="@Model.BitisTarih?.ToString("yyyy-MM-dd")" />
+        <input type="hidden" name="kayitNo" value="@Model.FiltreKayitNo" />
+        <input type="hidden" name="olusturmaTarihi" value="@Model.OlusturmaTarihi?.ToString("yyyy-MM-dd")" />
+        <input type="hidden" name="sonDenemeTarihi" value="@Model.SonDenemeTarihi?.ToString("yyyy-MM-dd")" />
     </form>
     <nav>
         <ul class="pagination pagination-sm shadow-sm">

@@ -54,45 +54,16 @@ namespace KcetasWeb.Controllers
             List<Sozlesme> pagedData;
             int totalItems;
 
-            if (string.IsNullOrEmpty(filtre.FiltreTuketiciGrubu))
-            {
-                var pagedResponse = await _sozlesmeService.GetPagedAsync(
-                    filtre.CurrentPage,
-                    filtre.PageSize,
-                    filtre.FiltreSozlesmeNo,
-                    filtre.FiltreDurum);
+            var pagedResponse = await _sozlesmeService.GetPagedAsync(
+                filtre.CurrentPage,
+                filtre.PageSize,
+                filtre.FiltreSozlesmeNo,
+                filtre.FiltreDurum,
+                filtre.FiltreTekilKod,
+                filtre.FiltreSozlesmeTipi);
 
-                pagedData = pagedResponse.Data;
-                totalItems = pagedResponse.TotalCount;
-            }
-            else
-            {
-                var sozlesmeler = (await _sozlesmeService.GetAllAsync()).AsQueryable();
-
-                if (!string.IsNullOrEmpty(filtre.FiltreSozlesmeNo))
-                    sozlesmeler = sozlesmeler.Where(x => x.sozlesme_no != null && x.sozlesme_no.Contains(filtre.FiltreSozlesmeNo, StringComparison.OrdinalIgnoreCase));
-
-                if (!string.IsNullOrEmpty(filtre.FiltreDurum) && Enum.TryParse<KcetasWeb.Models.Enums.SozlesmeDurumu>(filtre.FiltreDurum, out var seciliDurum))
-                    sozlesmeler = sozlesmeler.Where(x => x.durum == seciliDurum);
-
-                int tarifeId = filtre.FiltreTuketiciGrubu switch
-                {
-                    "Mesken" => 1,
-                    "Sanayi" => 2,
-                    "Ticarethane" => 3,
-                    "Tarımsal Sulama" => 4,
-                    "Aydınlatma" => 5,
-                    _ => 0
-                };
-                if (tarifeId > 0)
-                {
-                    sozlesmeler = sozlesmeler.Where(x => x.tarife_id == tarifeId);
-                }
-
-                var filteredData = sozlesmeler.OrderByDescending(x => x.sozlesme_id).ToList();
-                totalItems = filteredData.Count;
-                pagedData = filteredData.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
-            }
+            pagedData = pagedResponse.Data;
+            totalItems = pagedResponse.TotalCount;
             
             filtre.TotalItems = totalItems;
 

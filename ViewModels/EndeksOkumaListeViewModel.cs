@@ -15,6 +15,9 @@ namespace KcetasWeb.ViewModels
         public string? FiltreTuketimNoktasi { get; set; }
         public string? FiltreDonem { get; set; }
         public string? FiltreDogrulamaDurumu { get; set; }
+        public DateTime? FiltreOkumaTarihi { get; set; }
+        public string? FiltreAbone { get; set; }
+        public long? FiltreOkumaNo { get; set; }
 
         public List<OkumaSatirViewModel> Okumalar { get; set; } = new();
 
