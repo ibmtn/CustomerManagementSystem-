@@ -37,6 +37,16 @@
                         </div>
 
                         <div class="row g-4">
+                            <!-- Abone No -->
+                            <div class="col-12 mb-2">
+                                <label class="form-label fw-bold text-muted">Abone No</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-hash text-primary"></i>
+                                    </span>
+                                    <input class="form-control border-start-0 ps-0 bg-light" value="@Model.AboneNo" readonly />
+                                </div>
+                            </div>
                             <!-- Ad Soyad / Ünvan -->
                             <div class="col-12">
                                 <label asp-for="AdSoyadUnvan" class="form-label fw-bold text-muted" id="lblAdSoyadUnvan">
@@ -60,7 +70,7 @@
                                     <span class="input-group-text bg-light border-end-0">
                                         <i class="bi bi-credit-card-2-front text-primary"></i>
                                     </span>
-                                    <input asp-for="TCKN" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="11" class="form-control border-start-0 ps-0" placeholder="11 Haneli TC Kimlik No" />
+                                    <input asp-for="TCKN" value="@Model.TCKN" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="11" class="form-control border-start-0 ps-0" placeholder="11 Haneli TC Kimlik No" />
                                 </div>
                                 <span asp-validation-for="TCKN" class="text-danger small"></span>
                             </div>
@@ -74,7 +84,7 @@
                                     <span class="input-group-text bg-light border-end-0">
                                         <i class="bi bi-building text-primary"></i>
                                     </span>
-                                    <input asp-for="VKN" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="10" class="form-control border-start-0 ps-0" placeholder="10 Haneli Vergi No" />
+                                    <input asp-for="VKN" value="@Model.VKN" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="10" class="form-control border-start-0 ps-0" placeholder="10 Haneli Vergi No" />
                                 </div>
                                 <span asp-validation-for="VKN" class="text-danger small"></span>
                             </div>

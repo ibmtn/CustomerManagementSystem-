@@ -29,8 +29,8 @@
     <div class="card-body">
         <form asp-action="Index" method="get" class="row g-3 align-items-end">
             <div class="col-md-3">
-                <label class="form-label fw-bold">TCKN / VKN</label>
-                <input name="FiltreTCKNVKN" value="@Model.FiltreTCKNVKN" type="text" class="form-control" placeholder="Kimlik veya Vergi No..." />
+                <label class="form-label fw-bold">Abone No</label>
+                <input name="FiltreAboneNo" value="@Model.FiltreAboneNo" type="text" class="form-control" placeholder="Abone No..." />
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-bold">Ad Soyad / Ünvan</label>
@@ -58,7 +58,7 @@
 
 <form id="filterForm" method="get" action="/Abone/Index">
     <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
-    <input type="hidden" name="FiltreTCKNVKN" value="@Model.FiltreTCKNVKN" />
+    <input type="hidden" name="FiltreAboneNo" value="@Model.FiltreAboneNo" />
     <input type="hidden" name="FiltreAdSoyadUnvan" value="@Model.FiltreAdSoyadUnvan" />
     <input type="hidden" name="FiltreAboneTipi" value="@Model.FiltreAboneTipi" />
 </form>
@@ -112,7 +112,7 @@
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">
                                         <li><a class="dropdown-item fw-semibold" href="/Abone/Detay/@item.AboneId"><i class="bi bi-eye text-primary me-2"></i> Detay</a></li>
-                                        <li><a class="dropdown-item fw-semibold" href="/Abone/Detay/@item.AboneId#sozlesme"><i class="bi bi-journal-text text-info me-2"></i> Sözleşmeleri Gör</a></li>
+
                                         <li><hr class="dropdown-divider"></li>
                                         <li><a class="dropdown-item fw-semibold" href="/Abone/Duzenle/@item.AboneId"><i class="bi bi-pencil text-warning me-2"></i> Düzenle</a></li>
                                         <li>

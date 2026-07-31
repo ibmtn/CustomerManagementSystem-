@@ -7,8 +7,8 @@ namespace KcetasWeb.ViewModels
     {
         public string? FiltreTip { get; set; }
         public string? FiltreDurum { get; set; }
-        public DateTime? BaslangicTarih { get; set; }
-        public DateTime? BitisTarih { get; set; }
+        public DateTime? FiltreOlusturmaTarihi { get; set; }
+        public DateTime? FiltrePlanlananTarih { get; set; }
         public string? AramaMetni { get; set; }
         public int CurrentPage { get; set; } = 1;
         public int PageSize { get; set; } = 50;

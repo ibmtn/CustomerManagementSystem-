@@ -1,4 +1,4 @@
-﻿@model KcetasWeb.ViewModels.TutanakGirisViewModel
+@model KcetasWeb.ViewModels.TutanakGirisViewModel
 @{
     ViewData["Title"] = "Tutanak Girişi - " + Model.IsEmriNo;
 }
@@ -209,7 +209,7 @@
             }
 
             // SÖKME / TAKMA / DEĞİŞTİRME MANTIĞI
-            if (tip === "SAYAÇ SÖKME" || tip === "SOKME" || tip === "YENİ BAĞLANTI" || tip === "YENI BAGLANTI" || tip === "YENIBAGLANTI" || tip === "SAYAÇ TAKMA" || tip === "SAYAÇ DEĞIŞTIRME" || tip === "SAYAÇ DEĞİŞTİRME" || tip === "SAYAÇ DEĞIŞIM" || tip === "DEGISTIRME") {
+            if (tip === "SAYACDEGISIM" || tip === "SAYACTAKMA" || tip === "BAGLAMA" || tip === "YENI_BAGLANTI" || tip === "SAYAÇ SÖKME" || tip === "SOKME" || tip === "YENİ BAĞLANTI" || tip === "YENI BAGLANTI" || tip === "YENIBAGLANTI" || tip === "SAYAÇ TAKMA" || tip === "SAYAÇ DEĞIŞTIRME" || tip === "SAYAÇ DEĞİŞTİRME" || tip === "SAYAÇ DEĞIŞIM" || tip === "DEGISTIRME") {
                 sokmeTakmaBolumu.classList.remove("d-none");
                 muhurNo.setAttribute("required", "required");
 
@@ -226,14 +226,14 @@
                     showAndRequire(eskiSayacDiv, eskiSayacNo);
                     showAndRequire(eskiEndeksDiv, eskiSonEndeksi);
                 } 
-                else if (tip === "YENİ BAĞLANTI" || tip === "YENI BAGLANTI" || tip === "YENIBAGLANTI" || tip === "SAYAÇ TAKMA") {
+                else if (tip === "SAYACTAKMA" || tip === "BAGLAMA" || tip === "YENI_BAGLANTI" || tip === "YENİ BAĞLANTI" || tip === "YENI BAGLANTI" || tip === "YENIBAGLANTI" || tip === "SAYAÇ TAKMA") {
                     showAndRequire(yeniSayacDiv, yeniSayacNo);
                     showAndRequire(yeniMarkaDiv, yeniSayacMarka);
                     showAndRequire(yeniModelDiv, yeniSayacModel);
                     showAndRequire(yeniFazDiv, yeniSayacFaz);
                     showAndRequire(yeniEndeksDiv, yeniIlkEndeksi);
                 } 
-                else if (tip === "SAYAÇ DEĞIŞTIRME" || tip === "SAYAÇ DEĞİŞTİRME" || tip === "SAYAÇ DEĞIŞIM" || tip === "DEGISTIRME") {
+                else if (tip === "SAYACDEGISIM" || tip === "SAYAÇ DEĞIŞTIRME" || tip === "SAYAÇ DEĞİŞTİRME" || tip === "SAYAÇ DEĞIŞIM" || tip === "DEGISTIRME") {
                     showAndRequire(eskiSayacDiv, eskiSayacNo);
                     showAndRequire(eskiEndeksDiv, eskiSonEndeksi);
                     showAndRequire(yeniSayacDiv, yeniSayacNo);
@@ -245,7 +245,7 @@
             }
             
             // AÇMA / KESME MANTIĞI
-            if (tip === "ENERJİ AÇMA" || tip === "ENERJI ACMA" || tip === "AÇMA" || tip === "ACMA" || tip === "ENERJİ KESME" || tip === "ENERJI KESME" || tip === "KESME") {
+            if (tip === "ENERJI_ACMA" || tip === "ENERJIACMA" || tip === "ENERJİ AÇMA" || tip === "ENERJI ACMA" || tip === "AÇMA" || tip === "ACMA" || tip === "ENERJİ KESME" || tip === "ENERJI KESME" || tip === "KESME") {
                 acmaKesmeBolumu.classList.remove("d-none");
                 
                 hideAndUnrequire(kesmeDiv, kesmeEndeksi);
@@ -254,13 +254,13 @@
                 if (tip === "ENERJİ KESME" || tip === "ENERJI KESME" || tip === "KESME") {
                     showAndRequire(kesmeDiv, kesmeEndeksi);
                 } 
-                else if (tip === "ENERJİ AÇMA" || tip === "ENERJI ACMA" || tip === "AÇMA" || tip === "ACMA") {
+                else if (tip === "ENERJI_ACMA" || tip === "ENERJIACMA" || tip === "ENERJİ AÇMA" || tip === "ENERJI ACMA" || tip === "AÇMA" || tip === "ACMA") {
                     showAndRequire(acmaDiv, acmaEndeksi);
                 }
             }
 
             // ENDEKS OKUMA MANTIĞI
-            if (tip === "ENDEKS OKUMA" || tip === "ENDEKS_OKUMA") {
+            if (tip === "ENDEKSOKUMA" || tip === "ENDEKS OKUMA" || tip === "ENDEKS_OKUMA") {
                 endeksOkumaBolumu.classList.remove("d-none");
                 showAndRequire(guncelEndeksDiv, guncelEndeks);
             }

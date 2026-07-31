@@ -30,11 +30,11 @@ namespace KcetasWeb.Controllers
             var tumAboneler = await _aboneService.GetAllAsync();
             
             // Son eklenenlerin en üstte gözükmesi için id'ye göre ters sıralayalım
-            // SADECE aktif olan aboneleri gösterelim (Silinenler/Pasifler listede çıkmasın)
-            var aboneler = tumAboneler.Where(x => x.Durum != "PASIF").OrderByDescending(x => x.abone_id).AsQueryable();
+            // Silinenler/Pasifler de listede çıksın.
+            var aboneler = tumAboneler.OrderByDescending(x => x.abone_id).AsQueryable();
 
-            if (!string.IsNullOrEmpty(filtre.FiltreTCKNVKN))
-                aboneler = aboneler.Where(x => (x.tckn != null && x.tckn.Contains(filtre.FiltreTCKNVKN)) || (x.vkn != null && x.vkn.Contains(filtre.FiltreTCKNVKN)));
+            if (!string.IsNullOrEmpty(filtre.FiltreAboneNo))
+                aboneler = aboneler.Where(x => x.abone_no != null && x.abone_no.Contains(filtre.FiltreAboneNo));
 
             if (!string.IsNullOrEmpty(filtre.FiltreAdSoyadUnvan))
                 aboneler = aboneler.Where(x => 
@@ -208,10 +208,15 @@ namespace KcetasWeb.Controllers
             var abone = await _aboneService.GetByIdAsync(id);
             if (abone == null) return NotFound();
 
+            var tumSozlesmeler = await _sozlesmeService.GetAllAsync();
+            bool sozlesmeVar = tumSozlesmeler.Any(s => s.abone_id == id);
+
             var model = new AboneEkleViewModel
             {
                 IsTuzel = abone.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Kurumsal,
                 AdSoyadUnvan = abone.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Kurumsal ? abone.Unvan : $"{abone.Ad} {abone.Soyad}",
+                AboneNo = abone.abone_no,
+                SozlesmeVarMi = sozlesmeVar,
                 TCKN = abone.tckn,
                 VKN = abone.vkn,
                 Telefon = abone.telefon,
@@ -302,7 +307,12 @@ namespace KcetasWeb.Controllers
         {
             try 
             {
-                await _aboneService.DeleteAsync(id);
+                var abone = await _aboneService.GetByIdAsync(id);
+                if (abone != null)
+                {
+                    abone.Durum = "PASIF";
+                    await _aboneService.UpdateAsync(abone);
+                }
 
                 await _auditLogService.EkleAsync(
                     varlikTipi: "Abone",

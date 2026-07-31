@@ -49,7 +49,7 @@ public class IsEmriController : Controller
     {
         // Önce temel tarih ve durum/arama filtrelerini API üzerinden çekiyoruz.
         // Tip filtresini burada göndermiyoruz çünkü DB'deki değer (BAGLAMA) ile UI'daki (Sayaç Bağlama) farklı olabiliyor.
-        var isEmirleriTask = _isEmriService.FiltreleAsync(null, filtre.FiltreDurum, filtre.BaslangicTarih, filtre.BitisTarih, filtre.AramaMetni);
+        var isEmirleriTask = _isEmriService.FiltreleAsync(null, filtre.FiltreDurum, filtre.FiltreOlusturmaTarihi, filtre.FiltrePlanlananTarih, filtre.AramaMetni);
 
         // OPTİMİZASYON: N+1 Sorgu Problemini (Yavaşlık) Çözmek İçin
         // Tüm Tüketim Noktalarını ve Kullanıcıları (Personelleri) API'den 1 kez çekip Dictionary (Sözlük) yapıyoruz.
@@ -545,27 +545,42 @@ public class IsEmriController : Controller
                 {
                     try
                     {
-                        // 1. Yeni Sayac Oluştur
+                        // 1. Yeni Sayac Oluştur veya Mevcut Sayacı Güncelle
                         var allSayaclar = await _sayacService.GetAllAsync();
-                        int maxSayacId = allSayaclar.Any() ? (int)allSayaclar.Max(x => x.sayac_id) : 0;
-                        int newSayacId = maxSayacId + 1;
+                        var mevcutSayac = allSayaclar.FirstOrDefault(x => x.seri_no == model.YeniSayacNo);
                         
-                        var yeniSayac = new Sayac
+                        int newSayacId;
+                        if (mevcutSayac != null)
                         {
-                            sayac_id = newSayacId,
-                            tuketim_noktasi_id = tIsEmri.tuketim_noktasi_id,
-                            seri_no = model.YeniSayacNo,
-                            marka = !string.IsNullOrWhiteSpace(model.YeniSayacMarka) ? model.YeniSayacMarka : "Bilinmiyor",
-                            model = !string.IsNullOrWhiteSpace(model.YeniSayacModel) ? model.YeniSayacModel : "Bilinmiyor",
-                            uretim_yili = DateTime.Now.Year,
-                            muhur_no = model.MuhurNo,
-                            durum = KcetasWeb.Models.Enums.SayacDurumu.Bagli,
-                            faz = Enum.TryParse<KcetasWeb.Models.Enums.SayacFaz>(model.YeniSayacFaz, true, out var pFaz) ? pFaz : KcetasWeb.Models.Enums.SayacFaz.Monofaze,
-                            carpan = 1,
-                            status = "AKTIF"
-                        };
-                        
-                        await _sayacService.CreateAsync(yeniSayac);
+                            mevcutSayac.tuketim_noktasi_id = tIsEmri.tuketim_noktasi_id;
+                            mevcutSayac.durum = KcetasWeb.Models.Enums.SayacDurumu.Bagli;
+                            mevcutSayac.muhur_no = model.MuhurNo;
+                            mevcutSayac.status = "AKTIF";
+                            await _sayacService.UpdateAsync(mevcutSayac);
+                            newSayacId = mevcutSayac.sayac_id;
+                        }
+                        else
+                        {
+                            int maxSayacId = allSayaclar.Any() ? (int)allSayaclar.Max(x => x.sayac_id) : 0;
+                            newSayacId = maxSayacId + 1;
+                            
+                            var yeniSayac = new Sayac
+                            {
+                                sayac_id = newSayacId,
+                                tuketim_noktasi_id = tIsEmri.tuketim_noktasi_id,
+                                seri_no = model.YeniSayacNo,
+                                marka = !string.IsNullOrWhiteSpace(model.YeniSayacMarka) ? model.YeniSayacMarka : "Bilinmiyor",
+                                model = !string.IsNullOrWhiteSpace(model.YeniSayacModel) ? model.YeniSayacModel : "Bilinmiyor",
+                                uretim_yili = DateTime.Now.Year,
+                                muhur_no = model.MuhurNo,
+                                durum = KcetasWeb.Models.Enums.SayacDurumu.Bagli,
+                                faz = Enum.TryParse<KcetasWeb.Models.Enums.SayacFaz>(model.YeniSayacFaz, true, out var pFaz) ? pFaz : KcetasWeb.Models.Enums.SayacFaz.Monofaze,
+                                carpan = 1,
+                                status = "AKTIF"
+                            };
+                            
+                            await _sayacService.CreateAsync(yeniSayac);
+                        }
 
                         // 2. İlgili Sözleşmeyi Bul ve Aktif Et
                         var tnSozlesmeler = (await _sozlesmeService.GetAllAsync()).Where(s => s.tuketim_noktasi_id == tIsEmri.tuketim_noktasi_id).ToList();

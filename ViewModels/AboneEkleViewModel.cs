@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace KcetasWeb.ViewModels
 {
@@ -12,6 +12,8 @@ namespace KcetasWeb.ViewModels
 
         public string? TCKN { get; set; }
         public string? VKN { get; set; }
+        public string? AboneNo { get; set; }
+        public bool SozlesmeVarMi { get; set; }
 
         [Required(ErrorMessage = "Telefon zorunludur.")]
         [Phone]

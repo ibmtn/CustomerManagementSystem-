@@ -121,6 +121,7 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
+
         document.addEventListener('DOMContentLoaded', function () {
             if (!window.jQuery || !$.fn.select2) {
                 return;
@@ -245,6 +246,7 @@
                 }
 
                 loadSecimBilgisi(params);
+
             });
         });
     </script>

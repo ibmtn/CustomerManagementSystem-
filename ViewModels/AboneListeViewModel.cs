@@ -4,7 +4,7 @@ namespace KcetasWeb.ViewModels
 {
     public class AboneListeViewModel : PaginationBaseViewModel
     {
-        public string? FiltreTCKNVKN { get; set; }
+        public string? FiltreAboneNo { get; set; }
         public string? FiltreAdSoyadUnvan { get; set; }
         public string? FiltreAboneTipi { get; set; }
         public string? FiltreDurum { get; set; }

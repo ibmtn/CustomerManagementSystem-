@@ -133,7 +133,7 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public async Task<List<IsEmri>> FiltreleAsync(string? tip, string? durum, DateTime? baslangic, DateTime? bitis, string? arama)
+        public async Task<List<IsEmri>> FiltreleAsync(string? tip, string? durum, DateTime? olusturmaTarihi, DateTime? planlananTarih, string? arama)
         {
             var all = await GetAllAsync();
             var query = all.AsQueryable();
@@ -144,11 +144,11 @@ namespace KcetasWeb.Services.Api
             if (!string.IsNullOrEmpty(durum))
                 query = query.Where(x => ((int)x.durum).ToString() == durum || x.durum.ToString().Equals(durum, StringComparison.OrdinalIgnoreCase));
 
-            if (baslangic.HasValue)
-                query = query.Where(x => x.planlanan_tarih >= baslangic.Value);
+            if (olusturmaTarihi.HasValue)
+                query = query.Where(x => x.created_at.Date == olusturmaTarihi.Value.Date);
 
-            if (bitis.HasValue)
-                query = query.Where(x => x.planlanan_tarih <= bitis.Value);
+            if (planlananTarih.HasValue)
+                query = query.Where(x => x.planlanan_tarih.HasValue && x.planlanan_tarih.Value.Date == planlananTarih.Value.Date);
 
             if (!string.IsNullOrEmpty(arama))
             {
