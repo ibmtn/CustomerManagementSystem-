@@ -170,11 +170,7 @@ namespace KcetasWeb.Services.Api
                 var err = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Abone oluşturulamadı. \nPayload: {payload}\nDetay: {err}");
             }
-<<<<<<< HEAD
             // Clear cache so new item appears immediately in searches
-=======
-
->>>>>>> 600e20d70a5f7feb91e6f07cc290984fb95fb6e2
             _cache.Remove("Abone_TotalCount");
             _cache.Remove("Abone_GetAll");
             _cache.Remove("Abone_GetAll_2");

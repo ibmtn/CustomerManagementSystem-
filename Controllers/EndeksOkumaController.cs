@@ -450,7 +450,10 @@ namespace KcetasWeb.Controllers
                         await _isEmriService.EkleAsync(acmaIsEmri); 
                         TempData["OkumaMesaji"] += " Ayrıca onaylanan ilk okuma sonrası sisteme otomatik 'Enerji Açma' iş emri eklendi.";
                     } 
-                    catch { }
+                    catch (Exception ex) 
+                    {
+                        TempData["OkumaMesaji"] += $" Ancak otomatik 'Enerji Açma' iş emri oluşturulurken bir hata oluştu: {ex.Message}";
+                    }
                 }
 
 

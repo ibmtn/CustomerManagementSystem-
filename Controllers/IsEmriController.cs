@@ -409,55 +409,67 @@ public class IsEmriController : Controller
                 var tIsEmri = await _isEmriService.GetByIdAsync(model.IsEmriId);
                 if (tIsEmri != null)
                 {
-                    // 1. Yeni Sayac Oluştur
-                    var allSayaclar = await _sayacService.GetAllAsync();
-                    int maxSayacId = allSayaclar.Any() ? (int)allSayaclar.Max(x => x.sayac_id) : 0;
-                    int newSayacId = maxSayacId + 1;
-                    
-                    var yeniSayac = new Sayac
+                    try
                     {
-                        sayac_id = newSayacId,
-                        tuketim_noktasi_id = tIsEmri.tuketim_noktasi_id,
-                        seri_no = model.YeniSayacNo,
-                        marka = !string.IsNullOrWhiteSpace(model.YeniSayacMarka) ? model.YeniSayacMarka : "Bilinmiyor",
-                        model = !string.IsNullOrWhiteSpace(model.YeniSayacModel) ? model.YeniSayacModel : "Bilinmiyor",
-                        uretim_yili = DateTime.Now.Year,
-                        muhur_no = model.MuhurNo,
-                        durum = KcetasWeb.Models.Enums.SayacDurumu.Bagli,
-                        faz = Enum.TryParse<KcetasWeb.Models.Enums.SayacFaz>(model.YeniSayacFaz, true, out var pFaz) ? pFaz : KcetasWeb.Models.Enums.SayacFaz.Monofaze,
-                        carpan = 1,
-                        status = "AKTIF"
-                    };
-                    try { await _sayacService.CreateAsync(yeniSayac); } catch { }
+                        // 1. Yeni Sayac Oluştur
+                        var allSayaclar = await _sayacService.GetAllAsync();
+                        int maxSayacId = allSayaclar.Any() ? (int)allSayaclar.Max(x => x.sayac_id) : 0;
+                        int newSayacId = maxSayacId + 1;
+                        
+                        var yeniSayac = new Sayac
+                        {
+                            sayac_id = newSayacId,
+                            tuketim_noktasi_id = tIsEmri.tuketim_noktasi_id,
+                            seri_no = model.YeniSayacNo,
+                            marka = !string.IsNullOrWhiteSpace(model.YeniSayacMarka) ? model.YeniSayacMarka : "Bilinmiyor",
+                            model = !string.IsNullOrWhiteSpace(model.YeniSayacModel) ? model.YeniSayacModel : "Bilinmiyor",
+                            uretim_yili = DateTime.Now.Year,
+                            muhur_no = model.MuhurNo,
+                            durum = KcetasWeb.Models.Enums.SayacDurumu.Bagli,
+                            faz = Enum.TryParse<KcetasWeb.Models.Enums.SayacFaz>(model.YeniSayacFaz, true, out var pFaz) ? pFaz : KcetasWeb.Models.Enums.SayacFaz.Monofaze,
+                            carpan = 1,
+                            status = "AKTIF"
+                        };
+                        
+                        await _sayacService.CreateAsync(yeniSayac);
 
-                    // 2. İlgili Sözleşmeyi Bul ve Aktif Et
-                    var tnSozlesmeler = (await _sozlesmeService.GetAllAsync()).Where(s => s.tuketim_noktasi_id == tIsEmri.tuketim_noktasi_id).ToList();
-                    var bekleyenSozlesme = tnSozlesmeler.OrderByDescending(s => s.sozlesme_id).FirstOrDefault();
-                    if (bekleyenSozlesme != null)
-                    {
-                        bekleyenSozlesme.durum = KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif;
-                        bekleyenSozlesme.updated_at = DateTime.Now;
-                        try { await _sozlesmeService.UpdateAsync(bekleyenSozlesme); } catch { }
+                        // 2. İlgili Sözleşmeyi Bul ve Aktif Et
+                        var tnSozlesmeler = (await _sozlesmeService.GetAllAsync()).Where(s => s.tuketim_noktasi_id == tIsEmri.tuketim_noktasi_id).ToList();
+                        var bekleyenSozlesme = tnSozlesmeler.OrderByDescending(s => s.sozlesme_id).FirstOrDefault();
+                        if (bekleyenSozlesme != null)
+                        {
+                            bekleyenSozlesme.durum = KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif;
+                            bekleyenSozlesme.updated_at = DateTime.Now;
+                            await _sozlesmeService.UpdateAsync(bekleyenSozlesme);
+                        }
+
+                        // 3. İŞ MANTIĞI: Sayaç Bağlama bitince 'Endeks Okuma' İŞ EMRİ Fırlat!
+                        var endeksIsEmri = new IsEmri
+                        {
+                            is_emri_no = $"IE-END-{DateTime.Now.ToString("yyyyMMdd")}-{new Random().Next(1000, 9999)}",
+                            tuketim_noktasi_id = tIsEmri.tuketim_noktasi_id,
+                            sayac_id = newSayacId,
+                            tip = KcetasWeb.Models.Enums.IsEmriTipi.EndeksOkuma,
+                            durum = KcetasWeb.Models.Enums.IsEmriDurumu.Acik, // Havuza açık iş olarak düşer
+                            oncelik = "NORMAL",
+                            planlanan_tarih = DateTime.Now,
+                            atanan_kullanici_id = null,
+                            status = "AKTIF",
+                            created_at = DateTime.Now
+                        };
+                        
+                        await _isEmriService.EkleAsync(endeksIsEmri);
+
+                        mesaj = $"Tutanak kaydedildi. Sayaç bağlandı ve sahaya otomatik 'Endeks Okuma' iş emri eklendi.";
+                        TempData["Mesaj"] = mesaj;
+                        TempData["MesajTip"] = "success";
                     }
-
-                    // 3. İŞ MANTIĞI: Sayaç Bağlama bitince 'Endeks Okuma' İŞ EMRİ Fırlat!
-                    var endeksIsEmri = new IsEmri
+                    catch (Exception ex)
                     {
-                        is_emri_no = $"IE-END-{DateTime.Now.ToString("yyyyMMdd")}-{new Random().Next(1000, 9999)}",
-                        tuketim_noktasi_id = tIsEmri.tuketim_noktasi_id,
-                        sayac_id = newSayacId,
-                        tip = KcetasWeb.Models.Enums.IsEmriTipi.EndeksOkuma,
-                        durum = KcetasWeb.Models.Enums.IsEmriDurumu.Acik, // Havuza açık iş olarak düşer
-                        oncelik = "NORMAL",
-                        planlanan_tarih = DateTime.Now,
-                        atanan_kullanici_id = null,
-                        status = "AKTIF",
-                        created_at = DateTime.Now
-                    };
-                    try { await _isEmriService.EkleAsync(endeksIsEmri); } catch { }
-
-                    mesaj = $"Tutanak kaydedildi. Sayaç bağlandı ve sahaya otomatik 'Endeks Okuma' iş emri eklendi.";
-                    TempData["Mesaj"] = mesaj;
+                        TempData["Mesaj"] = $"Sayaç bağlama işlemi sırasında bir hata oluştu: {ex.Message}";
+                        TempData["MesajTip"] = "danger";
+                        return RedirectToAction("Detay", new { id = model.IsEmriId });
+                    }
                 }
             }
         }

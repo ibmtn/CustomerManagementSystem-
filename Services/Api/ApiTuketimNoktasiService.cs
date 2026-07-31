@@ -107,11 +107,7 @@ namespace KcetasWeb.Services.Api
                 var errorContent = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Tüketim noktası oluşturulamadı. \nPayload: {payload}\nDetay: {errorContent}");
             }
-<<<<<<< HEAD
-            
-=======
 
->>>>>>> 600e20d70a5f7feb91e6f07cc290984fb95fb6e2
             _cache.Remove("TuketimNoktasi_TotalCount");
             _cache.Remove("TuketimNoktasi_GetAll");
         }

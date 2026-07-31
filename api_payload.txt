@@ -1,1 +1,0 @@
-{"isEmriNo":"IE-2026-51149","tuketimNoktasiId":51105,"tuketimNoktasi":null,"sayacId":null,"tip":10,"oncelik":"NORMAL","planlananTarih":"2026-07-31","atananKullaniciId":null,"durum":1,"sahaSonucu":"","gerekce":"","muhurNo":"","tutanakNo":"","status":"ACIK","createdAt":"2026-07-30T15:51:00.4049103+03:00","updatedAt":"2026-07-30T15:51:00.4049105+03:00"}

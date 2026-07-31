@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-{"sayacId":50,"donem":"2026-07","isEmriId":null,"sozlesmeId":50,"okumaTipi":1,"okumaKaynagi":2,"oncekiEndeks":79.908,"yeniEndeks":1525,"okumaZamani":"2026-07-30","kullaniciId":1,"okunamamaNedeni":"","dogrulamaDurumu":3,"anomaliMi":true,"status":"AKTIF","createdAt":"2026-07-30T12:17:49.3302107Z","updatedAt":"2026-07-30T12:17:49.3302108Z"}
-=======
-{"sayacId":59528,"donem":null,"isEmriId":null,"sozlesmeId":null,"okumaTipi":2,"okumaKaynagi":1,"oncekiEndeks":0,"yeniEndeks":0,"okumaZamani":"2026-07-30","kullaniciId":1,"okunamamaNedeni":null,"dogrulamaDurumu":null,"anomaliMi":false,"status":"AKTIF","createdAt":"0001-01-01T00:00:00","updatedAt":null}
->>>>>>> 600e20d70a5f7feb91e6f07cc290984fb95fb6e2
+{"sayacId":87,"donem":"2026-07","isEmriId":null,"sozlesmeId":87,"okumaTipi":1,"okumaKaynagi":1,"oncekiEndeks":148.898,"yeniEndeks":152,"okumaZamani":"2026-07-30","kullaniciId":1,"okunamamaNedeni":"","dogrulamaDurumu":3,"anomaliMi":false,"status":"AKTIF","createdAt":"2026-07-30T13:38:17.6206193Z","updatedAt":"2026-07-30T13:38:17.6206195Z"}
