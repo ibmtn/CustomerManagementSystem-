@@ -245,14 +245,19 @@
 </style>
 
 @section Scripts {
-    @if (TempData["SuccessMessage"] != null)
+    @{
+        var successMessage = TempData["SuccessMessage"]?.ToString();
+        var successMessageJson = System.Text.Json.JsonSerializer.Serialize(successMessage);
+    }
+
+    @if (!string.IsNullOrWhiteSpace(successMessage))
     {
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire({
                     icon: 'success',
                     title: 'Ödeme Başarılı!',
-                    text: '@TempData["SuccessMessage"]',
+                    text: @Html.Raw(successMessageJson),
                     confirmButtonText: 'Tamam',
                     confirmButtonColor: '#198754'
                 });
