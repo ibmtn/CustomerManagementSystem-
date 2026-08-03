@@ -1,6 +1,7 @@
 using KcetasWeb.Models.entities;
 namespace KcetasWeb.ViewModels
 {
+    using KcetasWeb.Models.Enums;
     using System;
 
     public class TuketimNoktasiViewModels
@@ -47,6 +48,54 @@ namespace KcetasWeb.ViewModels
         public string il_adi { get; set; }
         public string ilce_adi { get; set; }
         public int okuma_id { get; set; }
+
+        public string BaglantiDurumuEtiketi => GetBaglantiDurumuAd(baglanti_durumu, status);
+        public string BaglantiDurumuBadgeClass => GetBaglantiDurumuBadgeClass(baglanti_durumu, status);
+
+        public static BaglantiDurumu? ResolveBaglantiDurumu(BaglantiDurumu? baglantiDurumu, string? status)
+        {
+            if (baglantiDurumu.HasValue)
+                return baglantiDurumu.Value;
+
+            return status?.Trim().ToUpperInvariant() switch
+            {
+                "AKTIF" or "AKTİF" or "ACTIVE" or "BAGLI" or "BAĞLI" => BaglantiDurumu.Aktif,
+                "PASIF" or "PASİF" or "KESIK" or "KESİK" => BaglantiDurumu.Pasif,
+                "KAPALI" or "SOKULU" or "SÖKÜLÜ" => BaglantiDurumu.Kapali,
+                "TASLAK" => BaglantiDurumu.Taslak,
+                "BAGLANTI BEKLIYOR" or "BAĞLANTI BEKLİYOR" => BaglantiDurumu.BaglantiBekliyor,
+                "BAGLANABILIR" or "BAĞLANABİLİR" => BaglantiDurumu.Baglanabilir,
+                _ => null
+            };
+        }
+
+        public static string GetBaglantiDurumuAd(BaglantiDurumu? baglantiDurumu, string? status)
+        {
+            return ResolveBaglantiDurumu(baglantiDurumu, status) switch
+            {
+                BaglantiDurumu.Aktif => "Bağlı",
+                BaglantiDurumu.Pasif => "Kesik",
+                BaglantiDurumu.Kapali => "Sökülü",
+                BaglantiDurumu.BaglantiBekliyor => "Bağlantı Bekliyor",
+                BaglantiDurumu.Baglanabilir => "Bağlanabilir",
+                BaglantiDurumu.Taslak => "Taslak",
+                _ => string.IsNullOrWhiteSpace(status) ? "-" : status
+            };
+        }
+
+        public static string GetBaglantiDurumuBadgeClass(BaglantiDurumu? baglantiDurumu, string? status)
+        {
+            return ResolveBaglantiDurumu(baglantiDurumu, status) switch
+            {
+                BaglantiDurumu.Aktif => "bg-success text-white",
+                BaglantiDurumu.Pasif => "bg-danger text-white",
+                BaglantiDurumu.Kapali => "bg-secondary text-white",
+                BaglantiDurumu.BaglantiBekliyor => "bg-warning text-dark",
+                BaglantiDurumu.Baglanabilir => "bg-info text-dark",
+                BaglantiDurumu.Taslak => "bg-secondary text-white",
+                _ => "bg-secondary text-white"
+            };
+        }
     }
 
 
@@ -56,7 +105,7 @@ namespace KcetasWeb.ViewModels
         public int? FiltreIlId { get; set; }
         public int? FiltreIlceId { get; set; }
         public string? FiltreTuketiciGrubu { get; set; }
-        public string? FiltreDurum { get; set; }
+        public string? FiltreBaglantiDurumu { get; set; }
 
         public System.Collections.Generic.List<TuketimNoktasiViewModels> TuketimNoktalari { get; set; } = new();
     }

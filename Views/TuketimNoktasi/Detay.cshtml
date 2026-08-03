@@ -25,14 +25,9 @@
                 <p class="mb-0 opacity-75">Tüketici Grubu: @Model.tuketici_grubu</p>
             </div>
             <div class="ms-auto">
-                @if (Model.status ?.ToUpper() == "AKTIF")
-                {
-                    <span class="badge bg-light text-success rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Aktif</span>
-                }
-                else
-                {
-                    <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-exclamation-triangle-fill me-1"></i> @Model.status</span>
-                }
+                <span class="badge @Model.BaglantiDurumuBadgeClass rounded-pill px-3 py-2 fs-6 shadow-sm">
+                    <i class="bi bi-plug-fill me-1"></i> @Model.BaglantiDurumuEtiketi
+                </span>
             </div>
         </div>
     </div>
@@ -94,8 +89,7 @@
                             
                             <label class="text-muted small fw-bold mb-1 text-uppercase">Bağlantı Gücü</label>
                             <p class="fs-5 fw-bold text-dark mb-3">@Model.baglanti_gucu_kw kW</p>
-                                
-                    
+
                             <div class="row">
                                 <div class="col-6 mb-3">
                                     <label class="text-muted small fw-bold mb-1 text-uppercase">İl / İlçe</label>
@@ -301,4 +295,3 @@
         });
     </script>
 }
-

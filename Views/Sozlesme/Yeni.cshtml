@@ -36,31 +36,21 @@
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Tüketim Noktası (Tesisat) <span class="text-danger">*</span></label>
-                            <select data-control="select2" class="form-select" name="tuketim_noktasi_id" data-placeholder="Tesisat Seçiniz..." required>
-                                <option value="" disabled selected>Tesisat Seçiniz...</option>
-                                @if(ViewBag.TuketimNoktalari != null)
+                            <select class="form-select" name="tuketim_noktasi_id" id="TuketimNoktasiId" required>
+                                <option value="">TK kodu veya adres yazın...</option>
+                                @if (Model?.tuketim_noktasi_id > 0 && ViewBag.SelectedTuketimNoktasiText != null)
                                 {
-                                    foreach (var tn in ViewBag.TuketimNoktalari)
-                                    {
-                                        <option value="@tn.tuketim_noktasi_id">@tn.tekil_kod - @tn.mahalle @tn.bina_no</option>
-                                    }
+                                    <option value="@Model.tuketim_noktasi_id" selected>@ViewBag.SelectedTuketimNoktasiText</option>
                                 }
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Abone (Müşteri) <span class="text-danger">*</span></label>
-                            <select data-control="select2" class="form-select" name="abone_id" data-placeholder="Müşteri Seçiniz..." required>
-                                <option value="" disabled selected>Müşteri Seçiniz...</option>
-                                @if(ViewBag.Aboneler != null)
+                            <select class="form-select" name="abone_id" id="AboneId" required>
+                                <option value="">Müşteri adı, kimlik no veya telefon yazın...</option>
+                                @if (Model?.abone_id > 0 && ViewBag.SelectedAboneText != null)
                                 {
-                                    foreach (var abone in ViewBag.Aboneler)
-                                    {
-                                        string kimlik = abone.tckn ?? abone.vkn ?? "";
-                                        string maskedKimlik = kimlik.Length >= 6 
-                                            ? kimlik.Substring(0, 3) + new string('*', kimlik.Length - 6) + kimlik.Substring(kimlik.Length - 3) 
-                                            : kimlik;
-                                        <option value="@abone.abone_id">@maskedKimlik - @abone.Ad @abone.Soyad @abone.Unvan</option>
-                                    }
+                                    <option value="@Model.abone_id" selected>@ViewBag.SelectedAboneText</option>
                                 }
                             </select>
                         </div>
@@ -108,3 +98,47 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (!window.jQuery || !$.fn.select2) {
+                return;
+            }
+
+            function select2Language() {
+                return {
+                    inputTooShort: function () { return 'Aramak için en az 2 karakter yazın'; },
+                    noResults: function () { return 'Kayıt bulunamadı'; },
+                    searching: function () { return 'Aranıyor...'; }
+                };
+            }
+
+            function initAjaxSelect($element, url, placeholder) {
+                $element.select2({
+                    ajax: {
+                        url: url,
+                        dataType: 'json',
+                        delay: 300,
+                        cache: true,
+                        data: function (params) {
+                            return { q: params.term || '' };
+                        },
+                        processResults: function (data) {
+                            return data;
+                        }
+                    },
+                    allowClear: true,
+                    minimumInputLength: 2,
+                    placeholder: placeholder,
+                    width: '100%',
+                    language: select2Language()
+                });
+            }
+
+            initAjaxSelect($('#TuketimNoktasiId'), '/Sozlesme/TuketimNoktasiAra', 'TK kodu veya adres yazın...');
+            initAjaxSelect($('#AboneId'), '/Sozlesme/AboneAra', 'Müşteri adı, kimlik no veya telefon yazın...');
+        });
+    </script>
+}

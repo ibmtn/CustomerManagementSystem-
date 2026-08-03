@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "Tüketici ve Tesisat Düzenle";
+    var seciliBaglantiDurumu = KcetasWeb.ViewModels.TuketimNoktasiViewModels.ResolveBaglantiDurumu(Model.baglanti_durumu, Model.status)
+        ?? KcetasWeb.Models.Enums.BaglantiDurumu.Pasif;
 }
 
 <div class="row justify-content-center">
@@ -20,7 +22,6 @@
                     <input type="hidden" name="tekil_kod" value="@Model.tekil_kod" />
                     <input type="hidden" name="tuketim_noktasi_id" value="@Model.tuketim_noktasi_id" />
 
-
                     <!-- Tesisat Bilgileri -->
                     <h5 class="text-warning border-bottom pb-2 mb-3 mt-4"><i class="bi bi-house-door"></i> Tesisat ve Adres Bilgileri</h5>
                     <div class="row mb-3">
@@ -36,15 +37,15 @@
                                 <option value="">Önce İl Seçin</option>
                             </select>
                         </div>
-                        <div class="col-md-8 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Mahalle <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="mahalle" value="@Model.mahalle" required />
                         </div>
-                        <div class="col-md-2 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label fw-bold">Bina No</label>
                             <input type="text" class="form-control" name="bina_no" value="@Model.bina_no" />
                         </div>
-                        <div class="col-md-2 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label fw-bold">Daire No</label>
                             <input type="text" class="form-control" name="bagimsiz_bolum_no" value="@Model.bagimsiz_bolum_no" />
                         </div>
@@ -67,10 +68,10 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Durum</label>
-                            <select data-control="select2" class="form-select" name="status">
-                                <option value="Bağlı" selected="@(Model.status == "Bağlı" || Model.baglanti_durumu == KcetasWeb.Models.Enums.BaglantiDurumu.Aktif)">Bağlı</option>
-                                <option value="Kesik" selected="@(Model.status == "Kesik" || Model.baglanti_durumu == KcetasWeb.Models.Enums.BaglantiDurumu.Pasif)">Kesik</option>
+                            <label class="form-label fw-bold">Bağlantı Durumu</label>
+                            <select data-control="select2" class="form-select" name="baglanti_durumu">
+                                <option value="Aktif" selected="@(seciliBaglantiDurumu == KcetasWeb.Models.Enums.BaglantiDurumu.Aktif)">Bağlı</option>
+                                <option value="Pasif" selected="@(seciliBaglantiDurumu == KcetasWeb.Models.Enums.BaglantiDurumu.Pasif)">Kesik</option>
                             </select>
                         </div>
 

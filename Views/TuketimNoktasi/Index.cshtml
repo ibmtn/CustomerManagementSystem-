@@ -25,11 +25,18 @@
 <div class="card shadow-sm border-0 mb-4 bg-light">
     <div class="card-body">
         <form asp-action="Index" method="get" class="row g-3 align-items-end">
-            <div class="col-md-3">
+            <div class="col-md-4 col-lg-2">
                 <label class="form-label fw-bold">Tekil Kod (Arama)</label>
                 <input name="FiltreTekilKod" value="@Model.FiltreTekilKod" type="text" class="form-control" placeholder="Örn: TK-2026-001" />
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4 col-lg-2">
+                <label class="form-label fw-bold">İl</label>
+                <select data-control="select2" name="FiltreIlId" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="38" selected="@(Model.FiltreIlId == 38 ? "selected" : null)">Kayseri</option>
+                </select>
+            </div>
+            <div class="col-md-4 col-lg-2">
                 <label class="form-label fw-bold">İlçe</label>
                 <select data-control="select2" name="FiltreIlceId" class="form-select">
                     <option value="">Tümü</option>
@@ -52,7 +59,7 @@
                     <option value="99" selected="@(Model.FiltreIlceId == 99 ? "selected" : null)">Merkez İlçe</option>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4 col-lg-2">
                 <label class="form-label fw-bold">Tüketici Grubu</label>
                 <select data-control="select2" name="FiltreTuketiciGrubu" class="form-select">
                     <option value="">Tümü</option>
@@ -63,21 +70,21 @@
                     <option value="Aydınlatma" selected="@(Model.FiltreTuketiciGrubu == "Aydınlatma" ? "selected" : null)">Aydınlatma</option>
                 </select>
             </div>
-            <div class="col-md-3">
-                <label class="form-label fw-bold">Durum</label>
-                <select data-control="select2" name="FiltreDurum" class="form-select">
+            <div class="col-md-4 col-lg-2">
+                <label class="form-label fw-bold">Bağlantı Durumu</label>
+                <select data-control="select2" name="FiltreBaglantiDurumu" class="form-select">
                     <option value="">Tümü</option>
-                    <option value="Aktif" selected="@(Model.FiltreDurum == "Aktif" ? "selected" : null)">Aktif</option>
-                    <option value="Pasif" selected="@(Model.FiltreDurum == "Pasif" ? "selected" : null)">Pasif</option>
+                    <option value="AKTIF" selected="@(Model.FiltreBaglantiDurumu == "AKTIF" ? "selected" : null)">Bağlı</option>
+                    <option value="PASIF" selected="@(Model.FiltreBaglantiDurumu == "PASIF" ? "selected" : null)">Kesik</option>
                 </select>
             </div>
-            <div class="col-md-9 d-flex justify-content-end gap-2">
-                <a href="/TuketimNoktasi/Index" class="btn btn-outline-secondary px-4" title="Temizle">
-                    <i class="bi bi-x-lg me-1"></i> Temizle
-                </a>
-                <button type="submit" class="btn btn-primary px-5">
-                    <i class="bi bi-search me-1"></i> Filtrele
+            <div class="col-md-4 col-lg-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">
+                    <i class="bi bi-search"></i> Filtrele
                 </button>
+                <a href="/TuketimNoktasi/Index" class="btn btn-outline-secondary" title="Temizle">
+                    <i class="bi bi-x-lg"></i>
+                </a>
             </div>
         </form>
     </div>
@@ -87,9 +94,10 @@
 <form id="filterForm" method="get" action="/TuketimNoktasi/Index">
     <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
     <input type="hidden" name="FiltreTekilKod" value="@Model.FiltreTekilKod" />
+    <input type="hidden" name="FiltreIlId" value="@Model.FiltreIlId" />
     <input type="hidden" name="FiltreIlceId" value="@Model.FiltreIlceId" />
     <input type="hidden" name="FiltreTuketiciGrubu" value="@Model.FiltreTuketiciGrubu" />
-    <input type="hidden" name="FiltreDurum" value="@Model.FiltreDurum" />
+    <input type="hidden" name="FiltreBaglantiDurumu" value="@Model.FiltreBaglantiDurumu" />
 </form>
 
 <div class="card shadow-sm border-0 rounded-4 mb-4">
@@ -99,12 +107,12 @@
                 <thead class="table-light">
                     <tr>
                         <th class="ps-4">Tekil Kod</th>
-                        <th>baglantı gücü</th>
+                        <th>Bağlantı Gücü</th>
                         <th>İlçe</th>
-
+                        <th>Mahalle</th>
                         <th>Bina / Daire</th>
                         <th>Tüketici Grubu</th>
-                        <th>Durum</th>
+                        <th>Bağlantı Durumu</th>
                         <th class="text-end pe-4">İşlemler</th>
                     </tr>
                 </thead>
@@ -117,12 +125,12 @@
                                 <td class="ps-4 fw-bold text-dark">@item.tekil_kod</td>
                                 <td>@item.baglanti_gucu_kw.ToString("N2")</td>
                                 <td>@item.ilce_adi</td>
-                                
+                                <td>@(string.IsNullOrWhiteSpace(item.mahalle) ? "-" : item.mahalle)</td>
                                 <td>@item.bina_no / @item.bagimsiz_bolum_no</td>
                                 <td>@item.tuketici_grubu</td>
                                 <td>
-                                    <span class="badge bg-@(item.status ?.ToUpper() == "AKTIF" ? "success" : "danger")">
-                                        @item.status
+                                    <span class="badge @item.BaglantiDurumuBadgeClass">
+                                        @item.BaglantiDurumuEtiketi
                                     </span>
                                 </td>
                                 <td class="text-end pe-4">
@@ -150,7 +158,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="7" class="text-center py-4 text-muted">Henüz kayıtlı tüketim noktası bulunmuyor.</td>
+                            <td colspan="8" class="text-center py-4 text-muted">Henüz kayıtlı tüketim noktası bulunmuyor.</td>
                         </tr>
                     }
                 </tbody>
@@ -177,5 +185,3 @@
         </nav>
     </div>
 }
-
-
