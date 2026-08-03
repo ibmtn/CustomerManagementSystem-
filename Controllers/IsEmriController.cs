@@ -609,6 +609,27 @@ public class IsEmriController : Controller
                             await _sozlesmeService.UpdateAsync(bekleyenSozlesme);
                         }
 
+                        // İlk endeks okuma (tesis) kaydını oluştur
+                        var ilkOkumaKaydi = new EndeksOkuma
+                        {
+                            sayac_id = newSayacId,
+                            sozlesme_id = bekleyenSozlesme?.sozlesme_id ?? 1,
+                            donem = DateTime.Now.ToString("yyyy-MM"),
+                            okuma_tipi = KcetasWeb.Models.Enums.OkumaTipi.IlkOkuma,
+                            okuma_kaynagi = KcetasWeb.Models.Enums.OkumaKaynagi.Manuel,
+                            onceki_endeks = 0,
+                            yeni_endeks = model.YeniIlkEndeksi.Value,
+                            okuma_zamani = DateTime.UtcNow,
+                            kullanici_id = 1,
+                            dogrulama_durumu = KcetasWeb.Models.Enums.DogrulamaDurumu.Onaylandi,
+                            anomali_mi = false,
+                            status = "AKTIF",
+                            okunamama_nedeni = "Sayaç Tesis Edildi",
+                            created_at = DateTime.UtcNow,
+                            is_emri_id = (int?)model.IsEmriId
+                        };
+                        await _endeksOkumaService.CreateAsync(ilkOkumaKaydi);
+
                         // 3. İŞ MANTIĞI: Sayaç Bağlama bitince 'Endeks Okuma' İŞ EMRİ Fırlat!
                         var endeksIsEmri = new IsEmri
                         {
@@ -669,6 +690,20 @@ public class IsEmriController : Controller
                     if (oncekiFaturalar.Any())
                     {
                         ilkEndeks = oncekiFaturalar.Max(f => f.son_endeks ?? 0);
+                    }
+                    else
+                    {
+                        // Fatura yoksa, bu sayacın tesis okumasına bak
+                        var sayacOkumalar = await _endeksOkumaService.GetAllAsync();
+                        var tesisOkumasi = sayacOkumalar
+                            .Where(o => o.sayac_id == tIsEmri.sayac_id)
+                            .OrderByDescending(o => o.okuma_zamani ?? o.created_at)
+                            .FirstOrDefault();
+                            
+                        if (tesisOkumasi != null)
+                        {
+                            ilkEndeks = tesisOkumasi.yeni_endeks ?? 0;
+                        }
                     }
                     
                     decimal tuketimKwh = model.GuncelEndeks.Value - ilkEndeks;
