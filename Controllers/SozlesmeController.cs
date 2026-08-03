@@ -125,22 +125,12 @@ namespace KcetasWeb.Controllers
             return View(filtre);
         }
 
-        public async Task<IActionResult> Yeni()
+        public IActionResult Yeni()
         {
-            var sozlesmeTask = _sozlesmeService.GetAllAsync();
-            var aboneTask = _aboneService.GetAllAsync();
-            var tuketimNoktasiTask = _tuketimNoktasiService.GetAllAsync();
-            
-            await Task.WhenAll(sozlesmeTask, aboneTask, tuketimNoktasiTask);
-
-            var aktifTnIdler = (await sozlesmeTask).Where(s => s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi && s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Pasif)
-                .Select(s => s.tuketim_noktasi_id)
-                .ToHashSet();
-
-            ViewBag.Aboneler = (await aboneTask);
-            ViewBag.TuketimNoktalari = (await tuketimNoktasiTask).Where(tn => !aktifTnIdler.Contains(tn.tuketim_noktasi_id))
-                .ToList();
-            return View();
+            return View(new KcetasWeb.ViewModels.SozlesmeViewModels
+            {
+                sozlesme_tipi = "Bireysel"
+            });
         }
 
         [HttpPost]
@@ -155,19 +145,7 @@ namespace KcetasWeb.Controllers
             if (aktifSozlesmeVarMi)
             {
                 ModelState.AddModelError("tuketim_noktasi_id", "HATA: Bu tüketim noktası üzerinde zaten aktif veya işlem bekleyen bir sözleşme bulunmaktadır. 1 tüketim noktasına aynı anda sadece 1 sözleşme bağlanabilir.");
-                
-                var aktifTnIdler = sozlesmeler
-                    .Where(s => s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi && s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Pasif)
-                    .Select(s => s.tuketim_noktasi_id)
-                    .ToHashSet();
-
-                var aboneTask = _aboneService.GetAllAsync();
-                var tuketimNoktasiTask = _tuketimNoktasiService.GetAllAsync();
-                await Task.WhenAll(aboneTask, tuketimNoktasiTask);
-
-                ViewBag.Aboneler = (await aboneTask);
-                ViewBag.TuketimNoktalari = (await tuketimNoktasiTask).Where(tn => !aktifTnIdler.Contains(tn.tuketim_noktasi_id))
-                    .ToList();
+                await PrepareYeniSelectionTextAsync(model);
                 return View(model);
             }
 
@@ -222,6 +200,58 @@ namespace KcetasWeb.Controllers
 
             TempData["SozlesmeMesaji"] = model.ad + " " + model.unvan + " için sözleşme başarıyla başlatıldı ve Yeni Bağlantı iş emri oluşturuldu.";
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> TuketimNoktasiAra(string? q)
+        {
+            if (string.IsNullOrWhiteSpace(q) || q.Trim().Length < 2)
+            {
+                return Json(new { results = Array.Empty<object>() });
+            }
+
+            var response = await _tuketimNoktasiService.GetPagedAsync(1, 20, q.Trim());
+            var results = response.Data
+                .Select(t => new
+                {
+                    id = t.tuketim_noktasi_id,
+                    text = FormatTuketimNoktasiSecim(t, t.tuketim_noktasi_id)
+                })
+                .ToList();
+
+            return Json(new { results });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> AboneAra(string? q)
+        {
+            if (string.IsNullOrWhiteSpace(q) || q.Trim().Length < 2)
+            {
+                return Json(new { results = Array.Empty<object>() });
+            }
+
+            var search = q.Trim();
+            var results = new List<object>();
+
+            if (search.Length <= 6 && !search.StartsWith("0") && int.TryParse(search, out var aboneId) && aboneId > 0)
+            {
+                var abone = await _aboneService.GetByIdAsync(aboneId);
+                if (abone != null)
+                {
+                    results.Add(new { id = abone.abone_id, text = FormatAboneSecim(abone) });
+                    return Json(new { results });
+                }
+            }
+
+            var aboneler = await _aboneService.GetAllAsync();
+            results = aboneler
+                .Where(a => AboneMatchesSearch(a, search))
+                .Take(20)
+                .Select(a => new { id = a.abone_id, text = FormatAboneSecim(a) })
+                .Cast<object>()
+                .ToList();
+
+            return Json(new { results });
         }
 
         public async Task<IActionResult> Detay(string id)
@@ -356,6 +386,95 @@ namespace KcetasWeb.Controllers
                 TempData["SozlesmeMesaji"] = id + " numaralı sözleşme başarıyla feshedildi.";
             }
             return RedirectToAction("Index");
+        }
+
+        private async Task PrepareYeniSelectionTextAsync(KcetasWeb.ViewModels.SozlesmeViewModels model)
+        {
+            if (model.tuketim_noktasi_id > 0)
+            {
+                var tuketimNoktasi = await _tuketimNoktasiService.GetByIdAsync(model.tuketim_noktasi_id);
+                ViewBag.SelectedTuketimNoktasiText = FormatTuketimNoktasiSecim(tuketimNoktasi, model.tuketim_noktasi_id);
+            }
+
+            if (model.abone_id > 0)
+            {
+                var abone = await _aboneService.GetByIdAsync(model.abone_id);
+                if (abone != null)
+                {
+                    ViewBag.SelectedAboneText = FormatAboneSecim(abone);
+                }
+            }
+        }
+
+        private static string FormatTuketimNoktasiSecim(TuketimNoktasi? tuketimNoktasi, long fallbackId)
+        {
+            var kod = !string.IsNullOrWhiteSpace(tuketimNoktasi?.tekil_kod)
+                ? tuketimNoktasi.tekil_kod
+                : $"TN-{fallbackId}";
+            var adresParcalari = new[]
+            {
+                tuketimNoktasi?.mahalle,
+                tuketimNoktasi?.bina_no,
+                tuketimNoktasi?.acik_adres
+            };
+            var adres = Shorten(string.Join(" ", adresParcalari.Where(x => !string.IsNullOrWhiteSpace(x))), 90);
+
+            return string.IsNullOrWhiteSpace(adres) ? kod : $"{kod} - {adres}";
+        }
+
+        private static string FormatAboneSecim(Abone abone)
+        {
+            var kimlik = !string.IsNullOrWhiteSpace(abone.tckn)
+                ? abone.tckn
+                : !string.IsNullOrWhiteSpace(abone.vkn)
+                    ? abone.vkn
+                    : abone.abone_no;
+            var adSoyad = string.Join(" ", new[] { abone.Ad, abone.Soyad, abone.Unvan }.Where(x => !string.IsNullOrWhiteSpace(x)));
+            var aboneLabel = string.IsNullOrWhiteSpace(adSoyad) ? $"Abone {abone.abone_id}" : adSoyad;
+
+            return string.IsNullOrWhiteSpace(kimlik)
+                ? aboneLabel
+                : $"{MaskKimlik(kimlik)} - {aboneLabel}";
+        }
+
+        private static bool AboneMatchesSearch(Abone abone, string search)
+        {
+            return abone.abone_id.ToString().Contains(search, StringComparison.OrdinalIgnoreCase)
+                || ContainsIgnoreCase(abone.abone_no, search)
+                || ContainsIgnoreCase(abone.tckn, search)
+                || ContainsIgnoreCase(abone.vkn, search)
+                || ContainsIgnoreCase(abone.telefon, search)
+                || ContainsIgnoreCase(abone.Ad, search)
+                || ContainsIgnoreCase(abone.Soyad, search)
+                || ContainsIgnoreCase(abone.Unvan, search)
+                || ContainsIgnoreCase(abone.e_posta, search);
+        }
+
+        private static bool ContainsIgnoreCase(string? value, string search)
+        {
+            return !string.IsNullOrWhiteSpace(value)
+                && value.Contains(search, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string MaskKimlik(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value) || value.Length < 6)
+            {
+                return value;
+            }
+
+            return value[..3] + new string('*', value.Length - 6) + value[^3..];
+        }
+
+        private static string Shorten(string? value, int maxLength)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return "";
+            }
+
+            var trimmed = value.Trim();
+            return trimmed.Length <= maxLength ? trimmed : $"{trimmed[..maxLength]}...";
         }
     }
 }

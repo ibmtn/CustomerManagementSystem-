@@ -47,18 +47,27 @@ namespace KcetasWeb.Controllers
             List<TuketimNoktasi> pagedData;
             int totalItems;
 
-            var pagedResponse = await _tuketimNoktasiService.GetPagedAsync(
-                filtre.CurrentPage,
-                filtre.PageSize,
-                filtre.FiltreTekilKod,
-                null, // baglantiDurumu if needed
-                null, // ilId removed
-                filtre.FiltreIlceId,
-                filtre.FiltreTuketiciGrubu,
-                filtre.FiltreDurum);
+            var kayseriDisiIlFiltresi = filtre.FiltreIlId.HasValue && filtre.FiltreIlId.Value != 38;
 
-            pagedData = pagedResponse.Data;
-            totalItems = pagedResponse.TotalCount;
+            if (kayseriDisiIlFiltresi)
+            {
+                pagedData = new List<TuketimNoktasi>();
+                totalItems = 0;
+            }
+            else
+            {
+                var pagedResponse = await _tuketimNoktasiService.GetPagedAsync(
+                    filtre.CurrentPage,
+                    filtre.PageSize,
+                    filtre.FiltreTekilKod,
+                    NormalizeBaglantiDurumuFilter(filtre.FiltreBaglantiDurumu),
+                    filtre.FiltreIlId,
+                    filtre.FiltreIlceId,
+                    filtre.FiltreTuketiciGrubu);
+
+                pagedData = pagedResponse.Data;
+                totalItems = pagedResponse.TotalCount;
+            }
 
             var viewModels = pagedData.Select(item => new KcetasWeb.ViewModels.TuketimNoktasiViewModels
             {
@@ -66,6 +75,9 @@ namespace KcetasWeb.Controllers
                 tekil_kod = item.tekil_kod,
                 baglanti_gucu_kw = item.baglanti_gucu_kw,
                 ilce_id = item.ilce_id,
+                mahalle = item.mahalle,
+                il_id = 38,
+                il_adi = "Kayseri",
                 ilce_adi = item.ilce_id switch
                 {
                     1 => "Melikgazi", 2 => "Kocasinan", 3 => "Talas", 4 => "Akkışla", 5 => "Bünyan",
@@ -76,6 +88,7 @@ namespace KcetasWeb.Controllers
                 bina_no = item.bina_no,
                 bagimsiz_bolum_no = item.bagimsiz_bolum_no,
                 tuketici_grubu = item.tuketici_grubu,
+                baglanti_durumu = item.baglanti_durumu,
                 status = item.status
             }).ToList();
 
@@ -152,7 +165,7 @@ namespace KcetasWeb.Controllers
                 koordinat_lot = model.koordinat_lot == 0 ? null : model.koordinat_lot,
                 tuketici_grubu = string.IsNullOrWhiteSpace(model.tuketici_grubu) ? "MESKEN" : model.tuketici_grubu,
                 baglanti_durumu = model.baglanti_durumu ?? KcetasWeb.Models.Enums.BaglantiDurumu.Pasif,
-                status = "PASIF",
+                status = "AKTIF",
                 created_at = DateTime.Now,
                 created_by = 1,
                 updated_at = DateTime.Now,
@@ -166,7 +179,7 @@ namespace KcetasWeb.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine("Tüketim noktası kayıt API hatası: " + ex);
-                ModelState.AddModelError(string.Empty, "Tüketim noktası API tarafında kaydedilemedi. API/veritabanı kayıt işlemindeki inner exception incelenmelidir.");
+                ModelState.AddModelError(string.Empty, ex.Message);
                 return View(model);
             }
 
@@ -241,6 +254,42 @@ namespace KcetasWeb.Controllers
                 "Aydinlatma" or "Aydınlatma" or "AYDINLATMA" => "AYDINLATMA",
                 var value => value ?? string.Empty
             };
+        }
+
+        private static string? NormalizeBaglantiDurumuFilter(string? baglantiDurumu)
+        {
+            return baglantiDurumu?.Trim().ToUpperInvariant() switch
+            {
+                "AKTIF" or "AKTİF" or "BAGLI" or "BAĞLI" => "AKTIF",
+                "PASIF" or "PASİF" or "KESIK" or "KESİK" => "PASIF",
+                "KAPALI" or "SOKULU" or "SÖKÜLÜ" => "KAPALI",
+                "TASLAK" => "TASLAK",
+                "BAGLANTI_BEKLIYOR" or "BAGLANTI BEKLIYOR" or "BAĞLANTI BEKLİYOR" => "BAGLANTI_BEKLIYOR",
+                "BAGLANABILIR" or "BAĞLANABİLİR" => "BAGLANABILIR",
+                _ => null
+            };
+        }
+
+        private static bool BaglantiDurumuEslesiyor(TuketimNoktasi item, string? filtre)
+        {
+            var normalizedFilter = NormalizeBaglantiDurumuFilter(filtre);
+            if (string.IsNullOrEmpty(normalizedFilter))
+                return true;
+
+            var itemDurum = item.baglanti_durumu.HasValue
+                ? item.baglanti_durumu.Value switch
+                {
+                    KcetasWeb.Models.Enums.BaglantiDurumu.Aktif => "AKTIF",
+                    KcetasWeb.Models.Enums.BaglantiDurumu.Pasif => "PASIF",
+                    KcetasWeb.Models.Enums.BaglantiDurumu.Kapali => "KAPALI",
+                    KcetasWeb.Models.Enums.BaglantiDurumu.Taslak => "TASLAK",
+                    KcetasWeb.Models.Enums.BaglantiDurumu.BaglantiBekliyor => "BAGLANTI_BEKLIYOR",
+                    KcetasWeb.Models.Enums.BaglantiDurumu.Baglanabilir => "BAGLANABILIR",
+                    _ => string.Empty
+                }
+                : NormalizeBaglantiDurumuFilter(item.status);
+
+            return string.Equals(itemDurum, normalizedFilter, StringComparison.OrdinalIgnoreCase);
         }
 
         public async Task<IActionResult> Detay(string id)
@@ -345,8 +394,10 @@ namespace KcetasWeb.Controllers
                 item.koordinat_lat = model.koordinat_lat;
                 item.koordinat_lot = model.koordinat_lot;
                 item.tuketici_grubu = string.IsNullOrWhiteSpace(model.tuketici_grubu) ? "Mesken" : model.tuketici_grubu;
-                item.baglanti_durumu = model.baglanti_durumu ?? KcetasWeb.Models.Enums.BaglantiDurumu.Pasif;
-                item.status = string.IsNullOrWhiteSpace(model.status) ? "PASIF" : model.status.ToUpper();
+                item.baglanti_durumu = KcetasWeb.ViewModels.TuketimNoktasiViewModels.ResolveBaglantiDurumu(model.baglanti_durumu, model.status)
+                    ?? item.baglanti_durumu
+                    ?? KcetasWeb.Models.Enums.BaglantiDurumu.Pasif;
+                item.status = string.IsNullOrWhiteSpace(item.status) ? "AKTIF" : item.status.ToUpperInvariant();
                 item.updated_at = DateTime.Now;
 
                 await _tuketimNoktasiService.UpdateAsync(item);

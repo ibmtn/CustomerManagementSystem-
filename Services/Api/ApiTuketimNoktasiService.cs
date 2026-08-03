@@ -132,7 +132,8 @@ namespace KcetasWeb.Services.Api
                 koordinatLon = tuketimNoktasi.koordinat_lot,
                 baglantiGucuKw = tuketimNoktasi.baglanti_gucu_kw,
                 tuketiciGrubu = string.IsNullOrWhiteSpace(tuketimNoktasi.tuketici_grubu) ? "MESKEN" : tuketimNoktasi.tuketici_grubu,
-                baglantiDurumu = tuketimNoktasi.baglanti_durumu ?? KcetasWeb.Models.Enums.BaglantiDurumu.Pasif
+                baglantiDurumu = ToApiBaglantiDurumuValue(tuketimNoktasi.baglanti_durumu ?? KcetasWeb.Models.Enums.BaglantiDurumu.Pasif),
+                status = string.IsNullOrWhiteSpace(tuketimNoktasi.status) ? "AKTIF" : tuketimNoktasi.status
             };
 
             var response = await _httpClient.PostAsJsonAsync("/api/TuketimNoktasi", dto, _jsonOptions);
@@ -149,17 +150,43 @@ namespace KcetasWeb.Services.Api
 
         public async Task UpdateAsync(TuketimNoktasi tuketimNoktasi)
         {
-            var response = await _httpClient.PutAsJsonAsync($"/api/TuketimNoktasi/{tuketimNoktasi.tuketim_noktasi_id}", tuketimNoktasi, _jsonOptions);
+            var dto = new
+            {
+                tuketimNoktasiId = tuketimNoktasi.tuketim_noktasi_id,
+                tekilKod = tuketimNoktasi.tekil_kod,
+                ilceId = tuketimNoktasi.ilce_id,
+                mahalle = string.IsNullOrWhiteSpace(tuketimNoktasi.mahalle) ? "Bilinmiyor" : tuketimNoktasi.mahalle,
+                binaNo = tuketimNoktasi.bina_no,
+                bagimsizBolumNo = tuketimNoktasi.bagimsiz_bolum_no,
+                acikAdres = string.IsNullOrWhiteSpace(tuketimNoktasi.acik_adres) ? "Belirtilmemiş" : tuketimNoktasi.acik_adres,
+                koordinatLat = tuketimNoktasi.koordinat_lat,
+                koordinatLon = tuketimNoktasi.koordinat_lot,
+                baglantiGucuKw = tuketimNoktasi.baglanti_gucu_kw,
+                tuketiciGrubu = string.IsNullOrWhiteSpace(tuketimNoktasi.tuketici_grubu) ? "MESKEN" : tuketimNoktasi.tuketici_grubu,
+                baglantiDurumu = ToApiBaglantiDurumuValue(tuketimNoktasi.baglanti_durumu ?? KcetasWeb.Models.Enums.BaglantiDurumu.Pasif),
+                status = string.IsNullOrWhiteSpace(tuketimNoktasi.status) ? "AKTIF" : tuketimNoktasi.status
+            };
+
+            var response = await _httpClient.PutAsJsonAsync($"/api/TuketimNoktasi/{tuketimNoktasi.tuketim_noktasi_id}", dto, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
+                var payload = System.Text.Json.JsonSerializer.Serialize(dto, _jsonOptions);
                 var errorContent = await response.Content.ReadAsStringAsync();
-                throw new Exception($"API Hatası: {response.StatusCode} - Tüketim noktası güncellenemedi. Detay: {errorContent}");
+                throw new Exception($"API Hatası: {response.StatusCode} - Tüketim noktası güncellenemedi. \nPayload: {payload}\nDetay: {errorContent}");
             }
+
+            _cache.Remove("TuketimNoktasi_TotalCount");
+            _cache.Remove("TuketimNoktasi_GetAll");
         }
 
         public async Task DeleteAsync(string tekilKod)
         {
             await _httpClient.DeleteAsync($"/api/TuketimNoktasi/{tekilKod}");
+        }
+
+        private static int ToApiBaglantiDurumuValue(KcetasWeb.Models.Enums.BaglantiDurumu baglantiDurumu)
+        {
+            return (int)baglantiDurumu;
         }
     }
 }

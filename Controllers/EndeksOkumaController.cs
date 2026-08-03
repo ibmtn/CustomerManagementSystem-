@@ -496,7 +496,7 @@ namespace KcetasWeb.Controllers
                         is_emri_no = $"IE-ACM-{DateTime.Now.ToString("yyyyMMdd")}-{new Random().Next(1000, 9999)}",
                         tuketim_noktasi_id = aktifSozlesme?.tuketim_noktasi_id ?? 0,
                         sayac_id = okuma.sayac_id,
-                        tip = KcetasWeb.Models.Enums.IsEmriTipi.EnerjiAcma,
+                        tip = KcetasWeb.Models.Enums.IsEmriTipi.Acma,
                         durum = KcetasWeb.Models.Enums.IsEmriDurumu.Acik,
                         oncelik = "YUKSEK",
                         planlanan_tarih = DateTime.Now.AddDays(1),

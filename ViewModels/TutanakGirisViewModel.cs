@@ -40,7 +40,7 @@ namespace KcetasWeb.ViewModels
         public decimal? GuncelEndeks { get; set; }
 
         public bool IsSokmeTakma => Tip == KcetasWeb.Models.Enums.IsEmriTipi.Sokme || Tip == KcetasWeb.Models.Enums.IsEmriTipi.YeniBaglanti || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Degistirme;
-        public bool IsAcmaKesme => Tip == KcetasWeb.Models.Enums.IsEmriTipi.EnerjiAcma || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Kesme || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Acma;
+        public bool IsAcmaKesme => Tip == KcetasWeb.Models.Enums.IsEmriTipi.Kesme || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Acma;
 
         // Belgedeki kural: "Seçilen iş emri tipine göre farklı alanlar zorunlu olmalı"
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -53,7 +53,6 @@ namespace KcetasWeb.ViewModels
                     break;
 
                 case KcetasWeb.Models.Enums.IsEmriTipi.Acma:
-                case KcetasWeb.Models.Enums.IsEmriTipi.EnerjiAcma:
                     if (!AcmaEndeksi.HasValue)
                         yield return new ValidationResult("Açma işleminde Açma Endeksi zorunludur.", new[] { nameof(AcmaEndeksi) });
                     break;

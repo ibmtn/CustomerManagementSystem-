@@ -492,6 +492,10 @@ public class IsEmriController : Controller
             if (!model.YeniIlkEndeksi.HasValue) ModelState.AddModelError("YeniIlkEndeksi", "Yeni bağlantı işlemi için İlk Endeks zorunludur.");
             if (string.IsNullOrWhiteSpace(model.MuhurNo)) ModelState.AddModelError("MuhurNo", "Yeni bağlantı işlemi için Mühür No zorunludur.");
         }
+        else if (model.Tip == KcetasWeb.Models.Enums.IsEmriTipi.EndeksOkuma)
+        {
+            if (!model.GuncelEndeks.HasValue) ModelState.AddModelError("GuncelEndeks", "Endeks okuma işlemi için Güncel Endeks girilmesi zorunludur.");
+        }
 
         if (string.IsNullOrWhiteSpace(model.SahaSonucu))
         {

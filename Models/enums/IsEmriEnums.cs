@@ -27,10 +27,10 @@ namespace KcetasWeb.Models.Enums
         Degistirme = 2,
         [Display(Name = "Sayaç Sökme")]
         Sokme = 3,
-        [Display(Name = "Enerji Kesme")]
-        Kesme = 4,
         [Display(Name = "Enerji Açma")]
-        Acma = 5,
+        Acma = 4,
+        [Display(Name = "Enerji Kesme")]
+        Kesme = 5,
         [Display(Name = "Endeks Okuma")]
         EndeksOkuma = 6,
         [Display(Name = "Sayaç Arıza")]
@@ -40,8 +40,6 @@ namespace KcetasWeb.Models.Enums
         [Display(Name = "Keşif/İnceleme")]
         KesifInceleme = 9,
         [Display(Name = "Yeni Bağlantı")]
-        YeniBaglanti = 10,
-        [Display(Name = "Enerji Açma İşlemi")]
-        EnerjiAcma = 11
+        YeniBaglanti = 10
     }
 }

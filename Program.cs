@@ -34,7 +34,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 // 2. API SERVİSLERİNİN DI CONTAINER'A KAYDI
-var baseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://172.10.38.28:5050";
+var baseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://172.10.38.26:5050";
 Action<HttpClient> configureClient = client => 
 {
     client.BaseAddress = new Uri(baseUrl);

@@ -13,6 +13,7 @@ namespace KcetasWeb.Services.Api
     {
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
+        private readonly JsonSerializerOptions _writeJsonOptions;
         private readonly IMemoryCache _cache;
 
         public ApiSozlesmeService(HttpClient httpClient, IMemoryCache cache)
@@ -25,6 +26,12 @@ namespace KcetasWeb.Services.Api
                 PropertyNameCaseInsensitive = true
             };
             _jsonOptions.Converters.Add(new JsonStringEnumConverter());
+
+            _writeJsonOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
+                PropertyNameCaseInsensitive = true
+            };
         }
 
         public async Task<int> GetTotalCountAsync()
@@ -121,7 +128,7 @@ namespace KcetasWeb.Services.Api
 
         public async Task CreateAsync(Sozlesme sozlesme)
         {
-            var response = await _httpClient.PostAsJsonAsync("/api/Sozlesmeler", sozlesme, _jsonOptions);
+            var response = await _httpClient.PostAsJsonAsync("/api/Sozlesmeler", sozlesme, _writeJsonOptions);
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
@@ -132,7 +139,7 @@ namespace KcetasWeb.Services.Api
 
         public async Task UpdateAsync(Sozlesme sozlesme)
         {
-            var response = await _httpClient.PutAsJsonAsync($"/api/Sozlesmeler/{sozlesme.sozlesme_id}", sozlesme, _jsonOptions);
+            var response = await _httpClient.PutAsJsonAsync($"/api/Sozlesmeler/{sozlesme.sozlesme_id}", sozlesme, _writeJsonOptions);
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
