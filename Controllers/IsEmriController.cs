@@ -610,11 +610,23 @@ public class IsEmriController : Controller
                         }
 
                         // İlk endeks okuma (tesis) kaydını oluştur
+                        if (bekleyenSozlesme == null)
+                        {
+                            throw new Exception("Sayaç takıldı fakat aktif bir sözleşme bulunamadığı için endeks okuma (tesis) kaydı oluşturulamadı.");
+                        }
+
+                        var donemStr = DateTime.Now.ToString("yyyy-MM");
+                        var existingOkumalar = await _endeksOkumaService.GetPagedAsync(1, 1, null, null, null, null, null, newSayacId.ToString(), donemStr, null, null, null, null);
+                        if (existingOkumalar.Data.Any())
+                        {
+                            throw new Exception($"Bu sayaç için {donemStr} döneminde zaten bir okuma kaydı bulunmaktadır.");
+                        }
+
                         var ilkOkumaKaydi = new EndeksOkuma
                         {
                             sayac_id = newSayacId,
-                            sozlesme_id = bekleyenSozlesme?.sozlesme_id ?? 1,
-                            donem = DateTime.Now.ToString("yyyy-MM"),
+                            sozlesme_id = bekleyenSozlesme.sozlesme_id,
+                            donem = donemStr,
                             okuma_tipi = KcetasWeb.Models.Enums.OkumaTipi.IlkOkuma,
                             okuma_kaynagi = KcetasWeb.Models.Enums.OkumaKaynagi.Manuel,
                             onceki_endeks = 0,
@@ -626,6 +638,7 @@ public class IsEmriController : Controller
                             status = "AKTIF",
                             okunamama_nedeni = "Sayaç Tesis Edildi",
                             created_at = DateTime.UtcNow,
+                            updated_at = DateTime.UtcNow,
                             is_emri_id = (int?)model.IsEmriId
                         };
                         await _endeksOkumaService.CreateAsync(ilkOkumaKaydi);
@@ -681,7 +694,16 @@ public class IsEmriController : Controller
                                      ?? tumSozlesmeler.OrderByDescending(s => s.sozlesme_id).FirstOrDefault();
                         
                     string tarifeGrubu = aktifSozlesme != null ? (aktifSozlesme.sozlesme_tipi?.ToString() ?? "Mesken") : "Mesken";
-                    int sozlesmeId = aktifSozlesme != null ? aktifSozlesme.sozlesme_id : 1; // Fallback to 1 to avoid FK error
+                    int? sozlesmeId = aktifSozlesme?.sozlesme_id; // FK hatasını önlemek için null
+                    
+                    if (sozlesmeId == null)
+                    {
+                        TempData["Mesaj"] = "HATA: Tüketim noktasına bağlı aktif bir sözleşme bulunamadığı için endeks okuma kaydı oluşturulamadı.";
+                        TempData["MesajTip"] = "danger";
+                        return RedirectToAction("Detay", new { id = model.IsEmriId });
+                    }
+                    
+                    int finalSayacId = tIsEmri.sayac_id ?? 0;
                     
                     // 2. İlk Endeksi Bul (Önceki Faturalardan veya 0)
                     var pagedFaturalar = await _faturaService.GetPagedAsync(1, 10, sozlesmeId: sozlesmeId);
@@ -706,6 +728,15 @@ public class IsEmriController : Controller
                         }
                     }
                     
+                    var donemString = DateTime.Now.ToString("yyyy-MM");
+                    var existingEndeks = await _endeksOkumaService.GetPagedAsync(1, 1, null, null, null, null, null, finalSayacId.ToString(), donemString, null, null, null, null);
+                    if (existingEndeks.Data.Any())
+                    {
+                        TempData["Mesaj"] = $"HATA: Bu sayaç için {donemString} döneminde zaten bir okuma kaydı bulunmaktadır. Tekrar kayıt atılamaz.";
+                        TempData["MesajTip"] = "danger";
+                        return RedirectToAction("Detay", new { id = model.IsEmriId });
+                    }
+                    
                     decimal tuketimKwh = model.GuncelEndeks.Value - ilkEndeks;
                     if (tuketimKwh < 0) tuketimKwh = 0;
                     
@@ -715,9 +746,9 @@ public class IsEmriController : Controller
                     // Endeks Okuma Kaydı
                     var yeniOkuma = new EndeksOkuma
                     {
-                        sayac_id = (tIsEmri.sayac_id != null && tIsEmri.sayac_id > 0) ? tIsEmri.sayac_id : null,
-                        sozlesme_id = sozlesmeId,
-                        donem = DateTime.Now.ToString("yyyy-MM"),
+                        sayac_id = finalSayacId > 0 ? finalSayacId : (int?)null,
+                        sozlesme_id = sozlesmeId.Value,
+                        donem = donemString,
                         okuma_tipi = oncekiFaturalar.Any() ? KcetasWeb.Models.Enums.OkumaTipi.RutinDonem : KcetasWeb.Models.Enums.OkumaTipi.IlkOkuma, // Eğer geçmiş fatura yoksa İLK OKUMA'dır
                         okuma_kaynagi = KcetasWeb.Models.Enums.OkumaKaynagi.Manuel,
                         onceki_endeks = ilkEndeks,
@@ -729,6 +760,7 @@ public class IsEmriController : Controller
                         status = "AKTIF",
                         okunamama_nedeni = "",
                         created_at = DateTime.UtcNow,
+                        updated_at = DateTime.UtcNow,
                         is_emri_id = (int?)model.IsEmriId
                     };
 
