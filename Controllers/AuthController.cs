@@ -30,40 +30,7 @@ namespace KcetasWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string kullaniciAdi, string sifre)
         {
-            if (sifre == "123")
-            {
-                switch (kullaniciAdi.ToLower())
-                {
-                    case "admin":
-                    case "bt":
-                        await GirisYap("BT Yöneticisi", AppRoles.BTYoneticisi, kullaniciAdi);
-                        return RedirectToAction("Index", "Dashboard");
-
-                    case "musteri":
-                        await GirisYap("Müşteri Temsilcisi", AppRoles.MusteriTemsilcisi, kullaniciAdi);
-                        return RedirectToAction("Index", "Home");
-
-                    case "sozlesme":
-                        await GirisYap("Sözleşme Yetkilisi", AppRoles.SozlesmeYetkilisi, kullaniciAdi);
-                        return RedirectToAction("Index", "Home");
-
-                    case "sayac":
-                        await GirisYap("Sayaç Okuma Personeli", AppRoles.SayacOkumaPersoneli, kullaniciAdi);
-                        return RedirectToAction("Index", "Home");
-
-                    case "saha":
-                        await GirisYap("Saha Operasyon Amiri", AppRoles.SahaOperasyonAmiri, kullaniciAdi);
-                        return RedirectToAction("Index", "Home");
-
-                    case "fatura":
-                        await GirisYap("Faturalama Uzmanı", AppRoles.FaturalamaUzmani, kullaniciAdi);
-                        return RedirectToAction("Index", "Home");
-
-                    case "denetci":
-                        await GirisYap("Denetçi Personel", AppRoles.Denetci, kullaniciAdi);
-                        return RedirectToAction("Index", "Home");
-                }
-            }
+            kullaniciAdi = kullaniciAdi?.Trim() ?? "";
 
             var kayitliKullanici = await _kullaniciDeposu.BulKullaniciAdiIleAsync(kullaniciAdi);
 
@@ -71,19 +38,14 @@ namespace KcetasWeb.Controllers
             {
                 PasswordVerificationResult sonuc = PasswordVerificationResult.Failed;
                 
-                bool apiGirisBasarili = await _kullaniciDeposu.GirisKontrolAsync(kullaniciAdi, sifre);
+                // API tarafı Case-Sensitive olduğu için, kullanıcının girdiği (küçük harfli vs) adı değil,
+                // Veritabanından (liste üzerinden) gelen birebir (orijinal büyük/küçük harfli) kullanıcı adını gönderiyoruz.
+                string orjinalKullaniciAdi = kayitliKullanici.kullanici_adi ?? kullaniciAdi;
+                bool apiGirisBasarili = await _kullaniciDeposu.GirisKontrolAsync(orjinalKullaniciAdi, sifre);
                 
                 if (apiGirisBasarili)
                 {
                     sonuc = PasswordVerificationResult.Success;
-                }
-                else
-                {
-                    // Yedek Düz metin kontrolü (API'de henüz şifresi güncellenmemiş test kullanıcıları için)
-                    if (kayitliKullanici.Sifre == sifre || kayitliKullanici.sifre_hash == sifre)
-                    {
-                        sonuc = PasswordVerificationResult.Success;
-                    }
                 }
 
                 if (sonuc == PasswordVerificationResult.Success || sonuc == PasswordVerificationResult.SuccessRehashNeeded)
