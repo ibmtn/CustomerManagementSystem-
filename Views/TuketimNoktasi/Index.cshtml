@@ -1,0 +1,187 @@
+@model MusteriYonetim.ViewModels.TuketimNoktasiListeViewModel
+
+@{
+    ViewData["Title"] = "Tüketim Noktaları ve Aboneler";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <div>
+        <h2 class="h4 text-success fw-bold d-inline-block me-3">Tüketim Noktaları ve Aboneler</h2>
+        <span class="badge bg-secondary bg-opacity-10 text-dark border fs-6">
+            Toplam: @Model.TotalItems (Sayfa @Model.CurrentPage / @Model.TotalPages)
+        </span>
+    </div>
+    <a href="/TuketimNoktasi/Yeni" class="btn btn-success fw-bold">+ Yeni Ekle</a>
+</div>
+
+@if (TempData["BasariMesaji"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        @TempData["BasariMesaji"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card shadow-sm border-0 mb-4 bg-light">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3 align-items-end">
+            <div class="col-md-4 col-lg-2">
+                <label class="form-label fw-bold">Tekil Kod (Arama)</label>
+                <input name="FiltreTekilKod" value="@Model.FiltreTekilKod" type="text" class="form-control" placeholder="Örn: TK-2026-001" />
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <label class="form-label fw-bold">İl</label>
+                <select data-control="select2" name="FiltreIlId" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="38" selected="@(Model.FiltreIlId == 38 ? "selected" : null)">Kayseri</option>
+                </select>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <label class="form-label fw-bold">İlçe</label>
+                <select data-control="select2" name="FiltreIlceId" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="1" selected="@(Model.FiltreIlceId == 1 ? "selected" : null)">Melikgazi</option>
+                    <option value="2" selected="@(Model.FiltreIlceId == 2 ? "selected" : null)">Kocasinan</option>
+                    <option value="3" selected="@(Model.FiltreIlceId == 3 ? "selected" : null)">Talas</option>
+                    <option value="4" selected="@(Model.FiltreIlceId == 4 ? "selected" : null)">Akkışla</option>
+                    <option value="5" selected="@(Model.FiltreIlceId == 5 ? "selected" : null)">Bünyan</option>
+                    <option value="6" selected="@(Model.FiltreIlceId == 6 ? "selected" : null)">Develi</option>
+                    <option value="7" selected="@(Model.FiltreIlceId == 7 ? "selected" : null)">Felahiye</option>
+                    <option value="8" selected="@(Model.FiltreIlceId == 8 ? "selected" : null)">Hacılar</option>
+                    <option value="9" selected="@(Model.FiltreIlceId == 9 ? "selected" : null)">İncesu</option>
+                    <option value="10" selected="@(Model.FiltreIlceId == 10 ? "selected" : null)">Özvatan</option>
+                    <option value="11" selected="@(Model.FiltreIlceId == 11 ? "selected" : null)">Pınarbaşı</option>
+                    <option value="12" selected="@(Model.FiltreIlceId == 12 ? "selected" : null)">Sarıoğlan</option>
+                    <option value="13" selected="@(Model.FiltreIlceId == 13 ? "selected" : null)">Sarız</option>
+                    <option value="14" selected="@(Model.FiltreIlceId == 14 ? "selected" : null)">Tomarza</option>
+                    <option value="15" selected="@(Model.FiltreIlceId == 15 ? "selected" : null)">Yahyalı</option>
+                    <option value="16" selected="@(Model.FiltreIlceId == 16 ? "selected" : null)">Yeşilhisar</option>
+                    <option value="99" selected="@(Model.FiltreIlceId == 99 ? "selected" : null)">Merkez İlçe</option>
+                </select>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <label class="form-label fw-bold">Tüketici Grubu</label>
+                <select data-control="select2" name="FiltreTuketiciGrubu" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="Mesken" selected="@(Model.FiltreTuketiciGrubu == "Mesken" ? "selected" : null)">Mesken</option>
+                    <option value="Ticarethane" selected="@(Model.FiltreTuketiciGrubu == "Ticarethane" ? "selected" : null)">Ticarethane</option>
+                    <option value="Sanayi" selected="@(Model.FiltreTuketiciGrubu == "Sanayi" ? "selected" : null)">Sanayi</option>
+                    <option value="Tarımsal Sulama" selected="@(Model.FiltreTuketiciGrubu == "Tarımsal Sulama" ? "selected" : null)">Tarımsal Sulama</option>
+                    <option value="Aydınlatma" selected="@(Model.FiltreTuketiciGrubu == "Aydınlatma" ? "selected" : null)">Aydınlatma</option>
+                </select>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <label class="form-label fw-bold">Bağlantı Durumu</label>
+                <select data-control="select2" name="FiltreBaglantiDurumu" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="AKTIF" selected="@(Model.FiltreBaglantiDurumu == "AKTIF" ? "selected" : null)">Bağlı</option>
+                    <option value="PASIF" selected="@(Model.FiltreBaglantiDurumu == "PASIF" ? "selected" : null)">Kesik</option>
+                </select>
+            </div>
+            <div class="col-md-4 col-lg-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">
+                    <i class="bi bi-search"></i> Filtrele
+                </button>
+                <a href="/TuketimNoktasi/Index" class="btn btn-outline-secondary" title="Temizle">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Sayfalama (Pagination) için Form -->
+<form id="filterForm" method="get" action="/TuketimNoktasi/Index">
+    <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
+    <input type="hidden" name="FiltreTekilKod" value="@Model.FiltreTekilKod" />
+    <input type="hidden" name="FiltreIlId" value="@Model.FiltreIlId" />
+    <input type="hidden" name="FiltreIlceId" value="@Model.FiltreIlceId" />
+    <input type="hidden" name="FiltreTuketiciGrubu" value="@Model.FiltreTuketiciGrubu" />
+    <input type="hidden" name="FiltreBaglantiDurumu" value="@Model.FiltreBaglantiDurumu" />
+</form>
+
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Tekil Kod</th>
+                        <th>Bağlantı Gücü</th>
+                        <th>İlçe</th>
+                        <th>Mahalle</th>
+                        <th>Bina / Daire</th>
+                        <th>Tüketici Grubu</th>
+                        <th>Bağlantı Durumu</th>
+                        <th class="text-end pe-4">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.TuketimNoktalari != null && Model.TuketimNoktalari.Any())
+                    {
+                        foreach (var item in Model.TuketimNoktalari)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold text-dark">@item.tekil_kod</td>
+                                <td>@item.baglanti_gucu_kw.ToString("N2")</td>
+                                <td>@item.ilce_adi</td>
+                                <td>@(string.IsNullOrWhiteSpace(item.mahalle) ? "-" : item.mahalle)</td>
+                                <td>@item.bina_no / @item.bagimsiz_bolum_no</td>
+                                <td>@item.tuketici_grubu</td>
+                                <td>
+                                    <span class="badge @item.BaglantiDurumuBadgeClass">
+                                        @item.BaglantiDurumuEtiketi
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown">
+                                            İşlem <i class="bi bi-chevron-down ms-1"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                            <li>
+                                                <a href="/TuketimNoktasi/Detay/@item.tekil_kod" class="dropdown-item fw-semibold">
+                                                    <i class="bi bi-eye text-primary me-2"></i> Detay
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/TuketimNoktasi/Duzenle/@item.tekil_kod" class="dropdown-item fw-semibold text-warning">
+                                                    <i class="bi bi-pencil-square text-warning me-2"></i> Düzenle
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">Henüz kayıtlı tüketim noktası bulunmuyor.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (Model.TotalPages > 1)
+{
+    <div class="d-flex justify-content-center mt-4 mb-3">
+        <nav>
+            <ul class="pagination pagination-sm shadow-sm">
+                <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                    <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage > 1) { document.getElementById('CurrentPage').value = @(Model.CurrentPage - 1); document.getElementById('filterForm').submit(); } return false;">&laquo; Önceki</a>
+                </li>
+                <li class="page-item active">
+                    <span class="page-link fw-bold px-4">Sayfa @Model.CurrentPage</span>
+                </li>
+                <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage < @Model.TotalPages) { document.getElementById('CurrentPage').value = @(Model.CurrentPage + 1); document.getElementById('filterForm').submit(); } return false;">Sonraki &raquo;</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+}

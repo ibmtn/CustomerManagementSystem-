@@ -1,0 +1,269 @@
+@model MusteriYonetim.ViewModels.TutanakGirisViewModel
+@{
+    ViewData["Title"] = "Tutanak Girişi - " + Model.IsEmriNo;
+}
+
+<div class="mb-3">
+    <a href="/IsEmri/Detay/@Model.IsEmriId" class="btn btn-sm btn-outline-secondary">&larr; İş Emri Detayına Dön</a>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-success bg-opacity-10 border-0">
+        <h5 class="mb-0 text-success fw-bold">Sahadan Tutanak Girişi</h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="TutanakKaydet" method="post">
+            <input type="hidden" asp-for="IsEmriId" />
+            <input type="hidden" asp-for="IsEmriNo" />
+            <input type="hidden" asp-for="Tip" />
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="IsEmriNo" class="form-label text-muted fw-semibold"></label>
+                    <input asp-for="IsEmriNo" class="form-control" readonly />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-muted fw-semibold">İş Emri Tipi</label>
+                    @{
+                        var tipName = Model.Tip.ToString();
+                        var field = Model.Tip.GetType().GetField(tipName);
+                        var displayAttribute = field?.GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.DisplayAttribute), false).FirstOrDefault() as System.ComponentModel.DataAnnotations.DisplayAttribute;
+                        var displayName = displayAttribute?.Name ?? tipName;
+                    }
+                    <input type="text" class="form-control" value="@displayName" readonly />
+                    <input type="hidden" id="TipStr" value="@tipName" />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label asp-for="TutanakNo" class="form-label fw-bold">Tutanak No <span class="text-danger">*</span></label>
+                    <input asp-for="TutanakNo" class="form-control" placeholder="Örn: TT-2026-..." />
+                    <span asp-validation-for="TutanakNo" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="IslemTarihi" class="form-label fw-bold">İşlem Tarihi <span class="text-danger">*</span></label>
+                    <input asp-for="IslemTarihi" class="form-control" />
+                    <span asp-validation-for="IslemTarihi" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="SahaSonucu" class="form-label fw-bold">Saha Sonucu / Yapılan İşlem <span class="text-danger">*</span></label>
+                <textarea asp-for="SahaSonucu" class="form-control" rows="2" placeholder="Sahada yapılan işlemleri kısaca açıklayınız..."></textarea>
+                <span asp-validation-for="SahaSonucu" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Gerekce" class="form-label fw-bold">Gerekçe / Ek Açıklama</label>
+                <textarea asp-for="Gerekce" class="form-control" rows="2" placeholder="Varsa eklemek istediğiniz notlar..."></textarea>
+            </div>
+
+            <div id="sokmeTakmaBolumu" class="d-none mt-4">
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Sökme / Takma Detayları ve Mühür Bilgileri</h6>
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="MuhurNo" class="form-label">Mühür No <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text fw-bold">MHR-</span>
+                            <input asp-for="MuhurNo" class="form-control" placeholder="123456" />
+                        </div>
+                        <span asp-validation-for="MuhurNo" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3" id="eskiSayacNoDiv">
+                        <label asp-for="EskiSayacNo" class="form-label fw-bold">Eski Sayaç Seri No <span class="text-danger">*</span></label>
+                        <input asp-for="EskiSayacNo" class="form-control" />
+                        <span asp-validation-for="EskiSayacNo" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 mb-3" id="eskiSonEndeksDiv">
+                        <label asp-for="EskiSonEndeksi" class="form-label fw-bold">Eski Sayaç Son Endeks <span class="text-danger">*</span></label>
+                        <input asp-for="EskiSonEndeksi" type="number" step="0.001" class="form-control" />
+                        <span asp-validation-for="EskiSonEndeksi" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 mb-3" id="yeniSayacNoDiv">
+                        <label asp-for="YeniSayacNo" class="form-label fw-bold">Yeni Sayaç Seri No <span class="text-danger">*</span></label>
+                        <input asp-for="YeniSayacNo" class="form-control" />
+                        <span asp-validation-for="YeniSayacNo" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 mb-3" id="yeniIlkEndeksDiv">
+                        <label asp-for="YeniIlkEndeksi" class="form-label fw-bold">Yeni Sayaç İlk Endeks <span class="text-danger">*</span></label>
+                        <input asp-for="YeniIlkEndeksi" type="number" step="0.001" class="form-control" />
+                        <span asp-validation-for="YeniIlkEndeksi" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 mb-3" id="yeniSayacMarkaDiv">
+                        <label asp-for="YeniSayacMarka" class="form-label fw-bold">Yeni Sayaç Markası <span class="text-danger">*</span></label>
+                        <input asp-for="YeniSayacMarka" class="form-control" />
+                        <span asp-validation-for="YeniSayacMarka" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 mb-3" id="yeniSayacModelDiv">
+                        <label asp-for="YeniSayacModel" class="form-label fw-bold">Yeni Sayaç Modeli <span class="text-danger">*</span></label>
+                        <input asp-for="YeniSayacModel" class="form-control" />
+                        <span asp-validation-for="YeniSayacModel" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 mb-3" id="yeniSayacFazDiv">
+                        <label asp-for="YeniSayacFaz" class="form-label fw-bold">Sayaç Fazı <span class="text-danger">*</span></label>
+                        <select data-control="select2" asp-for="YeniSayacFaz" class="form-select">
+                            <option value="">Seçiniz...</option>
+                            <option value="Monofaze">TEK_FAZ</option>
+                            <option value="Trifaze">UC_FAZ</option>
+                        </select>
+                        <span asp-validation-for="YeniSayacFaz" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="acmaKesmeBolumu" class="d-none mt-4">
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Açma / Kesme Endeks Bilgileri</h6>
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3" id="kesmeEndeksiDiv">
+                        <label asp-for="KesmeEndeksi" class="form-label fw-bold">Kesme Endeksi <span class="text-danger">*</span></label>
+                        <input asp-for="KesmeEndeksi" type="number" step="0.001" class="form-control" />
+                        <span asp-validation-for="KesmeEndeksi" class="text-danger small"></span>
+                        <div class="form-text">Kesme anındaki sayacın üzerindeki değer.</div>
+                    </div>
+                    <div class="col-md-6 mb-3" id="acmaEndeksiDiv">
+                        <label asp-for="AcmaEndeksi" class="form-label fw-bold">Açma Endeksi <span class="text-danger">*</span></label>
+                        <input asp-for="AcmaEndeksi" type="number" step="0.001" class="form-control" />
+                        <span asp-validation-for="AcmaEndeksi" class="text-danger small"></span>
+                        <div class="form-text">Açma anındaki sayacın üzerindeki değer.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="endeksOkumaBolumu" class="d-none mt-4">
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Periyodik Okuma Bilgileri</h6>
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3" id="guncelEndeksDiv">
+                        <label asp-for="GuncelEndeks" class="form-label fw-bold">Güncel Okuma Endeksi (kWh) <span class="text-danger">*</span></label>
+                        <input asp-for="GuncelEndeks" type="number" step="0.001" class="form-control" />
+                        <span asp-validation-for="GuncelEndeks" class="text-danger small"></span>
+                        <div class="form-text">Okunan mevcut endeks değerini giriniz.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                <button type="submit" class="btn btn-success px-4 fw-bold">
+                    <i class="bi bi-save me-2"></i> Tutanağı Kaydet
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Backend'den gelen iş emri tipini alıyoruz (Gizli inputtan)
+            var tip = document.getElementById("TipStr").value.toUpperCase();
+            
+            // Bölüm Container'ları
+            var sokmeTakmaBolumu = document.getElementById("sokmeTakmaBolumu");
+            var acmaKesmeBolumu = document.getElementById("acmaKesmeBolumu");
+            var endeksOkumaBolumu = document.getElementById("endeksOkumaBolumu");
+            
+            // Sökme Takma İç Alanları
+            var eskiSayacDiv = document.getElementById("eskiSayacNoDiv");
+            var eskiEndeksDiv = document.getElementById("eskiSonEndeksDiv");
+            var yeniSayacDiv = document.getElementById("yeniSayacNoDiv");
+            var yeniEndeksDiv = document.getElementById("yeniIlkEndeksDiv");
+            var yeniMarkaDiv = document.getElementById("yeniSayacMarkaDiv");
+            var yeniModelDiv = document.getElementById("yeniSayacModelDiv");
+            var yeniFazDiv = document.getElementById("yeniSayacFazDiv");
+            
+            var eskiSayacNo = document.getElementById("EskiSayacNo");
+            var eskiSonEndeksi = document.getElementById("EskiSonEndeksi");
+            var yeniSayacNo = document.getElementById("YeniSayacNo");
+            var yeniSayacMarka = document.getElementById("YeniSayacMarka");
+            var yeniSayacModel = document.getElementById("YeniSayacModel");
+            var yeniSayacFaz = document.getElementById("YeniSayacFaz");
+            var yeniIlkEndeksi = document.getElementById("YeniIlkEndeksi");
+            var muhurNo = document.getElementById("MuhurNo");
+
+            // Açma Kesme İç Alanları
+            var kesmeDiv = document.getElementById("kesmeEndeksiDiv");
+            var acmaDiv = document.getElementById("acmaEndeksiDiv");
+            
+            var kesmeEndeksi = document.getElementById("KesmeEndeksi");
+            var acmaEndeksi = document.getElementById("AcmaEndeksi");
+
+            // Endeks Okuma Alanları
+            var guncelEndeksDiv = document.getElementById("guncelEndeksDiv");
+            var guncelEndeks = document.getElementById("GuncelEndeks");
+
+            // Alanları Göster/Gizle ve Zorunlu Yap fonksiyonu
+            function showAndRequire(divElement, inputElement) {
+                divElement.classList.remove("d-none");
+                inputElement.setAttribute("required", "required");
+            }
+
+            function hideAndUnrequire(divElement, inputElement) {
+                divElement.classList.add("d-none");
+                inputElement.removeAttribute("required");
+                inputElement.value = ""; // Gizlenen alanın içini temizle
+            }
+
+            // SÖKME / TAKMA / DEĞİŞTİRME MANTIĞI
+            if (tip === "SAYACDEGISIM" || tip === "SAYACTAKMA" || tip === "BAGLAMA" || tip === "YENI_BAGLANTI" || tip === "SAYAÇ SÖKME" || tip === "SOKME" || tip === "YENİ BAĞLANTI" || tip === "YENI BAGLANTI" || tip === "YENIBAGLANTI" || tip === "SAYAÇ TAKMA" || tip === "SAYAÇ DEĞIŞTIRME" || tip === "SAYAÇ DEĞİŞTİRME" || tip === "SAYAÇ DEĞIŞIM" || tip === "DEGISTIRME") {
+                sokmeTakmaBolumu.classList.remove("d-none");
+                muhurNo.setAttribute("required", "required");
+
+                // Varsayılan olarak hepsini gizle
+                hideAndUnrequire(eskiSayacDiv, eskiSayacNo);
+                hideAndUnrequire(eskiEndeksDiv, eskiSonEndeksi);
+                hideAndUnrequire(yeniSayacDiv, yeniSayacNo);
+                hideAndUnrequire(yeniMarkaDiv, yeniSayacMarka);
+                hideAndUnrequire(yeniModelDiv, yeniSayacModel);
+                hideAndUnrequire(yeniFazDiv, yeniSayacFaz);
+                hideAndUnrequire(yeniEndeksDiv, yeniIlkEndeksi);
+
+                if (tip === "SAYAÇ SÖKME" || tip === "SOKME") {
+                    showAndRequire(eskiSayacDiv, eskiSayacNo);
+                    showAndRequire(eskiEndeksDiv, eskiSonEndeksi);
+                } 
+                else if (tip === "SAYACTAKMA" || tip === "BAGLAMA" || tip === "YENI_BAGLANTI" || tip === "YENİ BAĞLANTI" || tip === "YENI BAGLANTI" || tip === "YENIBAGLANTI" || tip === "SAYAÇ TAKMA") {
+                    showAndRequire(yeniSayacDiv, yeniSayacNo);
+                    showAndRequire(yeniMarkaDiv, yeniSayacMarka);
+                    showAndRequire(yeniModelDiv, yeniSayacModel);
+                    showAndRequire(yeniFazDiv, yeniSayacFaz);
+                    showAndRequire(yeniEndeksDiv, yeniIlkEndeksi);
+                } 
+                else if (tip === "SAYACDEGISIM" || tip === "SAYAÇ DEĞIŞTIRME" || tip === "SAYAÇ DEĞİŞTİRME" || tip === "SAYAÇ DEĞIŞIM" || tip === "DEGISTIRME") {
+                    showAndRequire(eskiSayacDiv, eskiSayacNo);
+                    showAndRequire(eskiEndeksDiv, eskiSonEndeksi);
+                    showAndRequire(yeniSayacDiv, yeniSayacNo);
+                    showAndRequire(yeniMarkaDiv, yeniSayacMarka);
+                    showAndRequire(yeniModelDiv, yeniSayacModel);
+                    showAndRequire(yeniFazDiv, yeniSayacFaz);
+                    showAndRequire(yeniEndeksDiv, yeniIlkEndeksi);
+                }
+            }
+            
+            // AÇMA / KESME MANTIĞI
+            if (tip === "ENERJI_ACMA" || tip === "ENERJIACMA" || tip === "ENERJİ AÇMA" || tip === "ENERJI ACMA" || tip === "AÇMA" || tip === "ACMA" || tip === "ENERJİ KESME" || tip === "ENERJI KESME" || tip === "KESME") {
+                acmaKesmeBolumu.classList.remove("d-none");
+                
+                hideAndUnrequire(kesmeDiv, kesmeEndeksi);
+                hideAndUnrequire(acmaDiv, acmaEndeksi);
+
+                if (tip === "ENERJİ KESME" || tip === "ENERJI KESME" || tip === "KESME") {
+                    showAndRequire(kesmeDiv, kesmeEndeksi);
+                } 
+                else if (tip === "ENERJI_ACMA" || tip === "ENERJIACMA" || tip === "ENERJİ AÇMA" || tip === "ENERJI ACMA" || tip === "AÇMA" || tip === "ACMA") {
+                    showAndRequire(acmaDiv, acmaEndeksi);
+                }
+            }
+
+            // ENDEKS OKUMA MANTIĞI
+            if (tip === "ENDEKSOKUMA" || tip === "ENDEKS OKUMA" || tip === "ENDEKS_OKUMA") {
+                endeksOkumaBolumu.classList.remove("d-none");
+                showAndRequire(guncelEndeksDiv, guncelEndeks);
+            }
+        });
+    </script>
+}

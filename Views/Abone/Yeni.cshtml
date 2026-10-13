@@ -1,0 +1,179 @@
+@model MusteriYonetim.ViewModels.AboneEkleViewModel
+@{
+    ViewData["Title"] = "Yeni Abone Ekle";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h4 text-primary fw-bold">
+                    <i class="bi bi-person-plus-fill me-2"></i>
+                    Yeni Abone (Müşteri) Ekle
+                </h2>
+                <a href="/Abone/Index" class="btn btn-outline-secondary fw-bold shadow-sm">
+                    <i class="bi bi-arrow-left"></i> Listeye Dön
+                </a>
+            </div>
+
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-5">
+                    <form asp-action="Yeni" method="post">
+                        @if (ViewData.ModelState[string.Empty]?.Errors.Count > 0)
+                        {
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        }
+                        
+                        <!-- Gerçek / Tüzel Toggle -->
+                        <div class="mb-4 text-center">
+                            <label class="form-label fw-bold text-muted d-block">Abone Tipi</label>
+                            <div class="btn-group" role="group" aria-label="Gerçek veya Tüzel Kişi">
+                                <input type="radio" class="btn-check" name="IsTuzel" id="tipGercek" value="false" @(Model.IsTuzel ? "" : "checked") onchange="toggleTip()">
+                                <label class="btn btn-outline-primary px-5 fw-bold" for="tipGercek">Gerçek Kişi</label>
+
+                                <input type="radio" class="btn-check" name="IsTuzel" id="tipTuzel" value="true" @(Model.IsTuzel ? "checked" : "") onchange="toggleTip()">
+                                <label class="btn btn-outline-primary px-5 fw-bold" for="tipTuzel">Tüzel Kişi (Kurum)</label>
+                            </div>
+                        </div>
+
+                        <div class="row g-4">
+                            <!-- Ad Soyad / Ünvan -->
+                            <div class="col-12">
+                                <label asp-for="AdSoyadUnvan" class="form-label fw-bold text-muted" id="lblAdSoyadUnvan">
+                                    Ad Soyad <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-person text-primary" id="iconAdSoyadUnvan"></i>
+                                    </span>
+                                    <input asp-for="AdSoyadUnvan" class="form-control border-start-0 ps-0" placeholder="Abonenin adı soyadı veya kurum ünvanı" required />
+                                </div>
+                                <span asp-validation-for="AdSoyadUnvan" class="text-danger small"></span>
+                            </div>
+
+                            <!-- TCKN -->
+                            <div class="col-md-6" id="divTCKN">
+                                <label asp-for="TCKN" class="form-label fw-bold text-muted">
+                                    TC Kimlik No <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-credit-card-2-front text-primary"></i>
+                                    </span>
+                                    <input asp-for="TCKN" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="11" class="form-control border-start-0 ps-0" placeholder="11 Haneli TC Kimlik No" />
+                                </div>
+                                <span asp-validation-for="TCKN" class="text-danger small"></span>
+                            </div>
+
+                            <!-- VKN -->
+                            <div class="col-md-6" id="divVKN" style="display:none;">
+                                <label asp-for="VKN" class="form-label fw-bold text-muted">
+                                    Vergi Kimlik No <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-building text-primary"></i>
+                                    </span>
+                                    <input asp-for="VKN" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="10" class="form-control border-start-0 ps-0" placeholder="10 Haneli Vergi No" />
+                                </div>
+                                <span asp-validation-for="VKN" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Telefon -->
+                            <div class="col-md-6">
+                                <label asp-for="Telefon" class="form-label fw-bold text-muted">
+                                    Telefon <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-telephone text-primary"></i>
+                                    </span>
+                                    <input asp-for="Telefon" type="tel" class="form-control border-start-0 ps-0" placeholder="0555 XXX XX XX" required />
+                                </div>
+                                <span asp-validation-for="Telefon" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Mail -->
+                            <div class="col-md-6">
+                                <label asp-for="Mail" class="form-label fw-bold text-muted">
+                                    E-Posta <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-envelope text-primary"></i>
+                                    </span>
+                                    <input asp-for="Mail" type="email" class="form-control border-start-0 ps-0" placeholder="ornek@mail.com" required />
+                                </div>
+                                <span asp-validation-for="Mail" class="text-danger small"></span>
+                            </div>
+
+
+                            <!-- KVKK Onayı -->
+                            <div class="col-12 mt-4">
+                                <div class="form-check bg-light p-3 rounded-3 border">
+                                    <input asp-for="KvkkOnayi" class="form-check-input ms-1 me-2" type="checkbox" id="kvkkCheck" required>
+                                    <label class="form-check-label fw-semibold text-dark ms-2" for="kvkkCheck">
+                                        Kişisel verilerin (KVKK) işlenmesini ve sözleşme şartlarını okudum, kabul ediyorum. <span class="text-danger">*</span>
+                                    </label>
+                                </div>
+                                <span asp-validation-for="KvkkOnayi" class="text-danger small d-block mt-1"></span>
+                            </div>
+
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary px-5 fw-bold shadow-sm">
+                                <i class="bi bi-save me-2"></i> Aboneyi Kaydet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleTip() {
+            var isTuzel = document.getElementById('tipTuzel').checked;
+            
+            var divTCKN = document.getElementById('divTCKN');
+            var divVKN = document.getElementById('divVKN');
+            var inputTCKN = document.getElementById('TCKN');
+            var inputVKN = document.getElementById('VKN');
+            
+            var lblAd = document.getElementById('lblAdSoyadUnvan');
+            var iconAd = document.getElementById('iconAdSoyadUnvan');
+
+            if (isTuzel) {
+                // Tüzel Kişi seçildi
+                divTCKN.style.display = 'none';
+                inputTCKN.removeAttribute('required');
+                
+                divVKN.style.display = 'block';
+                inputVKN.setAttribute('required', 'required');
+                
+                lblAd.innerHTML = 'Kurum Ünvanı <span class="text-danger">*</span>';
+                iconAd.className = 'bi bi-buildings text-primary';
+            } else {
+                // Gerçek Kişi seçildi
+                divVKN.style.display = 'none';
+                inputVKN.removeAttribute('required');
+                
+                divTCKN.style.display = 'block';
+                inputTCKN.setAttribute('required', 'required');
+                
+                lblAd.innerHTML = 'Ad Soyad <span class="text-danger">*</span>';
+                iconAd.className = 'bi bi-person text-primary';
+            }
+        }
+
+        // Sayfa yüklendiğinde mevcut duruma göre ayarla
+        document.addEventListener("DOMContentLoaded", function() {
+            toggleTip();
+        });
+    </script>
+}

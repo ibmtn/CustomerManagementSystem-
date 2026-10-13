@@ -1,0 +1,267 @@
+@model MusteriYonetim.ViewModels.FaturaSimulasyonViewModel
+
+@{
+    ViewData["Title"] = "Fatura Detayı";
+}
+
+<style>
+    .invoice-card {
+        border-radius: 1rem;
+        border: 1px solid rgba(0,0,0,0.08);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+        background: #fff;
+        overflow: hidden;
+    }
+    .invoice-header {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        color: white;
+        padding: 2.5rem 2rem;
+    }
+    .invoice-body {
+        padding: 2.5rem 2rem;
+    }
+    .invoice-footer {
+        background: #f8f9fa;
+        padding: 1.5rem 2rem;
+        border-top: 1px dashed rgba(0,0,0,0.1);
+    }
+    .watermark {
+        position: absolute;
+        top: 30%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-30deg);
+        font-size: 8rem;
+        color: rgba(0,0,0,0.02);
+        z-index: 0;
+        pointer-events: none;
+        font-weight: 900;
+        letter-spacing: 10px;
+    }
+    .table-items th {
+        background-color: #f1f5f9;
+        color: #475569;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        border-bottom: none;
+    }
+    .table-items td {
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+        font-size: 0.95rem;
+    }
+    .info-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    .info-value {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #1e293b;
+    }
+</style>
+
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 text-dark fw-bold">
+            <i class="bi bi-file-earmark-text text-primary me-2"></i> Fatura Görüntüleme
+        </h2>
+        <a href="/Fatura/Index" class="btn btn-light border shadow-sm fw-medium">
+            <i class="bi bi-arrow-left me-1"></i> Listeye Dön
+        </a>
+    </div>
+
+    <div class="invoice-card position-relative">
+        <div class="watermark">MYS</div>
+        
+        <!-- Header Section -->
+        <div class="invoice-header d-flex justify-content-between align-items-center position-relative z-1">
+            <div class="d-flex align-items-center">
+                <div class="bg-white text-primary rounded-circle d-flex justify-content-center align-items-center shadow" style="width: 70px; height: 70px; font-size: 30px;">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </div>
+                <div class="ms-4">
+                    <h3 class="mb-1 fw-bold">Fatura #@Model.fatura_no</h3>
+                    <p class="mb-0 text-white-50 fs-6">Fatura Dönemi: <strong class="text-white">@Model.donem</strong></p>
+                </div>
+            </div>
+            <div class="text-end">
+                <h2 class="fw-bold mb-1">₺@(Model.toplam_tutar?.ToString("N2") ?? "0.00")</h2>
+                @if (Model.durum == "ODENDI" || Model.durum == "Ödendi")
+                {
+                    <span class="badge bg-success bg-opacity-25 text-white border border-success border-opacity-50 px-3 py-1 rounded-pill"><i class="bi bi-check2-circle me-1"></i> Ödendi</span>
+                }
+                else
+                {
+                    <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50 px-3 py-1 rounded-pill"><i class="bi bi-hourglass-split me-1"></i> @Model.durum</span>
+                }
+            </div>
+        </div>
+
+        <!-- Body Section -->
+        <div class="invoice-body position-relative z-1">
+            
+            <!-- Bilgiler Grid -->
+            <div class="row mb-5 g-4">
+                <div class="col-md-6">
+                    <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">Müşteri Bilgileri</h6>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="info-label">Abone / Ünvan</div>
+                            <div class="info-value fs-5 fw-bold text-dark">@ViewBag.AboneBilgisi</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="info-label">Tüketim Noktası (Tekil Kod)</div>
+                            <div class="info-value">@Model.tekil_kod</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="info-label">Sözleşme ID</div>
+                            <div class="info-value">@Model.sozlesme_id</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="info-label">Tarife Grubu</div>
+                            <div class="info-value"><span class="badge bg-secondary">@Model.TarifeGrubu</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">Fatura / Endeks Bilgileri</h6>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="info-label">Fatura Tarihi</div>
+                            <div class="info-value"><i class="bi bi-calendar-check text-success me-1"></i> @(Model.fatura_tarihi?.ToString("dd.MM.yyyy") ?? "-")</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="info-label">Son Ödeme Tarihi</div>
+                            <div class="info-value"><i class="bi bi-calendar-x text-danger me-1"></i> @(Model.son_odeme_tarihi?.ToString("dd.MM.yyyy") ?? "-")</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="info-label">İlk Endeks</div>
+                            <div class="info-value">@Model.ilk_endeks</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="info-label">Son Endeks</div>
+                            <div class="info-value">@Model.son_endeks</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="info-label">Tüketim</div>
+                            <div class="info-value fw-bold text-primary">@Model.tuketim_kwh kWh</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fatura Kalemleri Table -->
+            <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">Fatura Kalemleri</h6>
+            <div class="table-responsive mb-4 rounded-3 border">
+                <table class="table table-items mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4 py-3">Kalem Adı</th>
+                            <th class="text-center py-3">Miktar / kWh</th>
+                            <th class="text-end py-3">Birim Fiyat</th>
+                            <th class="text-end pe-4 py-3">Tutar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Kalemler != null && Model.Kalemler.Any())
+                        {
+                            foreach (var kalem in Model.Kalemler)
+                            {
+                                <tr>
+                                    <td class="ps-4 py-3 fw-medium">
+                                        @if (kalem.KalemAdi.Contains("Enerji")) { <i class="bi bi-lightning-charge text-warning me-2"></i> }
+                                        else if (kalem.KalemAdi.Contains("Dağıtım")) { <i class="bi bi-diagram-3 text-info me-2"></i> }
+                                        else if (kalem.KalemAdi.Contains("Vergi")) { <i class="bi bi-bank text-secondary me-2"></i> }
+                                        else if (kalem.KalemAdi.Contains("Kesme")) { <i class="bi bi-scissors text-danger me-2"></i> }
+                                        else { <i class="bi bi-circle-fill text-muted me-2" style="font-size: 8px;"></i> }
+                                        @kalem.KalemAdi
+                                    </td>
+                                    <td class="text-center py-3 text-muted">@(kalem.Miktar > 0 ? kalem.Miktar.ToString("N0") : "-")</td>
+                                    <td class="text-end py-3 text-muted">@(kalem.BirimFiyat > 0 ? "₺" + kalem.BirimFiyat.ToString("N2") : "-")</td>
+                                    <td class="text-end pe-4 py-3 fw-bold text-dark">₺@kalem.Tutar.ToString("N2")</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Toplam Özet -->
+            <div class="row justify-content-end">
+                <div class="col-md-5 col-lg-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted fw-medium">Ara Toplam:</span>
+                        <span class="fw-bold text-dark">₺@((Model.toplam_tutar - Model.vergi_fon_toplama)?.ToString("N2") ?? "0.00")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted fw-medium">Vergi ve Fonlar:</span>
+                        <span class="fw-bold text-dark">₺@(Model.vergi_fon_toplama?.ToString("N2") ?? "0.00")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted fw-medium">Gecikme Zammı:</span>
+                        <span class="fw-bold text-dark">₺0.00</span>
+                    </div>
+                    <hr class="my-2 border-secondary opacity-25">
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span class="text-uppercase fw-bold text-primary fs-5">Genel Toplam:</span>
+                        <span class="fw-bolder text-primary fs-3">₺@(Model.toplam_tutar?.ToString("N2") ?? "0.00")</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="invoice-footer d-flex justify-content-end gap-2 position-relative z-1">
+            <button class="btn btn-outline-secondary fw-medium px-4 shadow-sm" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> Faturayı Yazdır
+            </button>
+            @if (Model.durum != "ODENDI" && Model.durum != "Ödendi")
+            {
+                <a href="/Fatura/Odeme/@Model.fatura_id" class="btn btn-success fw-bold px-4 shadow-sm">
+                    <i class="bi bi-credit-card me-1"></i> Şimdi Öde
+                </a>
+            }
+
+
+        </div>
+    </div>
+</div>
+
+<style>
+    @Html.Raw("@media print {")
+        body * { visibility: hidden; }
+        .invoice-card, .invoice-card * { visibility: visible; }
+        .invoice-card { position: absolute; left: 0; top: 0; width: 100%; border: none; box-shadow: none; }
+        .invoice-footer, .btn { display: none !important; }
+    @Html.Raw("}")
+</style>
+
+@section Scripts {
+    @{
+        var successMessage = TempData["SuccessMessage"]?.ToString();
+        var successMessageJson = System.Text.Json.JsonSerializer.Serialize(successMessage);
+    }
+
+    @if (!string.IsNullOrWhiteSpace(successMessage))
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Ödeme Başarılı!',
+                    text: @Html.Raw(successMessageJson),
+                    confirmButtonText: 'Tamam',
+                    confirmButtonColor: '#198754'
+                });
+            });
+        </script>
+    }
+}

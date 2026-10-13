@@ -1,0 +1,124 @@
+@model MusteriYonetim.ViewModels.AboneDetayViewModel
+@{
+    ViewData["Title"] = "Abone Detayı - " + Model.Abone.abone_no;
+}
+
+<div class="mb-4 mt-3 d-flex justify-content-between align-items-center">
+    <a href="/Abone/Index" class="btn btn-sm btn-outline-secondary fw-bold shadow-sm">
+        <i class="bi bi-arrow-left"></i> Listeye Dön
+    </a>
+    <div>
+        <form action="/Abone/DurumGuncelle" method="post" class="d-inline">
+            <input type="hidden" name="id" value="@Model.Abone.abone_id" />
+            <input type="hidden" name="yeniDurum" value="@(Model.Abone.Durum == "AKTIF" ? "PASIF" : "AKTIF")" />
+            <button type="submit" class="btn btn-@(Model.Abone.Durum == "AKTIF" ? "warning" : "success") btn-sm fw-bold shadow-sm me-2">
+                <i class="bi bi-arrow-repeat"></i> @(Model.Abone.Durum == "AKTIF" ? "Pasife Al" : "Aktife Al")
+            </button>
+        </form>
+        <form action="/Abone/Sil/@Model.Abone.abone_id" method="post" class="d-inline" onsubmit="return confirm('Bu aboneyi silmek (pasife almak) istediğinize emin misiniz?');">
+            <button type="submit" class="btn btn-danger btn-sm fw-bold shadow-sm"><i class="bi bi-trash"></i> Sil</button>
+        </form>
+    </div>
+</div>
+
+<!-- Profil Kartı -->
+<div class="card shadow-sm border-0 rounded-4 mb-4 bg-white">
+    <div class="card-body p-4">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-4" style="width: 80px; height: 80px;">
+                    @if (Model.Abone.abone_tipi == MusteriYonetim.Models.Enums.AboneTipi.Bireysel) {
+                        <i class="bi bi-person-fill fs-1"></i>
+                    } else {
+                        <i class="bi bi-buildings-fill fs-1"></i>
+                    }
+                </div>
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">
+                        @(Model.Abone.abone_tipi == MusteriYonetim.Models.Enums.AboneTipi.Bireysel ? $"{Model.Abone.Ad} {Model.Abone.Soyad}" : Model.Abone.Unvan)
+                    </h3>
+                    <p class="text-muted mb-2 fs-5">@Model.Abone.abone_no</p>
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-light text-dark border font-monospace">@Model.KimlikNoMaskeli</span>
+                        <span class="badge bg-@(Model.Abone.abone_tipi == MusteriYonetim.Models.Enums.AboneTipi.Bireysel ? "info" : "warning") bg-opacity-10 text-@(Model.Abone.abone_tipi == MusteriYonetim.Models.Enums.AboneTipi.Bireysel ? "info" : "warning") border">@Model.Abone.abone_tipi</span>
+                        <span class="badge bg-@(Model.Abone.Durum ?.ToUpper() == "AKTIF" ? "success" : "secondary")">@Model.Abone.Durum</span>
+                        <span class="badge bg-@(Model.Sozlesmeler.Any() ? "primary" : "danger")">
+                            <i class="bi bi-file-earmark-text"></i> @(Model.Sozlesmeler.Any() ? "Sözleşmesi Var" : "Sözleşmesi Yok")
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="text-end">
+                <div class="mb-2">
+                    <i class="bi bi-telephone-fill text-muted me-2"></i> <span class="fw-semibold">@Model.Abone.telefon</span>
+                </div>
+                <div>
+                    <i class="bi bi-envelope-fill text-muted me-2"></i> <span class="fw-semibold">@Model.Abone.e_posta</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs -->
+<div class="card shadow-sm border-0 rounded-4 mb-5">
+    <div class="card-header bg-white border-bottom-0 pt-3 px-4 pb-0">
+        <ul class="nav nav-tabs border-bottom-0" id="aboneTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold text-primary" id="genel-tab" data-bs-toggle="tab" data-bs-target="#genel" type="button" role="tab">
+                    <i class="bi bi-info-circle me-1"></i> Genel Bilgi
+                </button>
+            </li>
+
+        </ul>
+    </div>
+    
+    <div class="card-body p-4 bg-light rounded-bottom-4">
+        <div class="tab-content" id="aboneTabsContent">
+            
+            <!-- Genel Bilgi Tab -->
+            <div class="tab-pane fade show active" id="genel" role="tabpanel">
+                <h5 class="fw-bold mb-4">Abonelik Detayları</h5>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="bg-white p-3 rounded-3 border shadow-sm h-100">
+                            <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">İletişim Bilgileri</h6>
+                            <p class="mb-2"><span class="text-muted">Telefon:</span> <span class="fw-semibold float-end">@Model.Abone.telefon</span></p>
+                            <p class="mb-2"><span class="text-muted">E-Posta:</span> <span class="fw-semibold float-end">@Model.Abone.e_posta</span></p>
+                            <p class="mb-0"><span class="text-muted">Kayıt Tarihi:</span> <span class="fw-semibold float-end">@Model.Abone.CreatedAt.ToString("dd.MM.yyyy")</span></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="bg-white p-3 rounded-3 border shadow-sm h-100">
+                            <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Resmi Bilgiler</h6>
+                            <p class="mb-2"><span class="text-muted">Müşteri Tipi:</span> <span class="fw-semibold float-end">@Model.Abone.abone_tipi</span></p>
+                            <p class="mb-2"><span class="text-muted">Kimlik/Vergi No:</span> <span class="fw-semibold float-end">@Model.KimlikNoMaskeli</span></p>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // URL'de bir hash varsa (#sozlesme gibi) o sekmeyi aktif yap
+            var hash = window.location.hash;
+            if (hash) {
+                var triggerEl = document.querySelector('button[data-bs-target="' + hash + '"]');
+                if (triggerEl) {
+                    var tab = new bootstrap.Tab(triggerEl);
+                    tab.show();
+                }
+            }
+        });
+    </script>
+}
+

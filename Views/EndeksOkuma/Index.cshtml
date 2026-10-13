@@ -1,0 +1,213 @@
+@model MusteriYonetim.ViewModels.EndeksOkumaListeViewModel
+
+@{
+    ViewData["Title"] = "Endeks Okumaları";
+}
+
+<div class="container-fluid mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-0 text-gray-800 fw-bold d-inline-block me-3">
+                <i class="bi bi-speedometer2 text-primary me-2"></i> Endeks Okumaları
+            </h2>
+            <span class="badge bg-secondary bg-opacity-10 text-secondary border fs-6 align-text-bottom">
+                Toplam: @Model.TotalItems (Sayfa @Model.CurrentPage / @Model.TotalPages)
+            </span>
+            <p class="text-muted mt-1 mb-0">Saha ve uzaktan endeks okuma kayıtlarının listesi.</p>
+        </div>
+        <a href="/EndeksOkuma/Yeni" class="btn btn-primary shadow-sm rounded-pill px-4 fw-bold">
+            <i class="bi bi-plus-lg me-1"></i> Yeni Okuma Girişi
+        </a>
+    </div>
+
+    @if (TempData["OkumaMesaji"] != null)
+    {
+        var okumaMesajTip = TempData["OkumaMesajTip"]?.ToString() ?? (TempData["OkumaMesaji"]?.ToString()?.StartsWith("HATA:") == true ? "danger" : "success");
+        var okumaMesajIcon = okumaMesajTip == "danger" ? "bi-exclamation-triangle-fill" : "bi-check-circle-fill";
+        <div class="alert alert-@okumaMesajTip shadow-sm border-0 d-flex align-items-center rounded-3 mb-4" role="alert">
+            <i class="bi @okumaMesajIcon fs-4 me-3"></i>
+            <div>@TempData["OkumaMesaji"]</div>
+        </div>
+    }
+
+    <div class="card shadow-sm border-0 mb-4 bg-light">
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Okuma No</label>
+                    <input name="FiltreOkumaNo" value="@Model.FiltreOkumaNo" type="number" class="form-control" placeholder="Örn: 12345" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Sayaç Seri No</label>
+                    <input name="FiltreSayacId" value="@Model.FiltreSayacId" type="text" class="form-control" placeholder="Sayaç No..." />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Tüketim Noktası</label>
+                    <input name="FiltreTuketimNoktasi" value="@Model.FiltreTuketimNoktasi" type="text" class="form-control" placeholder="TK kodu veya adres..." />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Abone</label>
+                    <input name="FiltreAbone" value="@Model.FiltreAbone" type="text" class="form-control" placeholder="Ad, Soyad, TC veya Ünvan..." />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Dönem</label>
+                    <input name="FiltreDonem" value="@Model.FiltreDonem" type="text" class="form-control" placeholder="Örn: 2026-07" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Doğrulama Durumu</label>
+                    <select data-control="select2" name="FiltreDogrulamaDurumu" class="form-select">
+                        <option value="">Tümü</option>
+                        <option value="Onaylandi" selected="@(Model.FiltreDogrulamaDurumu == "Onaylandi" ? "selected" : null)">Onaylandı</option>
+                        <option value="DogrulamaBekliyor" selected="@(Model.FiltreDogrulamaDurumu == "DogrulamaBekliyor" ? "selected" : null)">Onay Bekliyor</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Okuma Tarihi</label>
+                    <input name="FiltreOkumaTarihi" value="@Model.FiltreOkumaTarihi?.ToString("yyyy-MM-dd")" type="date" class="form-control" />
+                </div>
+                <div class="col-md-3 d-flex justify-content-end gap-2">
+                    <a href="/EndeksOkuma/Index" class="btn btn-outline-secondary w-50" title="Temizle">
+                        <i class="bi bi-x-lg me-1"></i> Temizle
+                    </a>
+                    <button type="submit" class="btn btn-primary w-50">
+                        <i class="bi bi-search me-1"></i> Filtrele
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <form id="filterForm" method="get" action="/EndeksOkuma/Index">
+        <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
+        <input type="hidden" name="FiltreOkumaNo" value="@Model.FiltreOkumaNo" />
+        <input type="hidden" name="FiltreSayacId" value="@Model.FiltreSayacId" />
+        <input type="hidden" name="FiltreTuketimNoktasi" value="@Model.FiltreTuketimNoktasi" />
+        <input type="hidden" name="FiltreAbone" value="@Model.FiltreAbone" />
+        <input type="hidden" name="FiltreDonem" value="@Model.FiltreDonem" />
+        <input type="hidden" name="FiltreDogrulamaDurumu" value="@Model.FiltreDogrulamaDurumu" />
+        <input type="hidden" name="FiltreOkumaTarihi" value="@Model.FiltreOkumaTarihi?.ToString("yyyy-MM-dd")" />
+        <input type="hidden" name="kaynak" value="@ViewBag.Kaynak" />
+        <input type="hidden" name="durum" value="@ViewBag.Durum" />
+        <input type="hidden" name="baslangic" value="@ViewBag.Baslangic" />
+        <input type="hidden" name="bitis" value="@ViewBag.Bitis" />
+        <input type="hidden" name="arama" value="@ViewBag.Arama" />
+    </form>
+
+    <div class="card shadow border-0 rounded-4 mb-4">
+        <div class="card-header bg-white py-3 border-bottom-0">
+            <h6 class="m-0 font-weight-bold text-primary">Tüm Kayıtlar</h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Okuma No</th>
+                            <th>Okuma Tarihi</th>
+                            <th>Abone</th>
+                            <th>Okuma Tipi</th>
+                            <th>Okuma Kaynağı</th>
+                            <th>Tüketim Noktası</th>
+                            <th>Sayac No</th>
+                            <th>İlk Endeks</th>
+                            <th>Son Endeks</th>
+                            <th>Tüketim (kWh)</th>
+                            <th>Durum</th>
+                            <th class="text-end pe-4">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Okumalar)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold">@item.OkumaId</td>
+                                <td>
+                                    <span class="fw-bold text-dark">@item.OkumaTarihi.ToString("dd.MM.yyyy")</span>
+                                    <br><small class="text-muted">@item.OkumaTarihi.ToString("HH:mm")</small>
+                                </td>
+                                <td>@item.AboneBilgisi</td>
+                                <td><span class="badge bg-light text-dark border fw-bold px-2 py-1 shadow-sm">@item.OkumaTipi</span></td>
+                                <td><span class="badge bg-primary px-2 py-1 shadow-sm text-white">@item.Kaynak</span></td>
+                                <td><span class="text-dark fw-bold">@item.TuketimNoktasiKodu</span></td>
+                                <td><span class="font-monospace text-primary fw-medium">@item.SayacSeriNo</span></td>
+                                <td>@item.OncekiEndeks.ToString("N2")</td>
+                                <td>@item.GuncelEndeks.ToString("N2")</td>
+                                <td>
+                                    <span class="fw-bold @(item.TuketimMiktari > 1000 ? "text-danger" : "text-dark")">
+                                        @item.TuketimMiktari.ToString("0.00")
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (item.DogrulamaDurumu)
+                                    {
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-2 mt-1" style="font-size:0.7rem;"><i class="bi bi-check2-all"></i> Onaylandı</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark border border-warning rounded-pill px-2 mt-1" style="font-size:0.7rem;"><i class="bi bi-hourglass-split"></i> Onay Bekliyor</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(item.AnomaliAciklamasi))
+                                    {
+                                        <br>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-2 mt-1" style="font-size:0.7rem;"><i class="bi bi-exclamation-triangle"></i> @item.AnomaliAciklamasi</span>
+                                    }
+                                </td>
+                                <td class="pe-4 text-end">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown">
+                                            İşlem <i class="bi bi-chevron-down ms-1"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                            <li>
+                                                <a href="/EndeksOkuma/Detay/@item.OkumaId" class="dropdown-item fw-semibold">
+                                                    <i class="bi bi-eye text-primary me-2"></i> Detay
+                                                </a>
+                                            </li>
+                                            @if (!item.DogrulamaDurumu)
+                                            {
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <form action="/EndeksOkuma/OnaylaVeFaturalandir/@item.OkumaId" method="post" class="d-inline">
+                                                        <button type="submit" class="dropdown-item fw-semibold text-success">
+                                                            <i class="bi bi-check-circle-fill me-2"></i> Onayla ve Faturalandır
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        
+                        @if(Model.Okumalar.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="10" class="text-center py-4 text-muted">Kayıtlı endeks okuması bulunmamaktadır.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    @if (Model.TotalPages > 1)
+    {
+        <div class="d-flex justify-content-center mt-4 mb-3">
+            <nav>
+                <ul class="pagination pagination-sm shadow-sm">
+                    <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                        <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage > 1) { document.getElementById('CurrentPage').value = @(Model.CurrentPage - 1); document.getElementById('filterForm').submit(); } return false;">&laquo; Önceki</a>
+                    </li>
+                    <li class="page-item active">
+                        <span class="page-link fw-bold px-4">Sayfa @Model.CurrentPage</span>
+                    </li>
+                    <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage < @Model.TotalPages) { document.getElementById('CurrentPage').value = @(Model.CurrentPage + 1); document.getElementById('filterForm').submit(); } return false;">Sonraki &raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>

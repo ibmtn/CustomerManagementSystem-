@@ -1,0 +1,250 @@
+﻿@model MusteriYonetim.Models.EndeksOkuma
+@{
+    Layout = null;
+    var tuketim = (Model.yeni_endeks ?? 0) - (Model.onceki_endeks ?? 0);
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <title>Endeks Okuma Tutanağı - @Model.okuma_id</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #e9ecef;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #212529;
+            margin: 0;
+            padding: 20px 0;
+        }
+        .a4-container {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        .header-section {
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo-placeholder {
+            font-size: 32px;
+            font-weight: 900;
+            color: #0d6efd;
+            letter-spacing: 2px;
+            margin: 0;
+            line-height: 1;
+        }
+        .logo-sub {
+            font-size: 12px;
+            color: #6c757d;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+        .header-info {
+            text-align: right;
+            font-size: 14px;
+            color: #495057;
+        }
+        .report-title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            margin: 0 0 30px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .info-text {
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            text-align: justify;
+        }
+        .info-table {
+            width: 100%;
+            margin-bottom: 30px;
+            border-collapse: collapse;
+        }
+        .info-table th, .info-table td {
+            border: 1px solid #dee2e6;
+            padding: 12px 15px;
+            font-size: 15px;
+        }
+        .info-table th {
+            background-color: #f8f9fa;
+            width: 40%;
+            font-weight: 600;
+            color: #495057;
+        }
+        .info-table td {
+            color: #212529;
+        }
+        .disclaimer-box {
+            border: 1px solid #ced4da;
+            background-color: #f8f9fa;
+            padding: 15px;
+            font-size: 13px;
+            border-radius: 4px;
+            color: #6c757d;
+        }
+        .signatures {
+            margin-top: 60px;
+            display: flex;
+            justify-content: space-around;
+        }
+        .signature-box {
+            width: 250px;
+            text-align: center;
+        }
+        .signature-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .signature-sub {
+            font-size: 13px;
+            color: #6c757d;
+            margin-bottom: 80px;
+        }
+        .signature-line {
+            border-top: 1px solid #212529;
+            padding-top: 10px;
+            font-size: 14px;
+        }
+        .print-controls {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px dashed #ced4da;
+        }
+        @@media print {
+            body { background: white; margin: 0; padding: 0; }
+            .a4-container { 
+                margin: 0; 
+                padding: 10mm; 
+                width: 100%; 
+                min-height: auto; 
+                box-shadow: none; 
+                border-radius: 0; 
+            }
+            .no-print { display: none !important; }
+            @@page { margin: 10mm; size: A4; }
+        }
+    </style>
+</head>
+<body onload="window.print();">
+    <div class="a4-container">
+        <!-- Header -->
+        <div class="header-section">
+            <div>
+                <h1 class="logo-placeholder">MYS</h1>
+                <div class="logo-sub">ELEKTRİK DAĞITIM A.Ş.</div>
+            </div>
+            <div class="header-info">
+                <strong>Tarih:</strong> @DateTime.Now.ToString("dd.MM.yyyy HH:mm")<br />
+                <strong>Belge No:</strong> EO-@Model.okuma_id.ToString().PadLeft(6, '0')
+            </div>
+        </div>
+
+        <div class="report-title">
+            Endeks Okuma Tutanağı
+        </div>
+
+        <div class="info-text">
+            Aşağıda bilgileri verilen tesisat adresinde, <strong>@Model.okuma_zamani?.ToString("dd.MM.yyyy HH:mm")</strong> tarihinde gerçekleştirilen saha okuma faaliyeti neticesinde sayaç üzerinden tespit edilen güncel veriler imza altına alınmıştır.
+        </div>
+
+        <!-- Detay Tablosu -->
+        <table class="info-table">
+            <tbody>
+                <tr>
+                    <th>İşlem / Okuma ID</th>
+                    <td>@Model.okuma_id</td>
+                </tr>
+                <tr>
+                    <th>Sözleşme / Tesisat Numarası</th>
+                    <td>@Model.sozlesme_id</td>
+                </tr>
+                <tr>
+                    <th>Sayaç Seri Numarası</th>
+                    <td>@Model.sayac_id</td>
+                </tr>
+                <tr>
+                    <th>Okuma Tipi / Kaynağı</th>
+                    <td>@(!Model.okuma_tipi.HasValue ? "Normal" : Model.okuma_tipi.Value.ToString()) / @Model.okuma_kaynagi</td>
+                </tr>
+                <tr>
+                    <th>Önceki Endeks</th>
+                    <td>@Model.onceki_endeks</td>
+                </tr>
+                <tr>
+                    <th>Son (Güncel) Endeks</th>
+                    <td><strong>@Model.yeni_endeks</strong></td>
+                </tr>
+                <tr>
+                    <th>Hesaplanan Tüketim Miktarı</th>
+                    <td><strong style="color: #d9534f; font-size: 16px;">@tuketim.ToString("0.00") kWh</strong></td>
+                </tr>
+                <tr>
+                    <th>Sistem Tespit Durumu</th>
+                    <td>
+                        @if(Model.status == "Basarili")
+                        {
+                            <span>Başarılı (Normal Tüketim)</span>
+                        }
+                        else if(Model.status == "Anormal")
+                        {
+                            <strong>Anormal Tüketim Tespiti</strong>
+                        }
+                        else
+                        {
+                            <span>@Model.status</span>
+                        }
+                    </td>
+                </tr>
+                @if (Model.status == "Anormal" || Model.anomali_mi == true)
+                {
+                <tr>
+                    <th>Anomali Açıklaması</th>
+                    <td><strong>Bilinmiyor</strong></td>
+                </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="disclaimer-box">
+            <strong>Açıklama ve İhtar:</strong>
+            <p class="mb-0 mt-2">
+                İşbu tutanak, 6446 sayılı Elektrik Piyasası Kanunu ve ilgili yönetmelik hükümleri çerçevesinde sahada tespit edilen verilere istinaden düzenlenmiştir. Taraflar arasında oluşabilecek her türlü ihtilafta Elektrik Dağıtım Şirketi resmi kayıtları ve sistem logları kesin delil teşkil edecektir. Bu belge sistem tarafından otomatik olarak doğrulanmış ve üretilmiştir.
+            </p>
+        </div>
+
+        <!-- İmzalar -->
+        <div class="signatures">
+            <div class="signature-box">
+                <div class="signature-title">Abone / Tüketici</div>
+                <div class="signature-sub">Müşteri</div>
+                <div class="signature-line">Ad Soyad / İmza</div>
+            </div>
+            <div class="signature-box">
+                <div class="signature-title">Şirket Yetkilisi</div>
+                <div class="signature-sub">Saha Operasyon Personeli</div>
+                <div class="signature-line">Ad Soyad / İmza</div>
+            </div>
+        </div>
+
+        <div class="print-controls no-print">
+            <button class="btn btn-secondary px-4 me-2" onclick="window.close()">Kapat</button>
+            <button class="btn btn-primary px-4" onclick="window.print()">Yazdır</button>
+        </div>
+    </div>
+</body>
+</html>

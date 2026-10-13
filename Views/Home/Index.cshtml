@@ -1,0 +1,142 @@
+@{
+    ViewData["Title"] = "Ana Sayfa";
+}
+
+<section class="kc-dashboard-hero">
+    <div>
+        <span class="kc-hero-badge">
+            <i class="bi bi-stars"></i>
+            Müşteri Yönetim Portalı
+        </span>
+        <h2>Abonelik, saha ve faturalama süreçleri için modern çalışma alanı.</h2>
+        <p>Rolünüze göre yetkili olduğunuz modüllere erişebilir, günlük operasyon akışını düzenli ve hızlı şekilde takip edebilirsiniz.</p>
+
+        <div class="kc-hero-metrics">
+            <div class="kc-hero-metric">
+                <strong>7</strong>
+                <span>Operasyon modülü</span>
+            </div>
+            <div class="kc-hero-metric">
+                <strong>24/7</strong>
+                <span>Süreç takibi</span>
+            </div>
+            <div class="kc-hero-metric">
+                <strong>Tek</strong>
+                <span>Portal deneyimi</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="kc-hero-panel">
+        <div>
+            <img src="~/images/logo.svg" asp-append-version="true" alt="MYS" />
+        </div>
+        <div>
+            <strong>İşlemlere hızlı başlayın</strong>
+            <span>En sık kullanılan operasyon bağlantıları hazır.</span>
+        </div>
+        <a class="btn btn-primary" asp-controller="TuketimNoktasi" asp-action="Index">
+            <i class="bi bi-lightning-charge me-1"></i> Tüketim noktaları
+        </a>
+    </div>
+</section>
+
+<section class="kc-stat-grid">
+    <a class="kc-stat-card" asp-controller="TuketimNoktasi" asp-action="Index">
+        <div class="kc-stat-icon">
+            <i class="bi bi-lightning-charge-fill"></i>
+        </div>
+        <div>
+            <span>Aktif Sözleşmeler</span>
+            <strong>@ViewBag.SozlesmeCount</strong>
+        </div>
+    </a>
+
+    <a class="kc-stat-card" asp-controller="IsEmri" asp-action="Index">
+        <div class="kc-stat-icon success">
+            <i class="bi bi-clipboard2-pulse-fill"></i>
+        </div>
+        <div>
+            <span>Aktif İş Emirleri</span>
+            <strong>@ViewBag.AktifIsEmriCount</strong>
+        </div>
+    </a>
+
+    <a class="kc-stat-card" asp-controller="EndeksOkuma" asp-action="Index">
+        <div class="kc-stat-icon warning">
+            <i class="bi bi-speedometer2"></i>
+        </div>
+        <div>
+            <span>Toplam Aboneler</span>
+            <strong>@ViewBag.AboneCount</strong>
+        </div>
+    </a>
+
+    <a class="kc-stat-card" asp-controller="Fatura" asp-action="Index">
+        <div class="kc-stat-icon danger">
+            <i class="bi bi-receipt-cutoff"></i>
+        </div>
+        <div>
+            <span>Bekleyen Faturalar</span>
+            <strong>@ViewBag.BekleyenFaturaCount</strong>
+        </div>
+    </a>
+</section>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <section class="kc-surface h-100">
+            <div class="kc-surface-header">
+                <h3>Operasyon Modülleri</h3>
+                <span class="badge badge-light-primary">Aktif</span>
+            </div>
+            <div class="kc-surface-body">
+                <div class="kc-timeline">
+                    <div class="kc-timeline-item">
+                        <span class="kc-timeline-dot"></span>
+                        <div>
+                            <div class="fw-bold">Tüketim noktası ve abonelik kayıtları</div>
+                            <div class="text-muted">Saha ve müşteri süreçleri için temel kayıtlar.</div>
+                        </div>
+                    </div>
+                    <div class="kc-timeline-item">
+                        <span class="kc-timeline-dot"></span>
+                        <div>
+                            <div class="fw-bold">Sayaç, endeks ve iş emri akışı</div>
+                            <div class="text-muted">Operasyon ekiplerinin günlük takip alanı.</div>
+                        </div>
+                    </div>
+                    <div class="kc-timeline-item">
+                        <span class="kc-timeline-dot"></span>
+                        <div>
+                            <div class="fw-bold">Faturalama ve entegrasyon izleme</div>
+                            <div class="text-muted">Finansal kayıtların ve sistem kuyruklarının kontrolü.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-lg-6">
+        <section class="kc-surface h-100">
+            <div class="kc-surface-header">
+                <h3>Hızlı Erişim</h3>
+                <span class="badge badge-light-success">Hazır</span>
+            </div>
+            <div class="kc-surface-body">
+                <div class="d-grid gap-3">
+                    <a class="btn btn-light-primary text-start" asp-controller="AboneSorgulama" asp-action="Index">
+                        <i class="bi bi-search me-2"></i> Abone sorgulama ekranı
+                    </a>
+                    <a class="btn btn-light-primary text-start" asp-controller="Sayac" asp-action="Index">
+                        <i class="bi bi-cpu me-2"></i> Sayaç işlemleri
+                    </a>
+                    <a class="btn btn-light-primary text-start" asp-controller="Sozlesme" asp-action="Index">
+                        <i class="bi bi-file-earmark-check me-2"></i> Sözleşmeler
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>

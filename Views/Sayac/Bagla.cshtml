@@ -1,0 +1,70 @@
+@model MusteriYonetim.Models.Sayac
+
+@{
+    ViewData["Title"] = Model.durum == MusteriYonetim.Models.Enums.SayacDurumu.Bagli ? "Sayacı Sök veya Değiştir" : "Sayacı Bağla";
+    var tuketimNoktalari = ViewBag.TuketimNoktalari as List<MusteriYonetim.Models.TuketimNoktasi>;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="mb-3">
+            <a href="/Sayac" class="btn btn-sm btn-outline-secondary">&larr; Listeye Geri Dön</a>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="card-title mb-0 fw-bold">@(Model.durum == MusteriYonetim.Models.Enums.SayacDurumu.Bagli ? "Sayaç İşlemi (Sökme/Değişim)" : "Sayaç İşlemi (Bağlama)")</h5>
+            </div>
+            <div class="card-body p-4">
+                
+                <div class="alert alert-info shadow-sm mb-4">
+                    <strong>Sayaç Seri No:</strong> @Model.seri_no <br/>
+                    <strong>Marka / Model:</strong> @Model.marka / @Model.model <br/>
+                    <strong>Faz:</strong> @Model.faz
+                </div>
+
+                <form action="/Sayac/Bagla" method="post">
+                    <input type="hidden" name="sayac_id" value="@Model.sayac_id" />
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Tüketim Noktası (Bağlanacak Yer) <span class="text-danger">*</span></label>
+                        <select data-control="select2" class="form-select" name="tuketim_noktasi_id" required>
+                            <option value="0">-- Boşa Al (Depoya Kaldır / Sök) --</option>
+                            @if (tuketimNoktalari != null)
+                            {
+                                foreach (var tn in tuketimNoktalari)
+                                {
+                                    <option value="@tn.tuketim_noktasi_id" selected="@(tn.tuketim_noktasi_id == Model.tuketim_noktasi_id ? "selected" : null)">@tn.tekil_kod</option>
+                                }
+                            }
+                        </select>
+                        <div class="form-text">Sayacı sökmek istiyorsanız "Boşa Al" seçeneğini seçin.</div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Mühür Numarası <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text fw-bold">MHR-</span>
+                                <input type="text" class="form-control" name="muhur_no" value="@(!string.IsNullOrEmpty(Model.muhur_no) ? Model.muhur_no.Replace("MHR-", "") : "")" required placeholder="123456" />
+                            </div>
+                            <div class="form-text">İşlem sırasında takılan mühür numarası zorunludur.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Endeks Değeri <span class="text-danger">*</span></label>
+                            <input type="number" step="0.001" class="form-control" name="ilk_endeks" required placeholder="0.000" />
+                            <div class="form-text">Bağlanıyorsa İlk Endeks, Sökülüyorsa Son Endeks giriniz.</div>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted mb-4">
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="/Sayac" class="btn btn-light border">İptal</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-bold shadow-sm">İşlemi Kaydet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

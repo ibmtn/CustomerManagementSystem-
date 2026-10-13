@@ -1,0 +1,19 @@
+@model MusteriYonetim.Models.ErrorViewModel
+@{
+    ViewData["Title"] = "Hata";
+}
+
+<div class="text-center mt-5">
+    <h1 class="display-4 text-danger">Eyvah! Bir şeyler ters gitti.</h1>
+    <h2 class="text-muted">Sistemde beklenmeyen bir hata oluştu veya bağlantı koptu.</h2>
+    <p class="mt-4">
+        Lütfen daha sonra tekrar deneyiniz. Eğer sorun devam ederse sistem yöneticisine başvurun.
+    </p>
+    @if (Model.ShowRequestId)
+    {
+        <p>
+            <strong>Hata Takip Kodu (Request ID):</strong> <code>@Model.RequestId</code>
+        </p>
+    }
+    <a href="/" class="btn btn-primary mt-3">Ana Sayfaya Dön</a>
+</div>

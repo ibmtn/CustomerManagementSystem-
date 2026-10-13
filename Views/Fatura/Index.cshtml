@@ -1,0 +1,160 @@
+@model MusteriYonetim.ViewModels.FaturaListeViewModel
+
+@{
+    ViewData["Title"] = "Fatura Yönetimi";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <div>
+        <h2 class="h4 text-primary fw-bold d-inline-block me-3">Kesilen Faturalar</h2>
+        <span class="badge bg-secondary bg-opacity-10 text-dark border fs-6">
+            Toplam: @Model.TotalItems (Sayfa @Model.CurrentPage / @Model.TotalPages)
+        </span>
+    </div>
+</div>
+
+@if (TempData["BasariMesaji"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["BasariMesaji"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- ── Filtre Formu ── -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form id="filterForm" asp-action="Index" method="get" class="row g-3 align-items-end">
+            <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Fatura No</label>
+                <input name="FiltreFaturaNo" value="@Model.FiltreFaturaNo" type="text" class="form-control" placeholder="Örn: FAT2026..." />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Tekil Kod</label>
+                <input name="FiltreTekilKod" value="@Model.FiltreTekilKod" type="text" class="form-control" placeholder="Örn: TK-ID..." />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Dönem</label>
+                <input name="FiltreDonem" value="@Model.FiltreDonem" type="text" class="form-control" placeholder="Örn: 2026-07" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Sözleşme No</label>
+                <input name="FiltreSozlesmeNo" value="@Model.FiltreSozlesmeNo" type="text" class="form-control" placeholder="Örn: SOZ-2026..." />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Durum</label>
+                <select data-control="select2" name="FiltreDurum" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="TASLAK" selected="@(Model.FiltreDurum == "TASLAK" ? "selected" : null)">Taslak</option>
+                    <option value="HESAPLANDI" selected="@(Model.FiltreDurum == "HESAPLANDI" ? "selected" : null)">Hesaplandı</option>
+                    <option value="ONAYLANDI" selected="@(Model.FiltreDurum == "ONAYLANDI" ? "selected" : null)">Onaylandı</option>
+                    <option value="GONDERILDI" selected="@(Model.FiltreDurum == "GONDERILDI" ? "selected" : null)">Gönderildi</option>
+                    <option value="HATALI" selected="@(Model.FiltreDurum == "HATALI" ? "selected" : null)">Hatalı</option>
+                    <option value="IPTAL" selected="@(Model.FiltreDurum == "IPTAL" ? "selected" : null)">İptal</option>
+                    <option value="ODENMEDI" selected="@(Model.FiltreDurum == "ODENMEDI" ? "selected" : null)">Ödenmedi</option>
+                    <option value="ODENDI" selected="@(Model.FiltreDurum == "ODENDI" ? "selected" : null)">Ödendi</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="button" onclick="document.getElementById('CurrentPage').value=1; document.getElementById('filterForm').submit();" class="btn btn-primary flex-fill">
+                    <i class="bi bi-search"></i> Filtrele
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary" title="Temizle">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Fatura No</th>
+                        <th>Tekil Kod</th>
+                        <th>Dönem</th>
+                        <th>Fatura Tipi</th>
+                        <th>Sözleşme No</th>
+                        <th>Vergi ve Fonlar</th>
+                        <th>Toplam Tutar</th>
+                        <th>Son Ödeme</th>
+                        <th>Durum</th>
+                        <th class="pe-4 text-end">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var fatura in Model.Faturalar)
+                    {
+                        <tr>
+                            <td class="ps-4"><strong>@fatura.fatura_no</strong></td>
+                            <td>@fatura.tekil_kod</td>
+                            <td><span class="badge bg-secondary">@fatura.donem</span></td>
+                            <td><span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1">@fatura.fatura_tipi</span></td>
+                            <td>@fatura.sozlesme_no</td>
+                            <td>₺@(fatura.vergi_fon_toplama?.ToString("0.00") ?? "0.00")</td>
+                            <td class="fw-bold text-dark">₺@(fatura.toplam_tutar?.ToString("0.00") ?? "0.00")</td>
+                            <td>@(fatura.son_odeme_tarihi?.ToString("dd.MM.yyyy") ?? "-")</td>
+                            <td>
+                                @if(fatura.durum == "ONAYLANDI" || fatura.durum == "GONDERILDI" || fatura.durum == "ODENDI")
+                                {
+                                    <span class="badge bg-success">@fatura.durum</span>
+                                }
+                                else if(fatura.durum == "HATALI" || fatura.durum == "IPTAL" || fatura.durum == "ODENMEDI")
+                                {
+                                    <span class="badge bg-danger">@fatura.durum</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">@fatura.durum</span>
+                                }
+                            </td>
+                            <td class="pe-4 text-end">
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown">
+                                        İşlem <i class="bi bi-chevron-down ms-1"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                        <li>
+                                            <a href="/Fatura/Detay/@fatura.fatura_id" class="dropdown-item fw-semibold">
+                                                <i class="bi bi-eye text-primary me-2"></i> Detay
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    @if(Model.Faturalar.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="10" class="text-center py-4 text-muted">Arama kriterlerine uygun fatura bulunamadı.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (Model.TotalPages > 1)
+{
+    <div class="d-flex justify-content-center mt-4 mb-3">
+        <nav>
+            <ul class="pagination pagination-sm shadow-sm">
+                <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                    <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage > 1) { document.getElementById('CurrentPage').value = @(Model.CurrentPage - 1); document.getElementById('filterForm').submit(); } return false;">&laquo; Önceki</a>
+                </li>
+                <li class="page-item active">
+                    <span class="page-link fw-bold px-4">Sayfa @Model.CurrentPage</span>
+                </li>
+                <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage < @Model.TotalPages) { document.getElementById('CurrentPage').value = @(Model.CurrentPage + 1); document.getElementById('filterForm').submit(); } return false;">Sonraki &raquo;</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+}

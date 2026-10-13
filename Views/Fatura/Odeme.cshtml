@@ -1,0 +1,122 @@
+@model MusteriYonetim.Models.Fatura
+
+@{
+    ViewData["Title"] = "Fatura Ödeme";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="bg-primary text-white p-4 text-center">
+                    <h3 class="fw-bold mb-1"><i class="bi bi-credit-card-2-front"></i> Fatura Ödeme</h3>
+                    <p class="mb-0 text-white-50">Güvenli Ödeme Sayfası</p>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                        <div>
+                            <p class="text-muted mb-1 fs-6">Fatura No</p>
+                            <h5 class="fw-bold text-dark mb-0">@Model.fatura_no</h5>
+                        </div>
+                        <div class="text-end">
+                            <p class="text-muted mb-1 fs-6">Ödenecek Tutar</p>
+                            <h4 class="fw-bolder text-primary mb-0">₺@(Model.toplam_tutar?.ToString("N2") ?? "0.00")</h4>
+                        </div>
+                    </div>
+
+                    <form action="/Fatura/Odeme" method="post" id="paymentForm">
+                        <input type="hidden" name="id" value="@Model.fatura_id" />
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-muted">Kart Üzerindeki İsim</label>
+                            <input type="text" name="cardName" class="form-control form-control-lg bg-light" placeholder="AD SOYAD" required autocomplete="cc-name">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-muted">Kart Numarası</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-credit-card text-secondary"></i></span>
+                                <input type="text" name="cardNumber" id="cardNumber" class="form-control form-control-lg bg-light border-start-0" placeholder="0000 0000 0000 0000" maxlength="19" required autocomplete="cc-number">
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-5">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold text-muted">Son Kullanma (AA/YY)</label>
+                                <input type="text" name="expiryDate" id="expiryDate" class="form-control form-control-lg bg-light" placeholder="AA/YY" maxlength="5" required autocomplete="cc-exp">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold text-muted">CVV / CVC</label>
+                                <div class="input-group">
+                                    <input type="text" name="cvv" id="cvv" class="form-control form-control-lg bg-light border-end-0" placeholder="123" maxlength="3" required autocomplete="cc-csc">
+                                    <span class="input-group-text bg-light"><i class="bi bi-info-circle text-secondary" data-bs-toggle="tooltip" title="Kartınızın arkasındaki 3 haneli güvenlik kodu"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm" id="btnPay">
+                                <span class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true" id="paySpinner"></span>
+                                <span id="payText">₺@(Model.toplam_tutar?.ToString("N2") ?? "0.00") Öde</span>
+                            </button>
+                            <a href="/Fatura/Detay/@Model.fatura_id" class="btn btn-light mt-2 text-muted fw-medium">İptal Et ve Geri Dön</a>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <small class="text-muted"><i class="bi bi-shield-lock-fill text-success me-1"></i> 256-bit SSL şifreleme ile korunmaktadır.</small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enable tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+
+            // Format Card Number
+            document.getElementById('cardNumber').addEventListener('input', function (e) {
+                var target = e.target;
+                var position = target.selectionEnd;
+                var length = target.value.length;
+                
+                target.value = target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
+                
+                if(position !== length) {
+                    target.selectionEnd = position;
+                }
+            });
+
+            // Format Expiry
+            document.getElementById('expiryDate').addEventListener('input', function (e) {
+                var target = e.target;
+                target.value = target.value.replace(/[^\d]/g, '').replace(/(.{2})/, '$1/').trim();
+                if(target.value.length > 5) target.value = target.value.substring(0,5);
+            });
+
+            // Format CVV
+            document.getElementById('cvv').addEventListener('input', function (e) {
+                var target = e.target;
+                target.value = target.value.replace(/[^\d]/g, '');
+            });
+
+            // Form Submit Loading
+            document.getElementById('paymentForm').addEventListener('submit', function(e) {
+                document.getElementById('paySpinner').classList.remove('d-none');
+                document.getElementById('payText').textContent = 'İşleniyor...';
+                document.getElementById('btnPay').setAttribute('disabled', 'disabled');
+            });
+        });
+    </script>
+}

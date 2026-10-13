@@ -1,0 +1,151 @@
+@model MusteriYonetim.ViewModels.SozlesmeViewModels
+
+@{
+    ViewData["Title"] = "Sözleşme Detayı";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 text-primary fw-bold">
+            <i class="bi bi-file-earmark-text-fill me-2"></i> Sözleşme Detayı
+        </h2>
+        <a href="/Sozlesme/Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Listeye Dön
+        </a>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-gradient bg-primary text-white p-4">
+            <div class="d-flex align-items-center">
+                <div class="bg-white text-primary rounded-circle d-flex justify-content-center align-items-center shadow-sm" style="width: 60px; height: 60px; font-size: 24px;">
+                    <i class="bi bi-file-earmark-text"></i>
+                </div>
+                <div class="ms-3">
+                    <h3 class="mb-0 fw-bold">@Model.sozlesme_no</h3>
+
+                </div>
+                <div class="ms-auto">
+                    @if (Model.statu ?.ToUpper() == "AKTIF")
+                    {
+                        <span class="badge bg-light text-success rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Aktif</span>
+                    }
+                    else if (Model.statu == "Güvence Bekliyor")
+                    {
+                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-hourglass-split me-1"></i> Güvence Bekliyor</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger text-white rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-x-circle-fill me-1"></i> @Model.statu</span>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-4 bg-light">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
+                        <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-person-badge"></i> Müşteri Bilgileri</h5>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Ad Soyad / Ünvan</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">@(Model.ad) @(Model.soyad) @(Model.unvan)</p>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">TCKN / VKN</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">
+                            @{
+                                var tckn = Model.tckn;
+                                var maskeliTc = !string.IsNullOrEmpty(tckn) && tckn.Length >= 4 ? "***" + tckn.Substring(tckn.Length - 4) : tckn;
+                            }
+                            @maskeliTc @(string.IsNullOrEmpty(Model.vkn) ? "" : " / " + Model.vkn)
+                        </p>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">İletişim (Telefon - E-Posta)</label>
+                        <p class="fs-5 fw-bold text-dark mb-0">
+                            @{
+                                var tel = Model.telefon;
+                                var maskeliTel = !string.IsNullOrEmpty(tel) && tel.Length >= 4 ? "***" + tel.Substring(tel.Length - 4) : tel;
+                            }
+                            @maskeliTel - @Model.e_posta
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
+                        <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-info-circle"></i> Sözleşme Detayları</h5>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Sözleşme Tipi / Tarife Grubu</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">@Model.sozlesme_tipi / @Model.tarife_grubu</p>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Güvence Bedeli</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">@Model.guvence_bedeli.ToString("C")</p>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Tarihler (Başlangıç - Bitiş)</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">
+                            @Model.baslangic_tarihi.ToString("dd.MM.yyyy") - 
+                            @(Model.bitis_tarihi.HasValue ? Model.bitis_tarihi.Value.ToString("dd.MM.yyyy") : "Devam Ediyor")
+                        </p>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Oluşturulma Tarihi</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">@Model.created_at.ToString("dd.MM.yyyy HH:mm")</p>
+                        
+
+                </div>
+
+            </div>
+
+            <div class="mt-4">
+                <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-clock-history"></i> Sözleşme Geçmişi</h5>
+                @{
+                    var gecmisSozlesmeler = ViewBag.GecmisSozlesmeler as List<MusteriYonetim.Models.Sozlesme> ?? new List<MusteriYonetim.Models.Sozlesme>();
+                }
+                @if (gecmisSozlesmeler.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sözleşme No</th>
+                                    <th>Başlangıç - Bitiş</th>
+                                    <th>Durum</th>
+                                    <th>Tarife</th>
+                                    <th>Detay</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var gecmis in gecmisSozlesmeler)
+                                {
+                                    <tr>
+                                        <td class="fw-bold">@gecmis.sozlesme_no</td>
+                                        <td>@(gecmis.baslangic_tarihi.HasValue ? gecmis.baslangic_tarihi.Value.ToString("dd.MM.yyyy") : "-") - @(gecmis.bitis_tarihi.HasValue && gecmis.bitis_tarihi.Value.Year > 2000 ? gecmis.bitis_tarihi.Value.ToString("dd.MM.yyyy") : "Devam Ediyor")</td>
+                                        <td>
+                                            <span class="badge bg-@(gecmis.durum == MusteriYonetim.Models.Enums.SozlesmeDurumu.Feshedildi ? "danger" : "secondary")">@gecmis.durum</span>
+                                        </td>
+                                        <td>@(gecmis.tarife_id == 1 ? "Mesken" : (gecmis.tarife_id == 3 ? "Ticarethane" : (gecmis.tarife_id == 2 ? "Sanayi" : "Diğer")))</td>
+                                        <td><a href="/Sozlesme/Detay/@gecmis.sozlesme_no" class="btn btn-sm btn-outline-primary py-0">Görüntüle</a></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-light text-muted mb-0"><i class="bi bi-info-circle me-1"></i> Bu tüketim noktasına ait başka bir sözleşme geçmişi bulunmuyor.</div>
+                }
+            </div>
+
+            <div class="mt-4 text-end">
+                @if (Model.statu != "Feshedildi")
+                {
+                    <a href="/Sozlesme/Feshet/@Model.sozlesme_no" class="btn btn-danger shadow-sm me-2" onclick="return confirm('Sözleşmeyi feshetmek istediğinize emin misiniz?');">
+                        <i class="bi bi-x-octagon"></i> Feshet
+                    </a>
+                }
+                <a href="/Sozlesme/Duzenle/@Model.sozlesme_no" class="btn btn-warning shadow-sm">
+                    <i class="bi bi-pencil-square"></i> Düzenle
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+

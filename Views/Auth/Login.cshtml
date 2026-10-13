@@ -1,0 +1,107 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MYS | Giriş</title>
+    <link rel="shortcut icon" href="~/assets/media/logos/favicon.ico" />
+    <link href="~/assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+    <link href="~/assets/css/style.bundle.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="kc-auth-page">
+        <section class="kc-auth-visual">
+            <a class="kc-brand" asp-controller="Dashboard" asp-action="Index">
+                <img src="~/images/logo.svg" asp-append-version="true" alt="MYS" />
+                <span>
+                    <strong>MYS</strong>
+                    <small>Bilgi Portalı</small>
+                </span>
+            </a>
+
+            <div class="kc-auth-copy">
+                <h1>Operasyon portalına güvenli giriş.</h1>
+                <p>Tüketim noktaları, iş emirleri, sayaç okuma ve faturalama süreçleri için tek merkez.</p>
+            </div>
+
+            <div class="fw-semibold text-white-50">&copy; @DateTime.Now.Year MYS</div>
+        </section>
+
+        <main class="kc-auth-form-wrap">
+            <div class="kc-auth-card">
+                <div class="mb-8">
+                    <h2 class="mb-2">Giriş Yap</h2>
+                    <div class="kc-auth-muted">Kullanıcı bilgilerinizle devam edin.</div>
+                </div>
+
+                @if (TempData["BasariMesaji"] != null)
+                {
+                    <div class="alert alert-success">
+                        @TempData["BasariMesaji"]
+                    </div>
+                }
+
+                @if (TempData["HataMesaji"] != null)
+                {
+                    <div class="alert alert-danger">
+                        @TempData["HataMesaji"]
+                    </div>
+                }
+
+                <form asp-controller="Auth" asp-action="Login" method="post">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Kullanıcı Adı</label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <input type="text" class="form-control" name="kullaniciAdi" autocomplete="username" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="form-label fw-bold">Şifre</label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input type="password" class="form-control" id="password" name="sifre" autocomplete="current-password" required />
+                            <button class="btn btn-light border" type="button" id="togglePassword" aria-label="Şifreyi göster">
+                                <i class="bi bi-eye" id="passwordIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary btn-lg w-100" type="submit">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Sisteme Giriş Yap
+                    </button>
+
+                    <div class="text-center mt-5 kc-auth-muted">
+                        Hesabınız yok mu?
+                        <a class="fw-bold" asp-controller="Auth" asp-action="Register">Hesap oluşturun</a>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const password = document.getElementById("password");
+        const togglePassword = document.getElementById("togglePassword");
+        const passwordIcon = document.getElementById("passwordIcon");
+
+        togglePassword.addEventListener("click", () => {
+            const visible = password.type === "text";
+            password.type = visible ? "password" : "text";
+            passwordIcon.classList.toggle("bi-eye", visible);
+            passwordIcon.classList.toggle("bi-eye-slash", !visible);
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,101 @@
+@using MusteriYonetim.Models.entities
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    Func<string, string> active = controller =>
+        string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
+
+<nav class="kc-menu" aria-label="Ana menü">
+    <div class="kc-menu-section">Genel</div>
+
+    @if (User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
+    {
+        <a class="kc-menu-link @active("Dashboard")" asp-controller="Dashboard" asp-action="Index">
+            <i class="bi bi-grid-1x2-fill"></i>
+            <span>Gösterge Paneli</span>
+        </a>
+    }
+
+    @if (User.IsInRole(AppRoles.MusteriTemsilcisi) || User.IsInRole(AppRoles.SozlesmeYetkilisi) || User.IsInRole(AppRoles.SahaOperasyonAmiri) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
+    {
+        <a class="kc-menu-link @active("TuketimNoktasi")" asp-controller="TuketimNoktasi" asp-action="Index">
+            <i class="bi bi-lightning-charge-fill"></i>
+            <span>Tüketim Noktaları</span>
+        </a>
+    }
+
+    @if (User.IsInRole(AppRoles.SozlesmeYetkilisi) || User.IsInRole(AppRoles.MusteriTemsilcisi) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
+    {
+        <a class="kc-menu-link @active("Sozlesme")" asp-controller="Sozlesme" asp-action="Index">
+            <i class="bi bi-file-earmark-check-fill"></i>
+            <span>Sözleşmeler</span>
+        </a>
+        <a class="kc-menu-link @active("Abone")" asp-controller="Abone" asp-action="Index">
+            <i class="bi bi-people-fill"></i>
+            <span>Abone Yönetimi</span>
+        </a>
+        <a class="kc-menu-link @active("AboneSorgulama")" asp-controller="AboneSorgulama" asp-action="Index">
+            <i class="bi bi-search"></i>
+            <span>Abone Sorgulama</span>
+        </a>
+    }
+
+    @if (User.IsInRole("Yonetici") || User.IsInRole("Kullanici") || User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole(AppRoles.SahaOperasyonAmiri) || User.IsInRole(AppRoles.FaturalamaUzmani) || User.IsInRole(AppRoles.SayacOkumaPersoneli))
+    {
+        <div class="kc-menu-section">Saha Operasyonları</div>
+        <a class="kc-menu-link @active("IsEmri")" asp-controller="IsEmri" asp-action="Index">
+            <i class="bi bi-clipboard2-pulse-fill"></i>
+            <span>İş Emirleri</span>
+        </a>
+        <a class="kc-menu-link @active("EndeksOkuma")" asp-controller="EndeksOkuma" asp-action="Index">
+            <i class="bi bi-speedometer2"></i>
+            <span>Endeks Okuma</span>
+        </a>
+        <a class="kc-menu-link @active("Sayac")" asp-controller="Sayac" asp-action="Index">
+            <i class="bi bi-cpu-fill"></i>
+            <span>Sayaç İşlemleri</span>
+        </a>
+    }
+
+    @if (User.IsInRole(AppRoles.FaturalamaUzmani) || User.IsInRole(AppRoles.MusteriTemsilcisi) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
+    {
+        <div class="kc-menu-section">Finans & Arşiv</div>
+        <a class="kc-menu-link @active("Fatura")" asp-controller="Fatura" asp-action="Index">
+            <i class="bi bi-receipt-cutoff"></i>
+            <span>Faturalar</span>
+        </a>
+    }
+
+    @if (User.IsInRole(AppRoles.FaturalamaUzmani) || User.IsInRole(AppRoles.SozlesmeYetkilisi) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
+    {
+        <a class="kc-menu-link @active("Belgeler")" asp-controller="Belgeler" asp-action="Index">
+            <i class="bi bi-folder2-open"></i>
+            <span>Belgeler (Arşiv)</span>
+        </a>
+    }
+
+    @if (User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici") || User.IsInRole(AppRoles.Denetci))
+    {
+        <div class="kc-menu-section">Yönetim</div>
+        
+        @if (User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
+        {
+            <a class="kc-menu-link @active("Admin")" asp-controller="Admin" asp-action="Index">
+                <i class="bi bi-shield-lock-fill"></i>
+                <span>Admin Paneli</span>
+            </a>
+        }
+
+        <a class="kc-menu-link @active("AuditLog")" asp-controller="AuditLog" asp-action="Index">
+            <i class="bi bi-clock-history"></i>
+            <span>Denetim İzleri</span>
+        </a>
+        @if (User.IsInRole(AppRoles.BTYoneticisi))
+        {
+            <a class="kc-menu-link @active("Outbox")" asp-controller="Outbox" asp-action="Index">
+                <i class="bi bi-send-check-fill"></i>
+                <span>Outbox Paneli</span>
+            </a>
+        }
+    }
+</nav>

@@ -1,0 +1,205 @@
+@{
+    ViewData["Title"] = "Yeni Endeks Okuma Girişi";
+}
+
+<div class="row justify-content-center mt-3">
+    <div class="col-lg-8">
+        <div class="mb-3">
+            <a href="/EndeksOkuma" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Listeye Dön
+            </a>
+        </div>
+        
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-primary bg-opacity-10 border-0 py-3">
+                <h5 class="mb-0 text-primary fw-bold">
+                    <i class="bi bi-journal-text me-2"></i> Yeni Endeks Okuma Kaydı
+                </h5>
+            </div>
+            
+            <div class="card-body p-4">
+                <form action="/EndeksOkuma/Yeni" method="post" id="yeniOkumaForm">
+                    @if (TempData["WarningMessage"] != null)
+                    {
+                        <div class="alert alert-warning">@TempData["WarningMessage"]</div>
+                    }
+                    @if (TempData["OkumaMesaji"] != null)
+                    {
+                        var mesajTipi = TempData["OkumaMesajTip"]?.ToString() ?? "info";
+                        <div class="alert alert-@mesajTipi">@TempData["OkumaMesaji"]</div>
+                    }
+
+                    <div class="row mb-4">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-bold">Sözleşme Seçimi <span class="text-danger">*</span></label>
+                            <input type="hidden" name="SozlesmeId" id="sozlesmeId" />
+                            <select class="form-select form-select-lg border-primary" id="sozlesmeSelect" required>
+                                <option value="">Sözleşme no, tekil kod veya sayaç no yazın...</option>
+                            </select>
+                            <small class="text-muted">En az 2 karakter yazın. Seçimden sonra tüketim noktası, sayaç ve önceki endeks otomatik doldurulur.</small>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label class="form-label fw-bold">Tüketim Noktası (Abone) <span class="text-danger">*</span></label>
+                            <input type="hidden" name="TuketimNoktasiId" id="tuketimNoktasiId" />
+                            <input type="text" class="form-control form-control-lg bg-light" id="tuketimNoktasiDisplay" value="Sözleşme seçildiğinde otomatik dolar..." readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Sayaç Seri No <span class="text-danger">*</span></label>
+                            <input type="hidden" name="SayacId" id="sayacId" />
+                            <input type="hidden" name="SayacSeriNo" id="sayacSeriNo" />
+                            <input type="text" class="form-control form-control-lg bg-light" id="sayacDisplay" value="Sözleşme seçildiğinde otomatik dolar..." readonly />
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label class="form-label fw-bold">Okuma Tipi <span class="text-danger">*</span></label>
+                            <select data-control="select2" class="form-select form-select-lg" name="okuma_tipi" asp-items="Html.GetEnumSelectList<MusteriYonetim.Models.Enums.OkumaTipi>()">
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Okuma Kaynağı <span class="text-danger">*</span></label>
+                            <select data-control="select2" class="form-select form-select-lg" name="okuma_kaynagi" asp-items="Html.GetEnumSelectList<MusteriYonetim.Models.Enums.OkumaKaynagi>()">
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label class="form-label fw-bold">Önceki Endeks <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="number" step="0.001" name="onceki_endeks" id="onceki_endeks" class="form-control form-control-lg bg-light" required placeholder="0.000" readonly />
+                                <span class="input-group-text bg-white">kWh</span>
+                            </div>
+                            <small class="text-muted" id="endeks_mesaj">Sayaç seçildiğinde otomatik doldurulur.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Güncel Endeks <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="number" step="0.001" name="yeni_endeks" class="form-control form-control-lg border-primary" required placeholder="0.000" />
+                                <span class="input-group-text bg-primary text-white border-primary">kWh</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Not</label>
+                        <textarea name="aciklama" class="form-control bg-light" rows="2" placeholder="Gerekliyse bir açıklama yazınız..."></textarea>
+                    </div>
+
+                    <hr class="text-muted my-4">
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="/EndeksOkuma" class="btn btn-light border px-4 py-2">İptal</a>
+                        <button type="submit" class="btn btn-primary px-4 py-2 fw-bold shadow-sm" id="kaydetButton" disabled>
+                            <i class="bi bi-check-lg me-1"></i> Kaydet ve Kapat
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('yeniOkumaForm');
+            const sozlesmeIdInput = document.getElementById('sozlesmeId');
+            const tuketimNoktasiIdInput = document.getElementById('tuketimNoktasiId');
+            const tuketimNoktasiDisplay = document.getElementById('tuketimNoktasiDisplay');
+            const sayacIdInput = document.getElementById('sayacId');
+            const sayacSeriNoInput = document.getElementById('sayacSeriNo');
+            const sayacDisplay = document.getElementById('sayacDisplay');
+            const oncekiEndeksInput = document.getElementById('onceki_endeks');
+            const endeksMesaj = document.getElementById('endeks_mesaj');
+            const kaydetButton = document.getElementById('kaydetButton');
+
+            function resetDetails(message) {
+                sozlesmeIdInput.value = '';
+                tuketimNoktasiIdInput.value = '';
+                sayacIdInput.value = '';
+                sayacSeriNoInput.value = '';
+                oncekiEndeksInput.value = '';
+                tuketimNoktasiDisplay.value = message || 'Sözleşme seçildiğinde otomatik dolar...';
+                sayacDisplay.value = message || 'Sözleşme seçildiğinde otomatik dolar...';
+                endeksMesaj.textContent = 'Sayaç seçildiğinde otomatik doldurulur.';
+                endeksMesaj.className = 'text-muted';
+                kaydetButton.disabled = true;
+            }
+
+            function setEndeks(data) {
+                if (data.sonEndeksBasarili) {
+                    oncekiEndeksInput.value = data.sonEndeks;
+                    endeksMesaj.textContent = data.donem
+                        ? `Sistemdeki son endeks (${data.donem}) otomatik getirildi.`
+                        : 'Sistemdeki son endeks otomatik getirildi.';
+                    endeksMesaj.className = 'text-success';
+                } else {
+                    oncekiEndeksInput.value = '0';
+                    endeksMesaj.textContent = 'Bu sayaca ait eski okuma bulunamadı, 0 olarak başlatıldı.';
+                    endeksMesaj.className = 'text-warning';
+                }
+            }
+
+            $('#sozlesmeSelect').select2({
+                ajax: {
+                    url: '/EndeksOkuma/SozlesmeAra',
+                    dataType: 'json',
+                    delay: 300,
+                    data: function (params) {
+                        return { 
+                            q: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results,
+                            pagination: data.pagination || { more: false }
+                        };
+                    }
+                },
+                minimumInputLength: 0,
+                width: '100%',
+                placeholder: 'Sözleşme no, tekil kod veya sayaç no yazın...',
+                language: {
+                    noResults: function () { return 'Kayıt bulunamadı'; },
+                    searching: function () { return 'Aranıyor...'; }
+                }
+            });
+
+            $('#sozlesmeSelect').on('select2:select', function (event) {
+                const data = event.params.data;
+                resetDetails('Bilgiler getiriliyor...');
+
+                if (!data.basarili || !data.sayacId) {
+                    resetDetails(data.mesaj || 'Bu seçim için aktif sayaç bilgisi alınamadı.');
+                    endeksMesaj.textContent = data.mesaj || 'Bu seçim için aktif sayaç bilgisi alınamadı.';
+                    endeksMesaj.className = 'text-danger';
+                    return;
+                }
+
+                tuketimNoktasiIdInput.value = data.tuketimNoktasiId;
+                sozlesmeIdInput.value = data.sozlesmeId;
+                sayacIdInput.value = data.sayacId;
+                sayacSeriNoInput.value = data.sayacSeriNo || '';
+                tuketimNoktasiDisplay.value = `${data.tuketimNoktasiKodu || data.tuketimNoktasiId} - ${data.adres || 'Adres bilgisi yok'}`;
+                sayacDisplay.value = `${data.sayacSeriNo || data.sayacId} ${data.sayacMarkaModel ? '(' + data.sayacMarkaModel + ')' : ''}`;
+                setEndeks(data);
+                kaydetButton.disabled = false;
+            });
+
+            form.addEventListener('submit', function (event) {
+                if (!tuketimNoktasiIdInput.value || !sayacIdInput.value) {
+                    event.preventDefault();
+                    endeksMesaj.textContent = 'Kaydetmeden önce geçerli bir sözleşme seçmelisiniz.';
+                    endeksMesaj.className = 'text-danger';
+                }
+            });
+        });
+    </script>
+}

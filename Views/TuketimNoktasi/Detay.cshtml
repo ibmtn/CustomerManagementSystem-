@@ -1,0 +1,297 @@
+@using Microsoft.AspNetCore.Http.Features
+@model MusteriYonetim.ViewModels.TuketimNoktasiViewModels
+
+@{
+    ViewData["Title"] = "Tüketim Noktası ve Abone Detayı";
+}
+
+<div class="mb-4 mt-3 d-flex justify-content-between align-items-center">
+    <a href="/TuketimNoktasi/Index" class="btn btn-sm btn-outline-secondary fw-bold shadow-sm">
+        <i class="bi bi-arrow-left"></i> Listeye Dön
+    </a>
+    <div>
+        <a href="/TuketimNoktasi/Duzenle/@Model.tekil_kod" class="btn btn-warning btn-sm fw-bold shadow-sm me-2"><i class="bi bi-pencil"></i> Düzenle</a>
+    </div>
+</div>
+
+<div class="card shadow-lg border-0 rounded-4 overflow-hidden mb-4">
+    <div class="card-header bg-gradient bg-success text-white p-4">
+        <div class="d-flex align-items-center">
+            <div class="bg-white text-success rounded-circle d-flex justify-content-center align-items-center shadow-sm" style="width: 60px; height: 60px; font-size: 24px;">
+                <i class="bi bi-lightning-charge-fill"></i>
+            </div>
+            <div class="ms-3">
+                <h3 class="mb-0 fw-bold">@Model.tekil_kod</h3>
+                <p class="mb-0 opacity-75">Tüketici Grubu: @Model.tuketici_grubu</p>
+            </div>
+            <div class="ms-auto">
+                <span class="badge @Model.BaglantiDurumuBadgeClass rounded-pill px-3 py-2 fs-6 shadow-sm">
+                    <i class="bi bi-plug-fill me-1"></i> @Model.BaglantiDurumuEtiketi
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs -->
+<div class="card shadow-sm border-0 rounded-4 mb-5">
+    <div class="card-header bg-white border-bottom-0 pt-3 px-4 pb-0">
+        <ul class="nav nav-tabs border-bottom-0" id="tuketimTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold text-success" id="genel-tab" data-bs-toggle="tab" data-bs-target="#genel" type="button" role="tab">
+                    <i class="bi bi-info-circle me-1"></i> Genel Bilgi
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold text-dark" id="sayac-tab" data-bs-toggle="tab" data-bs-target="#sayac" type="button" role="tab">
+                    <i class="bi bi-speedometer2 me-1"></i> Sayaçlar
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold text-dark" id="sozlesme-tab" data-bs-toggle="tab" data-bs-target="#sozlesme" type="button" role="tab">
+                    <i class="bi bi-file-earmark-text me-1"></i> Sözleşmeler
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold text-dark" id="isemri-tab" data-bs-toggle="tab" data-bs-target="#isemri" type="button" role="tab">
+                    <i class="bi bi-tools me-1"></i> İş Emirleri
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold text-dark" id="endeks-tab" data-bs-toggle="tab" data-bs-target="#endeks" type="button" role="tab">
+                    <i class="bi bi-graph-up me-1"></i> Endeks Okumaları
+                </button>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="card-body p-4 bg-light rounded-bottom-4">
+        <div class="tab-content" id="tuketimTabsContent">
+            
+            <!-- Genel Bilgi Tab -->
+            <div class="tab-pane fade show active" id="genel" role="tabpanel">
+                <div class="row g-4">
+                    <!-- Abone Bilgileri -->
+                    <div class="col-md-6">
+                        <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
+                            <h5 class="text-success border-bottom pb-2 mb-3"><i class="bi bi-person-badge"></i> Müşteri Bilgileri</h5>
+                            
+                            <label class="text-muted small fw-bold mb-1 text-uppercase">Ad Soyad / Ünvan</label>
+                            <p class="fs-5 fw-bold text-dark mb-3">@(string.IsNullOrWhiteSpace(Model.Ad) && string.IsNullOrWhiteSpace(Model.Unvan) ? "Sözleşmesi Yok" : $"{Model.Ad} {Model.Soyad} {Model.Unvan}")</p>
+                            
+                        </div>
+                    </div>
+
+                    <!-- Tesisat Bilgileri -->
+                    <div class="col-md-6">
+                        <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
+                            <h5 class="text-success border-bottom pb-2 mb-3"><i class="bi bi-house-door"></i> Tesisat & Adres Bilgileri</h5>
+                            
+                            <label class="text-muted small fw-bold mb-1 text-uppercase">Bağlantı Gücü</label>
+                            <p class="fs-5 fw-bold text-dark mb-3">@Model.baglanti_gucu_kw kW</p>
+
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <label class="text-muted small fw-bold mb-1 text-uppercase">İl / İlçe</label>
+                                    <p class="fs-5 fw-bold text-dark mb-0">@Model.il_adi / @Model.ilce_adi</p>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="text-muted small fw-bold mb-1 text-uppercase">Mahalle</label>
+                                    <p class="fs-5 fw-bold text-dark mb-0">@(string.IsNullOrEmpty(Model.mahalle) ? "-" : Model.mahalle)</p>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <label class="text-muted small fw-bold mb-1 text-uppercase">Bina / Daire No</label>
+                                    <p class="fs-5 fw-bold text-dark mb-0">@(string.IsNullOrEmpty(Model.bina_no) ? "-" : Model.bina_no) / @(string.IsNullOrEmpty(Model.bagimsiz_bolum_no) ? "-" : Model.bagimsiz_bolum_no)</p>
+                                </div>
+                            </div>
+                            
+                            <label class="text-muted small fw-bold mb-1 text-uppercase mt-2">Açık Adres Detayı</label>
+                            <p class="fs-6 fw-bold text-dark mb-0">@Model.acik_adres</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sayaçlar Tab -->
+            <div class="tab-pane fade" id="sayac" role="tabpanel">
+                <h5 class="fw-bold mb-4">Sayaç Bilgileri</h5>
+                @if (ViewBag.Sayaclar != null && ((IEnumerable<MusteriYonetim.Models.Sayac>)ViewBag.Sayaclar).Any())
+                {
+                    <div class="table-responsive bg-white rounded-3 shadow-sm">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Seri No</th>
+                                    <th>Marka/Model</th>
+                                    <th>Faz</th>
+                                    <th>Durum</th>
+                                    <th>İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (MusteriYonetim.Models.Sayac sayac in ViewBag.Sayaclar)
+                                {
+                                    <tr>
+                                        <td class="fw-bold">@sayac.seri_no</td>
+                                        <td>@sayac.marka / @sayac.model</td>
+                                        <td>@sayac.faz</td>
+                                        <td><span class="badge bg-success">@sayac.status</span></td>
+                                        <td><a href="/Sayac/Detay/@sayac.sayac_id" class="btn btn-sm btn-outline-primary">Detay</a></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5 bg-white rounded-3 border border-dashed">
+                        <i class="bi bi-speedometer2 text-muted fs-1 mb-3 d-block"></i>
+                        <h6 class="fw-bold text-secondary">Sayaç Bulunamadı</h6>
+                        <p class="text-muted small">Bu noktaya ait kayıtlı bir sayaç yok.</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Sözleşmeler Tab -->
+            <div class="tab-pane fade" id="sozlesme" role="tabpanel">
+                <h5 class="fw-bold mb-4">Abonelik Sözleşmeleri</h5>
+                @if (ViewBag.Sozlesmeler != null && ((IEnumerable<MusteriYonetim.Models.Sozlesme>)ViewBag.Sozlesmeler).Any())
+                {
+                    <div class="table-responsive bg-white rounded-3 shadow-sm">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sözleşme No</th>
+                                    <th>Başlangıç Tarihi</th>
+                                    <th>Sözleşme Tipi</th>
+                                    <th>Durum</th>
+                                    <th>İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (MusteriYonetim.Models.Sozlesme soz in ViewBag.Sozlesmeler)
+                                {
+                                    <tr>
+                                        <td class="fw-bold">@soz.sozlesme_no</td>
+                                        <td>@(soz.baslangic_tarihi.HasValue ? soz.baslangic_tarihi.Value.ToString("dd.MM.yyyy") : "-") - @(soz.bitis_tarihi.HasValue && soz.bitis_tarihi.Value.Year > 2000 ? soz.bitis_tarihi.Value.ToString("dd.MM.yyyy") : "Devam Ediyor")</td>
+                                        <td>@soz.sozlesme_tipi</td>
+                                        <td><span class="badge bg-success">@soz.durum</span></td>
+                                        <td><a href="/Sozlesme/Detay/@soz.sozlesme_id" class="btn btn-sm btn-outline-primary">Detay</a></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5 bg-white rounded-3 border border-dashed">
+                        <i class="bi bi-file-earmark-text text-muted fs-1 mb-3 d-block"></i>
+                        <h6 class="fw-bold text-secondary">Sözleşme Bulunamadı</h6>
+                        <p class="text-muted small">Sözleşme kaydı mevcut değil.</p>
+                    </div>
+                }
+            </div>
+
+            <!-- İş Emirleri Tab -->
+            <div class="tab-pane fade" id="isemri" role="tabpanel">
+                <h5 class="fw-bold mb-4">İş Emirleri Geçmişi</h5>
+                @if (ViewBag.IsEmirleri != null && ((IEnumerable<MusteriYonetim.Models.IsEmri>)ViewBag.IsEmirleri).Any())
+                {
+                    <div class="table-responsive bg-white rounded-3 shadow-sm">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-center">İş Emri No</th>
+                                    <th>Tip</th>
+                                    <th>Tarih</th>
+                                    <th>Durum</th>
+                                    <th>İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (MusteriYonetim.Models.IsEmri ie in ViewBag.IsEmirleri)
+                                {
+                                    <tr>
+                                        <td class="fw-bold text-center">@ie.is_emri_no</td>
+                                        <td>@ie.tip</td>
+                                        <td>@ie.created_at.ToString("dd.MM.yyyy")</td>
+                                        <td><span class="badge bg-info">@ie.durum</span></td>
+                                        <td><a href="/IsEmri/Detay/@ie.is_emri_id" class="btn btn-sm btn-outline-primary">Detay</a></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5 bg-white rounded-3 border border-dashed">
+                        <i class="bi bi-tools text-muted fs-1 mb-3 d-block"></i>
+                        <h6 class="fw-bold text-secondary">İş Emri Yok</h6>
+                        <p class="text-muted small">Geçmişte açılmış iş emri bulunmuyor.</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Endeksler Tab -->
+            <div class="tab-pane fade" id="endeks" role="tabpanel">
+                <h5 class="fw-bold mb-4">Endeks Okumaları</h5>
+                @if (ViewBag.Endeksler != null && ((IEnumerable<MusteriYonetim.Models.EndeksOkuma>)ViewBag.Endeksler).Any())
+                {
+                    <div class="table-responsive bg-white rounded-3 shadow-sm">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Okuma Tarihi</th>
+                                    <th>Kaynak</th>
+                                    <th>Son Endeks</th>
+                                    <th>Tüketim (kWh)</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (MusteriYonetim.Models.EndeksOkuma e in ViewBag.Endeksler)
+                                {
+                                    <tr>
+                                        <td>@(e.okuma_zamani?.ToString("dd.MM.yyyy HH:mm") ?? "-")</td>
+                                        <td>@e.okuma_tipi</td>
+                                        <td class="fw-bold">@e.yeni_endeks</td>
+                                        <td>@(e.yeni_endeks - e.onceki_endeks)</td>
+                                        <td><span class="badge bg-success">@e.status</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5 bg-white rounded-3 border border-dashed">
+                        <i class="bi bi-graph-up text-muted fs-1 mb-3 d-block"></i>
+                        <h6 class="fw-bold text-secondary">Endeks Kaydı Yok</h6>
+                        <p class="text-muted small">Bu sayaç için henüz okuma yapılmamış.</p>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // URL'de bir hash varsa (#sozlesme gibi) o sekmeyi aktif yap
+            var hash = window.location.hash;
+            if (hash) {
+                var triggerEl = document.querySelector('button[data-bs-target="' + hash + '"]');
+                if (triggerEl) {
+                    var tab = new bootstrap.Tab(triggerEl);
+                    tab.show();
+                }
+            }
+        });
+    </script>
+}

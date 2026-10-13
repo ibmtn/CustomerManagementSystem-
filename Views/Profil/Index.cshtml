@@ -1,0 +1,139 @@
+@model MusteriYonetim.ViewModels.ProfilViewModel
+
+@{
+    ViewData["Title"] = "Profilim";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <h1 class="h3 mb-0 text-gray-800 fw-bold">
+        <i class="bi bi-person-badge text-primary me-2"></i>Profilim
+    </h1>
+    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary fw-bold shadow-sm">
+        <i class="bi bi-arrow-left me-1"></i> Ana Sayfaya Dön
+    </a>
+</div>
+
+@if (TempData["HataMesaji"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["HataMesaji"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["BasariMesaji"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["BasariMesaji"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row g-4 mb-5">
+    <!-- Profil Bilgileri Formu -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-gradient bg-primary text-white p-3 border-0 rounded-top-4">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-person-lines-fill me-2"></i> Kişisel Bilgiler</h5>
+            </div>
+            <div class="card-body p-4 bg-light">
+                <form asp-action="Guncelle" asp-controller="Profil" method="post">
+                    @if (ViewBag.IsTestAccount == true) { Html.Raw("<fieldset disabled>"); }
+                    
+                    <div class="mb-3">
+                        <label asp-for="KullaniciAdi" class="form-label fw-bold text-secondary">Kullanıcı Adı</label>
+                        <input asp-for="KullaniciAdi" class="form-control form-control-lg bg-white" readonly />
+                        <div class="form-text">Kullanıcı adı değiştirilemez.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="AdSoyad" class="form-label fw-bold text-secondary">Ad Soyad</label>
+                        <input asp-for="AdSoyad" class="form-control form-control-lg bg-white shadow-sm" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="EPosta" class="form-label fw-bold text-secondary">E-Posta Adresi</label>
+                        <input asp-for="EPosta" type="email" class="form-control form-control-lg bg-white shadow-sm" />
+                    </div>
+
+                    @if (ViewBag.IsTestAccount == true) { Html.Raw("</fieldset>"); }
+
+                    @if (ViewBag.IsTestAccount != true)
+                    {
+                        <div class="d-grid mt-2">
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold shadow">
+                                <i class="bi bi-save me-2"></i> Bilgilerimi Kaydet
+                            </button>
+                        </div>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Şifre Değiştirme Formu -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-gradient bg-dark text-white p-3 border-0 rounded-top-4">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-shield-lock-fill me-2"></i> Şifre Değiştir</h5>
+            </div>
+            <div class="card-body p-4 bg-light">
+                <form asp-action="SifreDegistir" asp-controller="Profil" method="post">
+                    
+                    @if (ViewBag.IsTestAccount == true)
+                    {
+                        <div class="alert alert-warning py-2 mb-4">
+                            <i class="bi bi-info-circle-fill me-2"></i> Sistem hesabıyla girdiğiniz için şifre değiştiremezsiniz.
+                        </div>
+                    }
+
+                    @if (ViewBag.IsTestAccount == true) { Html.Raw("<fieldset disabled>"); }
+
+                    <div class="mb-3">
+                        <label asp-for="EskiSifre" class="form-label fw-bold text-secondary">Mevcut Şifreniz</label>
+                        <div class="input-group input-group-lg shadow-sm">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-key text-muted"></i></span>
+                            <input asp-for="EskiSifre" class="form-control border-start-0 ps-0" placeholder="Mevcut şifrenizi girin..." required />
+                        </div>
+                    </div>
+
+                    <hr class="my-4 text-muted" />
+
+                    <div class="mb-3">
+                        <label asp-for="YeniSifre" class="form-label fw-bold text-secondary">Yeni Şifreniz</label>
+                        <div class="input-group input-group-lg shadow-sm">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-lock text-muted"></i></span>
+                            <input asp-for="YeniSifre" class="form-control border-start-0 ps-0" placeholder="En az 6 karakter..." required minlength="6" />
+                        </div>
+                        <span asp-validation-for="YeniSifre" class="text-danger small fw-bold"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="YeniSifreTekrar" class="form-label fw-bold text-secondary">Yeni Şifre (Tekrar)</label>
+                        <div class="input-group input-group-lg shadow-sm">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-lock-fill text-muted"></i></span>
+                            <input asp-for="YeniSifreTekrar" class="form-control border-start-0 ps-0" placeholder="Yeni şifrenizi doğrulayın..." required />
+                        </div>
+                        <span asp-validation-for="YeniSifreTekrar" class="text-danger small fw-bold"></span>
+                    </div>
+
+                    @if (ViewBag.IsTestAccount == true) { Html.Raw("</fieldset>"); }
+
+                    @if (ViewBag.IsTestAccount != true)
+                    {
+                        <div class="d-grid mt-2">
+                            <button type="submit" class="btn btn-dark btn-lg fw-bold shadow">
+                                <i class="bi bi-check-circle me-2"></i> Şifremi Güncelle
+                            </button>
+                        </div>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

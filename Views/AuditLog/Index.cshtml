@@ -1,0 +1,216 @@
+@model List<MusteriYonetim.Models.AuditLog>
+@{
+    ViewData["Title"] = "Denetim İzi (Audit Log)";
+    var kullanicilar = ViewBag.KullaniciDict as Dictionary<int, string> ?? new Dictionary<int, string>();
+
+    string IslemTipiBadge(MusteriYonetim.Models.Enums.AuditIslemTipi? islemTipi) => islemTipi switch
+    {
+        MusteriYonetim.Models.Enums.AuditIslemTipi.Ekleme => "bg-success",
+        MusteriYonetim.Models.Enums.AuditIslemTipi.Guncelleme => "bg-warning text-dark",
+        MusteriYonetim.Models.Enums.AuditIslemTipi.Silme => "bg-danger",
+        MusteriYonetim.Models.Enums.AuditIslemTipi.Giris => "bg-info",
+        _ => "bg-secondary"
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <h2 class="h4 text-dark fw-bold">
+        <i class="bi bi-shield-lock me-2"></i> Sistem İşlem Kayıtları (Audit Log)
+    </h2>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body bg-light rounded-4">
+        <form method="get" action="/AuditLog/Index" class="row g-3 align-items-end">
+            <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted">Arama (Tablo vb.)</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Ara..." value="@ViewBag.SearchQ">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted">Kullanıcı</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-person text-muted"></i></span>
+                    <input type="text" name="kullanici" class="form-control border-start-0 ps-0" placeholder="Ad, Soyad..." value="@ViewBag.SearchKullanici">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted">Kayıt ID</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-hash text-muted"></i></span>
+                    <input type="number" name="kayitId" class="form-control border-start-0 ps-0" placeholder="ID..." value="@ViewBag.SearchKayitId">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted">İşlem Tipi</label>
+                <select name="islemTipi" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="1" selected="@(ViewBag.SearchIslemTipi == "1" ? "selected" : null)">Ekleme</option>
+                    <option value="2" selected="@(ViewBag.SearchIslemTipi == "2" ? "selected" : null)">Güncelleme</option>
+                    <option value="3" selected="@(ViewBag.SearchIslemTipi == "3" ? "selected" : null)">Silme</option>
+                    <option value="4" selected="@(ViewBag.SearchIslemTipi == "4" ? "selected" : null)">Giriş</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted">Tarih</label>
+                <input type="date" name="tarih" class="form-control" value="@ViewBag.SearchTarih">
+            </div>
+            <div class="col-md-2 text-end">
+                <a href="/AuditLog/Index" class="btn btn-outline-secondary me-1"><i class="bi bi-x-circle"></i></a>
+                <button type="submit" class="btn btn-dark"><i class="bi bi-funnel"></i> Filtrele</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-lg border-0 rounded-4 overflow-hidden mb-5">
+    <div class="card-header bg-gradient p-3" style="background-color: var(--kc-sidebar) !important;">
+        <h5 class="mb-0 fw-bold text-white"><i class="bi bi-list-columns-reverse me-2"></i> Tüm Kayıtlar</h5>
+    </div>
+    <div class="card-body p-0">
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Tarih</th>
+                            <th>Kullanıcı</th>
+                            <th>İşlem Tipi</th>
+                            <th>Tablo (Varlık)</th>
+                            <th>Kayıt ID</th>
+                            <th>Gerekçe</th>
+                            <th class="text-center">Detaylar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">@log.islem_zamani.ToString("dd.MM.yyyy HH:mm:ss")</td>
+                                <td class="fw-bold text-dark">
+                                    @(!string.IsNullOrEmpty(log.kullanici_adi) ? log.kullanici_adi : (kullanicilar.ContainsKey(log.kullanici_id) ? kullanicilar[log.kullanici_id] : $"Bilinmeyen (ID: {log.kullanici_id})"))
+                                </td>
+                                <td>
+                                    <span class="badge @IslemTipiBadge(log.islem_tipi) px-2 py-1">@log.islem_tipi</span>
+                                </td>
+                                <td class="fw-bold">@log.varlik_tipi</td>
+                                <td>#@log.varlik_id</td>
+                                <td>
+                                    <span class="text-dark small">@(string.IsNullOrEmpty(log.islem_gerekcesi) ? "-" : log.islem_gerekcesi)</span>
+                                </td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-outline-dark fw-bold" data-bs-toggle="modal" data-bs-target="#logModal-@log.audit_id">
+                                        <i class="bi bi-eye"></i> İncele
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="logModal-@log.audit_id" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content border-0 shadow-lg">
+                                        <div class="modal-header bg-dark text-white">
+                                            <h5 class="modal-title fw-bold">
+                                                <i class="bi bi-search me-2"></i> Log Detayı (#@log.audit_id)
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body p-4 bg-light">
+                                            <div class="row mb-4">
+                                                <div class="col-md-6">
+                                                    <p class="mb-1 text-muted small fw-bold">İŞLEM YAPAN</p>
+                                                    <p class="fs-6 fw-bold">@(!string.IsNullOrEmpty(log.kullanici_adi) ? log.kullanici_adi : (kullanicilar.ContainsKey(log.kullanici_id) ? kullanicilar[log.kullanici_id] : log.kullanici_id.ToString()))</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p class="mb-1 text-muted small fw-bold">İŞLEM ZAMANI</p>
+                                                    <p class="fs-6 fw-bold">@log.islem_zamani.ToString("dd.MM.yyyy HH:mm:ss")</p>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <p class="mb-1 text-muted small fw-bold">TABLO (VARLIK)</p>
+                                                    <p class="fs-6 fw-bold">@log.varlik_tipi</p>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <p class="mb-1 text-muted small fw-bold">KAYIT ID</p>
+                                                    <p class="fs-6 fw-bold">#@log.varlik_id</p>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <p class="mb-1 text-muted small fw-bold">İŞLEM TİPİ</p>
+                                                    <p class="fs-6 fw-bold"><span class="badge @IslemTipiBadge(log.islem_tipi)">@log.islem_tipi</span></p>
+                                                </div>
+                                            </div>
+                                            
+                                            <h6 class="fw-bold text-secondary border-bottom pb-2 mb-3">Veri Değişimi</h6>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="card border-0 shadow-sm">
+                                                        <div class="card-header bg-danger text-white fw-bold py-2">
+                                                            <i class="bi bi-dash-circle me-1"></i> Eski Değer
+                                                        </div>
+                                                        <div class="card-body bg-white">
+                                                            <pre class="mb-0 text-wrap text-danger" style="font-family: monospace; font-size: 0.85rem;">@(string.IsNullOrWhiteSpace(log.eski_deger) ? "BOŞ / YOK" : log.eski_deger)</pre>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="card border-0 shadow-sm">
+                                                        <div class="card-header bg-success text-white fw-bold py-2">
+                                                            <i class="bi bi-plus-circle me-1"></i> Yeni Değer
+                                                        </div>
+                                                        <div class="card-body bg-white">
+                                                            <pre class="mb-0 text-wrap text-success" style="font-family: monospace; font-size: 0.85rem;">@(string.IsNullOrWhiteSpace(log.yeni_deger) ? "BOŞ / SİLİNDİ" : log.yeni_deger)</pre>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            @if (!string.IsNullOrWhiteSpace(log.islem_gerekcesi))
+                                            {
+                                                <div class="mt-4 p-3 bg-white border rounded shadow-sm">
+                                                    <p class="mb-1 text-muted small fw-bold">İŞLEM GEREKÇESİ / AÇIKLAMA</p>
+                                                    <p class="mb-0 fw-medium">@log.islem_gerekcesi</p>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-inboxes text-muted mb-3 d-block" style="font-size: 3rem;"></i>
+                <h5 class="fw-bold text-secondary">Henüz İşlem Kaydı Yok</h5>
+                <p class="text-muted">Sistemde herhangi bir denetim izi (audit log) bulunamadı.</p>
+            </div>
+        }
+        
+        <div class="d-flex justify-content-center mt-4 mb-3">
+            <nav>
+                <ul class="pagination pagination-sm shadow-sm">
+                    @{
+                        int currentPage = ViewBag.CurrentPage ?? 1;
+                        int totalPages = ViewBag.TotalPages ?? 1;
+                        bool hasNext = currentPage < totalPages;
+                        string queryParams = $"&q={ViewBag.SearchQ}&kullanici={ViewBag.SearchKullanici}&kayitId={ViewBag.SearchKayitId}&islemTipi={ViewBag.SearchIslemTipi}&tarih={ViewBag.SearchTarih}";
+                    }
+                    <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
+                        <a class="page-link fw-bold px-3" href="/AuditLog/Index?page=@(currentPage - 1)@queryParams">&laquo; Önceki</a>
+                    </li>
+                    <li class="page-item active">
+                        <span class="page-link fw-bold px-4">Sayfa @currentPage / @totalPages</span>
+                    </li>
+                    <li class="page-item @(!hasNext ? "disabled" : "")">
+                        <a class="page-link fw-bold px-3" href="/AuditLog/Index?page=@(currentPage + 1)@queryParams">Sonraki &raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>

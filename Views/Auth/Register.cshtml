@@ -1,0 +1,112 @@
+@model MusteriYonetim.Models.RegisterViewModel
+@using MusteriYonetim.Models.entities
+@{
+    Layout = null;
+    var roller = ViewBag.Roller as List<Rol>;
+}
+
+<!DOCTYPE html>
+<html lang="tr" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MYS | Hesap Aç</title>
+    <link rel="shortcut icon" href="~/assets/media/logos/favicon.ico" />
+    <link href="~/assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+    <link href="~/assets/css/style.bundle.css" rel="stylesheet" type="text/css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="kc-auth-page">
+        <section class="kc-auth-visual">
+            <a class="kc-brand" asp-controller="Dashboard" asp-action="Index">
+                <img src="~/images/logo.svg" asp-append-version="true" alt="MYS" />
+                <span>
+                    <strong>MYS</strong>
+                    <small>Bilgi Portalı</small>
+                </span>
+            </a>
+
+            <div class="kc-auth-copy">
+                <h1>Portal hesabınızı oluşturun.</h1>
+                <p>Rolünüze uygun yetkilerle operasyon modüllerine erişim sağlayın.</p>
+            </div>
+
+            <div class="fw-semibold text-white-50">&copy; @DateTime.Now.Year MYS</div>
+        </section>
+
+        <main class="kc-auth-form-wrap">
+            <div class="kc-auth-card">
+                <div class="mb-8">
+                    <h2 class="mb-2">Hesap Aç</h2>
+                    <div class="kc-auth-muted">Bilgilerinizi doldurarak yeni kullanıcı kaydı oluşturun.</div>
+                </div>
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            @foreach (var hata in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li>@hata.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <form asp-controller="Auth" asp-action="Register" method="post">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Ad Soyad</label>
+                        <input asp-for="AdSoyad" class="form-control form-control-lg" autocomplete="name" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">E-posta</label>
+                        <input asp-for="EPosta" type="email" class="form-control form-control-lg" autocomplete="email" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Kullanıcı Tipi</label>
+                        <select data-control="select2" asp-for="RolId" class="form-select form-select-lg">
+                            <option value="">Seçiniz</option>
+                            @if (roller != null)
+                            {
+                                foreach (var rol in roller)
+                                {
+                                    var etiket = rol.rol_adi == "Kullanici" ? "Personel" : rol.aciklama ?? rol.rol_adi;
+                                    <option value="@rol.rol_id">@etiket</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Kullanıcı Adı</label>
+                        <input asp-for="KullaniciAdi" class="form-control form-control-lg" autocomplete="username" />
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Şifre</label>
+                            <input asp-for="Sifre" type="password" class="form-control form-control-lg" autocomplete="new-password" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Şifre Tekrar</label>
+                            <input asp-for="SifreTekrar" type="password" class="form-control form-control-lg" autocomplete="new-password" />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mt-5">
+                        <i class="bi bi-person-plus me-1"></i> Hesap Oluştur
+                    </button>
+                    <a asp-controller="Auth" asp-action="Login" class="btn btn-light btn-lg w-100 mt-3">
+                        Zaten hesabım var
+                    </a>
+                </form>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+
+

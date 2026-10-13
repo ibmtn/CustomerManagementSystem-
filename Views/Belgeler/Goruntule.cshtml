@@ -1,0 +1,222 @@
+@model MusteriYonetim.ViewModels.BelgeGoruntuleViewModel
+@{
+    ViewData["Title"] = Model.BelgeTipi + " Görüntüle - " + Model.BelgeNo;
+    Layout = null; // A4 Çıktı tarzı olması için layout kullanmıyoruz
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        body { background-color: #f8f9fa; }
+        .a4-container {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20mm;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header-logo { max-height: 80px; }
+        .section-title {
+            border-bottom: 2px solid #0056b3;
+            color: #0056b3;
+            font-weight: bold;
+            padding-bottom: 5px;
+            margin-top: 20px;
+            margin-bottom: 15px;
+        }
+        .info-table th { width: 30%; background-color: #f8f9fa; }
+        
+        @@media print {
+            .no-print { display: none !important; }
+            .a4-container { margin: 0; box-shadow: none; width: 100%; padding: 0; }
+            body { background-color: #fff; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="text-center mt-3 no-print">
+        <a href="/Belgeler" class="btn btn-secondary me-2">Geri Dön</a>
+        <button onclick="window.print()" class="btn btn-primary me-2">Yazdır</button>
+        <button onclick="downloadPDF(this)" class="btn btn-success">PDF Olarak İndir</button>
+    </div>
+
+    <!-- Bu alan PDF olarak indirilecek veya yazdırılacak -->
+    <div id="pdf-content" class="a4-container">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+            <div>
+                <img src="/images/logo.svg" alt="Logo" class="header-logo" onerror="this.style.display='none';">
+            </div>
+            <div class="text-end">
+                <h4 class="fw-bold mb-1">
+                    @if (Model.BelgeTipi == "Fatura") { @("ELEKTRİK FATURASI") }
+                    else if (Model.BelgeTipi == "Sozlesme") { @("ELEKTRİK SATIŞ SÖZLEŞMESİ") }
+                    else if (Model.BelgeTipi == "Tutanak") { @("SAHA OPERASYON TUTANAĞI") }
+                </h4>
+                <div class="text-muted">Tarih: @Model.Tarih.ToString("dd.MM.yyyy HH:mm")</div>
+                <div class="text-muted">Belge No: @Model.BelgeNo</div>
+            </div>
+        </div>
+
+        <h5 class="section-title">Temel Bilgiler</h5>
+        <table class="table table-bordered info-table">
+            <tbody>
+                <tr>
+                    <th>Abone Bilgisi</th>
+                    <td>@(string.IsNullOrEmpty(Model.AboneBilgisi) ? "Bilinmiyor" : Model.AboneBilgisi)</td>
+                </tr>
+                <tr>
+                    <th>Tüketim Noktası (Tekil Kod)</th>
+                    <td>@Model.TuketimNoktasiKod</td>
+                </tr>
+                <tr>
+                    <th>Belge Türü</th>
+                    <td>@Model.BelgeTipi</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- FATURA BÖLÜMÜ -->
+        @if (Model.BelgeTipi == "Fatura")
+        {
+            <h5 class="section-title">Fatura Detayları</h5>
+            <table class="table table-bordered info-table">
+                <tbody>
+                    <tr>
+                        <th>Toplam Tüketim (kWh)</th>
+                        <td>@Model.FaturaTuketim</td>
+                    </tr>
+                    <tr>
+                        <th>Fatura Durumu</th>
+                        <td>@Model.FaturaDurum</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">Ödenecek Tutar</th>
+                        <td class="fw-bold fs-5 text-danger">@(Model.FaturaTutar.HasValue ? Model.FaturaTutar.Value.ToString("C2") : "0,00 TL")</td>
+                    </tr>
+                </tbody>
+            </table>
+        }
+
+        <!-- SÖZLEŞME BÖLÜMÜ -->
+        @if (Model.BelgeTipi == "Sozlesme")
+        {
+            <h5 class="section-title">Sözleşme Detayları</h5>
+            <table class="table table-bordered info-table">
+                <tbody>
+                    <tr>
+                        <th>Sözleşme Tipi</th>
+                        <td>@Model.SozlesmeTipi</td>
+                    </tr>
+                    <tr>
+                        <th>Sözleşme Durumu</th>
+                        <td>@Model.SozlesmeDurum</td>
+                    </tr>
+                    <tr>
+                        <th>Güvence Bedeli</th>
+                        <td>@(Model.GuvenceBedeli.HasValue ? Model.GuvenceBedeli.Value.ToString("C2") : "-")</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="mt-4 p-3 border text-muted fs-7">
+                <p>İşbu sözleşme, yukarıda bilgileri verilen abone ile şirketimiz arasında elektrik enerjisi satışı/dağıtımı şartlarını belirlemek üzere dijital ortamda düzenlenmiş ve onaylanmıştır.</p>
+                <p>Taraflar, yönetmeliklerdeki tüm yasal yükümlülükleri peşinen kabul eder.</p>
+            </div>
+        }
+
+        <!-- TUTANAK BÖLÜMÜ -->
+        @if (Model.BelgeTipi == "Tutanak")
+        {
+            <h5 class="section-title">İşlem & Saha Sonucu</h5>
+            <table class="table table-bordered info-table">
+                <tbody>
+                    <tr>
+                        <th>İşlem Tipi</th>
+                        <td>@Model.TutanakIslemTipi</td>
+                    </tr>
+                    <tr>
+                        <th>Durum</th>
+                        <td>@Model.TutanakDurum</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="p-3 bg-light border rounded mb-3">
+                <strong>Yapılan İşlem Özeti:</strong><br />
+                @(string.IsNullOrEmpty(Model.TutanakSahaSonucu) ? "Sonuç girilmemiş." : Model.TutanakSahaSonucu)
+            </div>
+            
+            @if (!string.IsNullOrEmpty(Model.TutanakGerekce))
+            {
+                <div class="p-3 bg-light border rounded mb-3">
+                    <strong>Gerekçe / Açıklama:</strong><br />
+                    @Model.TutanakGerekce
+                </div>
+            }
+        }
+
+        <!-- İMZA BÖLÜMÜ -->
+        <div class="row mt-5 pt-5 text-center">
+            <div class="col-6">
+                <strong>Yetkili Birim</strong><br />
+                (Sistem Onayı)
+            </div>
+            <div class="col-6">
+                <strong>Müşteri / Abone</strong><br />
+                @if(Model.BelgeTipi == "Fatura") { <span>(Tahsilat)</span> }
+                else { <span>(İmza / E-Onay)</span> }
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function downloadPDF(btn) {
+            try {
+                const element = document.getElementById('pdf-content');
+                let rawName = '@(Model.BelgeTipi)_@(Model.BelgeNo).pdf';
+                let safeFilename = rawName.replace(/[\/\\?%*:|"<>]/g, '-');
+                
+                var opt = {
+                  margin:       10,
+                  filename:     safeFilename,
+                  image:        { type: 'jpeg', quality: 0.98 },
+                  html2canvas:  { scale: 2, logging: false },
+                  jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                
+                var oldText = btn.innerHTML;
+                btn.innerHTML = "İndiriliyor...";
+                btn.disabled = true;
+
+                html2pdf().set(opt).from(element).save().then(function() {
+                    btn.innerHTML = oldText;
+                    btn.disabled = false;
+                }).catch(function(err) {
+                    console.error("PDF Export Error: ", err);
+                    alert("PDF oluşturulurken bir hata oluştu. Konsolu kontrol edin.");
+                    btn.innerHTML = oldText;
+                    btn.disabled = false;
+                });
+            } catch(e) {
+                console.error("Genel Hata: ", e);
+                alert("PDF işlemi başlatılamadı: " + e.message);
+                if(btn) {
+                    btn.innerHTML = "PDF Olarak İndir";
+                    btn.disabled = false;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

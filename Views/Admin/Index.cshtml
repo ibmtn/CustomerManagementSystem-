@@ -1,0 +1,150 @@
+@model MusteriYonetim.ViewModels.AdminListeViewModel
+
+@using MusteriYonetim.Services.Interfaces
+
+@{
+    ViewData["Title"] = "Admin Paneli - Kullanıcılar";
+
+    string RolEtiketi(short? rolId) {
+        if (!rolId.HasValue) return "Tanımsız";
+        var rol = RolListesi.BulRolId(rolId.Value);
+        return rol?.aciklama ?? "Tanımsız";
+    }
+
+    string RolBadgeRengi(short? rolId) => rolId switch
+    {
+        1 => "bg-danger text-white",
+        2 => "bg-info text-white",
+        3 => "bg-success text-white",
+        4 => "bg-warning text-white",
+        5 => "bg-primary text-white",
+        6 => "bg-secondary text-white",
+        7 => "bg-dark text-white",
+        _ => "bg-secondary text-white"
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="h4 text-danger fw-bold d-inline-block me-3">Sistem Kullanıcıları</h2>
+        <span class="badge bg-secondary bg-opacity-10 text-dark border fs-6">
+            Toplam: @Model.TotalItems (Sayfa @Model.CurrentPage / @Model.TotalPages)
+        </span>
+    </div>
+    <a href="/Admin/Yeni" class="btn btn-primary fw-bold">+ Yeni Personel Ekle</a>
+</div>
+
+@if (TempData["PersonelMesaji"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
+        <strong>İşlem Başarılı!</strong> @TempData["PersonelMesaji"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card shadow-sm border-0 mb-4 bg-light">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Kullanıcı Adı</label>
+                <input name="FiltreKullaniciAdi" value="@Model.FiltreKullaniciAdi" type="text" class="form-control" placeholder="Aranacak kullanıcı adı..." />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Ad Soyad</label>
+                <input name="FiltreAdSoyad" value="@Model.FiltreAdSoyad" type="text" class="form-control" placeholder="Personel ad soyad..." />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Rol</label>
+                <select data-control="select2" name="FiltreRol" class="form-select">
+                    <option value="">Tümü</option>
+                    @foreach(var rol in RolListesi.Roller)
+                    {
+                        <option value="@rol.rol_id" selected="@(Model.FiltreRol == rol.rol_id ? "selected" : null)">@rol.aciklama</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">
+                    <i class="bi bi-search"></i> Filtrele
+                </button>
+                <a href="/Admin/Index" class="btn btn-outline-secondary" title="Temizle">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<form id="filterForm" method="get" action="/Admin/Index">
+    <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
+    <input type="hidden" name="FiltreKullaniciAdi" value="@Model.FiltreKullaniciAdi" />
+    <input type="hidden" name="FiltreAdSoyad" value="@Model.FiltreAdSoyad" />
+    <input type="hidden" name="FiltreRol" value="@Model.FiltreRol" />
+</form>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="text-center">ID</th>
+                        <th>Ad Soyad</th>
+                        <th>Kullanıcı Adı</th>
+                        <th>E-Posta</th>
+                        <th>Rol</th>
+                        <th>Durum</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var personel in Model.Kullanicilar)
+                    {
+                        <tr>
+                            <td class="text-center"><strong>#@personel.kullanici_id</strong></td>
+                            <td>@personel.ad_soyad</td>
+                            <td>@personel.kullanici_adi</td>
+                            <td>@personel.e_posta</td>
+                            <td><span class="badge @RolBadgeRengi(personel.rol_id)">@RolEtiketi(personel.rol_id)</span></td>
+                            <td>
+                                @if (personel.durum == MusteriYonetim.Models.Enums.KullaniciDurumu.Aktif)
+                                {
+                                    <span class="badge bg-success">Aktif</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Pasif</span>
+                                }
+                            </td>
+                            <td>
+                                <a href="/Admin/Detay/@personel.kullanici_id" class="btn btn-sm btn-outline-primary shadow-sm">Detay</a>
+                            </td>
+                        </tr>
+                    }
+                    @if (Model.Kullanicilar.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">Kullanıcı bulunamadı.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-center mt-4 mb-3">
+    <nav>
+        <ul class="pagination pagination-sm shadow-sm">
+            <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage > 1) { document.getElementById('CurrentPage').value = @(Model.CurrentPage - 1); document.getElementById('filterForm').submit(); } return false;">&laquo; Önceki</a>
+            </li>
+            <li class="page-item active">
+                <span class="page-link fw-bold px-4">Sayfa @Model.CurrentPage / @Model.TotalPages</span>
+            </li>
+            <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage < @Model.TotalPages) { document.getElementById('CurrentPage').value = @(Model.CurrentPage + 1); document.getElementById('filterForm').submit(); } return false;">Sonraki &raquo;</a>
+            </li>
+        </ul>
+    </nav>
+</div>

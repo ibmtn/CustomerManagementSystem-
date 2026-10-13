@@ -1,0 +1,170 @@
+@model MusteriYonetim.ViewModels.SozlesmeListeViewModel
+
+@{
+    ViewData["Title"] = "Sözleşmeler";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <div>
+        <h2 class="h4 text-primary fw-bold d-inline-block me-3">Sözleşmeler Listesi</h2>
+        <span class="badge bg-secondary bg-opacity-10 text-dark border fs-6">
+            Toplam: @Model.TotalItems (Sayfa @Model.CurrentPage / @Model.TotalPages)
+        </span>
+    </div>
+    <a href="/Sozlesme/Yeni" class="btn btn-primary fw-bold">+ Yeni Sözleşme</a>
+</div>
+
+@if (TempData["SozlesmeMesaji"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        @TempData["SozlesmeMesaji"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card shadow-sm border-0 mb-4 bg-light">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Sözleşme No</label>
+                <input name="FiltreSozlesmeNo" value="@Model.FiltreSozlesmeNo" type="text" class="form-control" placeholder="Örn: SZL-10045" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Tekil Kod (Arama)</label>
+                <input name="FiltreTekilKod" value="@Model.FiltreTekilKod" type="text" class="form-control" placeholder="Örn: TK-2026-001" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Durum</label>
+                <select data-control="select2" name="FiltreDurum" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="AKTIF" selected="@(Model.FiltreDurum ?.ToUpper() == "AKTIF" ? "selected" : null)">AKTIF</option>
+                    <option value="Güvence Bekliyor" selected="@(Model.FiltreDurum == "Güvence Bekliyor" ? "selected" : null)">Güvence Bekliyor</option>
+                    <option value="Feshedildi" selected="@(Model.FiltreDurum == "Feshedildi" ? "selected" : null)">Feshedildi</option>
+                    <option value="PASIF" selected="@(Model.FiltreDurum ?.ToUpper() == "PASIF" ? "selected" : null)">PASIF</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Sözleşme Tipi</label>
+                <select data-control="select2" name="FiltreSozlesmeTipi" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="Bireysel" selected="@(Model.FiltreSozlesmeTipi == "Bireysel" ? "selected" : null)">Bireysel</option>
+                    <option value="Kurumsal" selected="@(Model.FiltreSozlesmeTipi == "Kurumsal" ? "selected" : null)">Kurumsal</option>
+                </select>
+            </div>
+            <div class="col-md-6 d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">
+                    <i class="bi bi-search"></i> Filtrele
+                </button>
+                <a href="/Sozlesme/Index" class="btn btn-outline-secondary" title="Temizle">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Sayfalama (Pagination) için Form -->
+<form id="filterForm" method="get" action="/Sozlesme/Index">
+    <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
+    <input type="hidden" name="FiltreSozlesmeNo" value="@Model.FiltreSozlesmeNo" />
+    <input type="hidden" name="FiltreTekilKod" value="@Model.FiltreTekilKod" />
+    <input type="hidden" name="FiltreSozlesmeTipi" value="@Model.FiltreSozlesmeTipi" />
+    <input type="hidden" name="FiltreDurum" value="@Model.FiltreDurum" />
+</form>
+
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Sözleşme No</th>
+                        <th>Müşteri Ad Soyad / Ünvan</th>
+                        <th>Tekil Kod</th>
+                        <th>Sözleşme Tipi</th>
+                        <th>Tarife</th>
+                        <th>Güvence Bedeli</th>
+                        <th>Başlangıç / Bitiş Tarihi</th>
+                        <th>Durum</th>
+                        <th class="text-end pe-4">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Sozlesmeler != null && Model.Sozlesmeler.Any())
+                    {
+                        foreach (var item in Model.Sozlesmeler)
+                        {
+                            var tcMaskeli = !string.IsNullOrEmpty(item.tckn) && item.tckn.Length >= 4 ? "***" + item.tckn.Substring(item.tckn.Length - 4) : item.tckn;
+                            var durum = item.statu?.Trim() ?? "";
+                            var durumClass = durum switch
+                            {
+                                "Aktif" or "AKTIF" => "success",
+                                "Güvence Bekliyor" or "GuvenceBekliyor" => "warning text-dark",
+                                "Feshedildi" => "danger",
+                                "Pasif" or "PASIF" => "secondary",
+                                _ => "light text-dark"
+                            };
+                            <tr>
+                                <td class="ps-4 fw-bold text-dark">@item.sozlesme_no</td>
+                                <td>@(item.ad) @(item.soyad) @(item.unvan)</td>
+                                <td>
+                                    <span class="badge bg-secondary">@item.tekil_kod</span>
+                                    
+                                </td>
+                                <td>@item.sozlesme_tipi</td>
+                                <td>@item.tarife_id</td>
+                                <td class="fw-bold">@item.guvence_bedeli.ToString("C")</td>
+                                <td>@item.baslangic_tarihi.ToString("dd.MM.yyyy") / @(item.bitis_tarihi.HasValue ? item.bitis_tarihi.Value.ToString("dd.MM.yyyy") : "Devam Ediyor")</td>
+                                <td>
+                                    <span class="badge bg-@durumClass">
+                                        @item.statu
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown">
+                                            İşlem <i class="bi bi-chevron-down ms-1"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                            <li>
+                                                <a href="/Sozlesme/Detay/@item.sozlesme_no" class="dropdown-item fw-semibold">
+                                                    <i class="bi bi-eye text-primary me-2"></i> Detay
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">Kayıtlı sözleşme bulunmamaktadır.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (Model.TotalPages > 1)
+{
+    <div class="d-flex justify-content-center mt-4 mb-3">
+        <nav>
+            <ul class="pagination pagination-sm shadow-sm">
+                <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                    <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage > 1) { document.getElementById('CurrentPage').value = @(Model.CurrentPage - 1); document.getElementById('filterForm').submit(); } return false;">&laquo; Önceki</a>
+                </li>
+                <li class="page-item active">
+                    <span class="page-link fw-bold px-4">Sayfa @Model.CurrentPage</span>
+                </li>
+                <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage < @Model.TotalPages) { document.getElementById('CurrentPage').value = @(Model.CurrentPage + 1); document.getElementById('filterForm').submit(); } return false;">Sonraki &raquo;</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+}
+

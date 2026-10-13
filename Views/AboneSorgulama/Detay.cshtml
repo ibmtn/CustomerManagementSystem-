@@ -1,0 +1,98 @@
+@model MusteriYonetim.Models.Abone
+
+@{
+    ViewData["Title"] = "Abone Detayı";
+}
+
+<div class="container-fluid mt-3">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-0 text-gray-800 fw-bold">
+                <i class="bi bi-person-lines-fill text-primary me-2"></i> Abone Detayı
+            </h2>
+            <p class="text-muted mt-1 mb-0">Abone profili ve iletişim bilgileri.</p>
+        </div>
+        <a href="/AboneSorgulama/Index" class="btn btn-outline-secondary shadow-sm rounded-pill px-4">
+            <i class="bi bi-arrow-left me-1"></i> Geri Dön
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Sol Profil Kartı -->
+        <div class="col-xl-4 col-lg-5 mb-4">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden h-100">
+                <div class="card-body p-5 text-center bg-gradient bg-primary text-white position-relative">
+                    <div class="position-absolute top-0 end-0 p-3">
+                        @if (Model.Durum ?.ToUpper() == "AKTIF")
+                        {
+                            <span class="badge bg-white text-success rounded-pill px-3 py-2 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Aktif</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger text-white rounded-pill px-3 py-2 shadow-sm"><i class="bi bi-x-circle-fill me-1"></i> Pasif</span>
+                        }
+                    </div>
+                    
+                    <div class="bg-white text-primary rounded-circle d-flex justify-content-center align-items-center shadow mx-auto mb-4" style="width: 100px; height: 100px; font-size: 40px;">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <h4 class="fw-bold mb-1">@(Model.abone_tipi == MusteriYonetim.Models.Enums.AboneTipi.Kurumsal ? Model.Unvan : $"{Model.Ad} {Model.Soyad}")</h4>
+                    <p class="mb-3 opacity-75">@(Model.abone_tipi == MusteriYonetim.Models.Enums.AboneTipi.Kurumsal ? "Kurumsal Abone" : "Bireysel Abone")</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sağ Detay Kartı -->
+        <div class="col-xl-8 col-lg-7 mb-4">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-white py-3 border-bottom-0 pt-4 px-4">
+                    <h5 class="m-0 font-weight-bold text-primary"><i class="bi bi-info-circle-fill me-2"></i> Kimlik & İletişim Bilgileri</h5>
+                </div>
+                <div class="card-body px-4 pb-4 pt-2">
+                    <div class="row g-4">
+                        
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border h-100">
+                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-hash me-1"></i> Abone No</label>
+                                <p class="fs-5 fw-bold text-dark mb-0 font-monospace">@Model.AboneNo</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border h-100">
+                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-fingerprint me-1"></i> TCKN / VKN</label>
+                                <p class="fs-5 fw-bold text-dark mb-0 font-monospace">@(Model.abone_tipi == MusteriYonetim.Models.Enums.AboneTipi.Kurumsal ? (string.IsNullOrEmpty(Model.vkn) ? "Belirtilmemiş" : Model.vkn) : (string.IsNullOrEmpty(Model.tckn) ? "Belirtilmemiş" : Model.tckn))</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border h-100">
+                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-telephone-fill me-1"></i> Telefon</label>
+                                <p class="fs-5 fw-bold text-dark mb-0">@(string.IsNullOrEmpty(Model.Telefon) ? "Belirtilmemiş" : Model.Telefon)</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border h-100">
+                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-envelope-fill me-1"></i> E-Posta</label>
+                                <p class="fs-5 fw-bold text-dark mb-0">@(string.IsNullOrEmpty(Model.EPosta) ? "Belirtilmemiş" : Model.EPosta)</p>
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border h-100">
+                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-calendar-plus me-1"></i> Kayıt Tarihi</label>
+                                <p class="fs-5 fw-medium text-dark mb-0">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

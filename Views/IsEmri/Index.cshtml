@@ -1,0 +1,250 @@
+@model MusteriYonetim.ViewModels.IsEmriListeViewModel
+
+@{
+    ViewData["Title"] = "İş Emri Listesi";
+    var tipSecenekleri = new List<SelectListItem> { 
+
+        new SelectListItem("Sayaç Değiştirme", "Degistirme"), 
+        new SelectListItem("Sayaç Sökme", "Sokme"), 
+        new SelectListItem("Enerji Kesme", "Kesme"), 
+        new SelectListItem("Enerji Açma", "Acma"),
+        new SelectListItem("Sayaç Arıza", "SayacAriza"),
+        new SelectListItem("Yeni Bağlantı", "YeniBaglanti"),
+        new SelectListItem("Endeks Okuma", "EndeksOkuma"),
+        new SelectListItem("Mühürleme", "Muhurleme"),
+        new SelectListItem("Keşif İnceleme", "KesifInceleme")
+    };
+    var durumSecenekleri = new List<SelectListItem> { new SelectListItem("Açık", "ACIK"), new SelectListItem("Atandı", "ATANDI"), new SelectListItem("Yolda", "YOLDA"), new SelectListItem("Sahada", "SAHADA"), new SelectListItem("Tamamlandı", "TAMAMLANDI"), new SelectListItem("İptal", "IPTAL"), new SelectListItem("Başarısız", "BASARISIZ") };
+}
+
+@if (TempData["Mesaj"] != null)
+{
+    <div class="alert alert-@(TempData["MesajTip"] ?? "info") alert-dismissible fade show" role="alert">
+        @TempData["Mesaj"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="fw-bold text-dark mb-0">İş Emri Listesi</h3>
+    <div class="d-flex align-items-center">
+        <span class="badge bg-secondary bg-opacity-10 text-secondary border fs-6 me-3">
+            Toplam: @Model.TotalItems (Sayfa @Model.CurrentPage / @Model.TotalPages)
+        </span>
+        @if (User.IsInRole("BTYoneticisi") || User.IsInRole("SahaOperasyonAmiri") || User.IsInRole("Denetci"))
+        {
+            <a asp-action="Yeni" class="btn btn-primary fw-bold shadow-sm">
+                <i class="bi bi-plus-lg me-1"></i> Yeni İş Emri
+            </a>
+        }
+    </div>
+</div>
+
+<!-- ── Filtre Formu ── -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3 align-items-end">
+            <!-- 1. Satır: Yeni Eklenen Filtreler -->
+            <input type="hidden" asp-for="CurrentPage" id="CurrentPage" />
+            <div class="col-md-3">
+                <label class="form-label">İş Emri No</label>
+                <select asp-for="FiltreIsEmriNo" data-control="select2" class="form-select" data-placeholder="Örn: IE-2026..." data-allow-clear="true">
+                    <option value=""></option>
+                    @if(ViewBag.IsEmriNolar != null) {
+                        foreach(var item in ViewBag.IsEmriNolar as List<string>) {
+                            <option value="@item">@item</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Tekil Kod</label>
+                <select asp-for="FiltreTekilKod" data-control="select2" class="form-select" data-placeholder="Örn: TK-2026..." data-allow-clear="true">
+                    <option value=""></option>
+                    @if(ViewBag.TekilKodlar != null) {
+                        foreach(var item in ViewBag.TekilKodlar as List<string>) {
+                            <option value="@item">@item</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Atanan Personel</label>
+                <select asp-for="FiltrePersonel" data-control="select2" class="form-select" data-placeholder="Personel Adı" data-allow-clear="true">
+                    <option value=""></option>
+                    @if(ViewBag.Personeller != null) {
+                        foreach(var item in ViewBag.Personeller as List<string>) {
+                            <option value="@item">@item</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Öncelik</label>
+                <select data-control="select2" asp-for="FiltreOncelik" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="ACIL">Acil</option>
+                    <option value="YUKSEK">Yüksek</option>
+                    <option value="NORMAL">Normal</option>
+                    <option value="DUSUK">Düşük</option>
+                </select>
+            </div>
+
+            <!-- 2. Satır: Mevcut Filtreler -->
+            <div class="col-md-2">
+                <label class="form-label">Tip</label>
+                <select data-control="select2" asp-for="FiltreTip" asp-items="tipSecenekleri" class="form-select">
+                    <option value="">Tümü</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Durum</label>
+                <select data-control="select2" asp-for="FiltreDurum" asp-items="durumSecenekleri" class="form-select">
+                    <option value="">Tümü</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Oluşturma Tarihi</label>
+                <input asp-for="FiltreOlusturmaTarihi" type="date" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Planlanan Tarih</label>
+                <input asp-for="FiltrePlanlananTarih" type="date" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Genel Ara</label>
+                <input asp-for="AramaMetni" type="text" class="form-control" placeholder="Genel arama..." />
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">
+                    <i class="bi bi-search"></i> Filtrele
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary" title="Filtreleri Temizle">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ── Liste Tablosu ── -->
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        @if (!Model.IsEmirleri.Any())
+        {
+            <div class="text-center text-muted py-5">
+                <p class="mb-0">Kayıt bulunamadı.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">İş Emri No</th>
+                            <th>Tip</th>
+                            <th>Durum</th>
+                            <th>Öncelik Durumu</th>
+                            <th>Tüketim Noktası & Adres</th>
+                            <th>Planlanan Tarih</th>
+                            <th>Oluşturulma Tarihi</th>
+                            <th>Atanan Kullanıcı</th>
+                            <th class="text-end">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach  (var item in Model.IsEmirleri)
+                        {
+                            <tr>
+                                <td class="py-3 fw-bold ps-4">
+                                    @item.IsEmriNo
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border fw-bold px-2 py-1 shadow-sm">@MusteriYonetim.ViewModels.IsEmriListeViewModel.GetTipAd(item.Tip)</span>
+                                </td>
+                                <td>
+                                    <span class="badge @item.DurumRenk px-2 py-1 shadow-sm">@MusteriYonetim.ViewModels.IsEmriListeViewModel.GetDurumAd(item.Durum)</span>
+                                </td>
+
+                                <td>
+                                    @{
+                                        var oncelikKey = MusteriYonetim.ViewModels.IsEmriListeViewModel.NormalizeOncelikKey(item.oncelik);
+                                        var oncelikAd = MusteriYonetim.ViewModels.IsEmriListeViewModel.GetOncelikAd(item.oncelik);
+                                        if (oncelikKey == "ACIL")
+                                        {
+                                            <span class="badge bg-light-danger text-danger border border-danger">@oncelikAd</span>
+                                        }
+                                        else if (oncelikKey == "YUKSEK")
+                                        {
+                                            <span class="badge bg-light-warning text-warning border border-warning">@oncelikAd</span>
+                                        }
+                                        else if (oncelikKey == "DUSUK")
+                                        {
+                                            <span class="badge bg-light-info text-info border border-info">@oncelikAd</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light-primary text-primary border border-primary">@oncelikAd</span>
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    <span class="text-dark fw-medium"><i class="bi bi-geo-alt-fill text-muted"></i> @item.tekil_kod</span><br />
+                                    <small class="text-muted">@item.Adres</small>
+                                </td>
+                                <td>@(item.PlanlananTarih?.ToString("dd.MM.yyyy") ?? "-")</td>
+                                <td>
+                                    <span>
+                                        @item.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center me-2" style="width: 28px; height: 28px; font-size: 12px;">
+                                            <i class="bi bi-person-fill"></i>
+                                        </div>
+                                        <span>@item.AtananKullaniciAdi</span>
+                                    </div>
+                                </td>
+                                <td class="text-end">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown">
+                                            İşlem <i class="bi bi-chevron-down ms-1"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                            <li><a class="dropdown-item fw-semibold" asp-action="Detay" asp-route-id="@item.IsEmriId"><i class="bi bi-eye text-primary me-2"></i> Detay</a></li>
+                                            <li><a class="dropdown-item fw-semibold" asp-action="Tamamlama" asp-route-id="@item.IsEmriId"><i class="bi bi-check-circle text-info me-2"></i> Tamamlama Ekranı</a></li>
+                                            @if (item.Durum != MusteriYonetim.Models.Enums.IsEmriDurumu.Tamamlandi && item.Durum != MusteriYonetim.Models.Enums.IsEmriDurumu.Iptal && item.Durum != MusteriYonetim.Models.Enums.IsEmriDurumu.Basarisiz)
+                                            {
+                                                <li><a class="dropdown-item fw-semibold text-success" asp-action="TutanakGiris" asp-route-id="@item.IsEmriId"><i class="bi bi-file-earmark-plus text-success me-2"></i> Tutanak Gir</a></li>
+                                            }
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        @if (Model.TotalPages > 1)
+        {
+            <div class="d-flex justify-content-center mt-4 mb-3">
+                <nav>
+                    <ul class="pagination pagination-sm shadow-sm">
+                        <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                            <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage > 1) { document.getElementById('CurrentPage').value = @(Model.CurrentPage - 1); document.forms[0].submit(); } return false;">&laquo; Önceki</a>
+                        </li>
+                        <li class="page-item active">
+                            <span class="page-link fw-bold px-4">Sayfa @Model.CurrentPage</span>
+                        </li>
+                        <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage < @Model.TotalPages) { document.getElementById('CurrentPage').value = @(Model.CurrentPage + 1); document.forms[0].submit(); } return false;">Sonraki &raquo;</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    </div>
+</div>

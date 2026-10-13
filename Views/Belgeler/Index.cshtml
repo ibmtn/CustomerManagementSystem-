@@ -1,0 +1,220 @@
+@model MusteriYonetim.ViewModels.BelgelerListeViewModel
+@{
+    ViewData["Title"] = "Belgeler";
+}
+
+<div class="d-flex flex-column flex-column-fluid">
+    <div class="kc-toolbar" id="kc_toolbar">
+        <div class="container-fluid d-flex flex-stack">
+            <div class="page-title d-flex align-items-center flex-wrap me-3 mb-5 mb-lg-0">
+                <h1 class="d-flex text-dark fw-bolder fs-3 align-items-center my-1">
+                    Belge Arşivi
+                </h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="kc-post d-flex flex-column-fluid" id="kc_post">
+        <div class="container-fluid">
+            <div class="card shadow-sm border-0 mb-4 bg-light">
+                <div class="card-body">
+                    <form asp-action="Index" method="get" class="row g-3 align-items-end" id="mainFilterForm">
+                        <input type="hidden" name="AktifSekme" id="topAktifSekme" value="@Model.AktifSekme" />
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Belge Tarihi</label>
+                            <input name="FiltreBelgeTarihi" value="@(Model.FiltreBelgeTarihi?.ToString("yyyy-MM-dd"))" type="date" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Belge No</label>
+                            <input name="FiltreBelgeNo" value="@Model.FiltreBelgeNo" type="text" class="form-control" placeholder="Belge No..." />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Tüketim Noktası (Tekil Kod)</label>
+                            <input name="FiltreTekilKod" value="@Model.FiltreTekilKod" type="text" class="form-control" placeholder="Tekil Kod..." />
+                        </div>
+                        <div class="col-md-3 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary flex-fill">
+                                <i class="bi bi-search"></i> Filtrele
+                            </button>
+                            <a href="/Belgeler/Index" class="btn btn-outline-secondary" title="Temizle">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header pt-7 pb-0">
+                    <h3 class="card-title align-items-start flex-column mb-5">
+                        <span class="card-label fw-bolder fs-3 mb-1">Sistemdeki Tüm Belgeler</span>
+                        <span class="text-muted mt-1 fw-bold fs-7">Toplam: @Model.TotalItems (Sayfa @Model.CurrentPage / @Model.TotalPages)</span>
+                    </h3>
+                    
+                    <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6 w-100 border-0" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link @(Model.AktifSekme == "Fatura" ? "active text-primary fw-bolder" : "text-muted")" href="#" onclick="document.getElementById('topAktifSekme').value='Fatura'; document.getElementById('mainFilterForm').submit(); return false;">
+                                <i class="bi bi-receipt-cutoff me-2"></i>Faturalar
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link @(Model.AktifSekme == "Sozlesme" ? "active text-success fw-bolder" : "text-muted")" href="#" onclick="document.getElementById('topAktifSekme').value='Sozlesme'; document.getElementById('mainFilterForm').submit(); return false;">
+                                <i class="bi bi-file-earmark-check-fill me-2"></i>Sözleşmeler
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link @(Model.AktifSekme == "Tutanak" ? "active text-warning fw-bolder" : "text-muted")" href="#" onclick="document.getElementById('topAktifSekme').value='Tutanak'; document.getElementById('mainFilterForm').submit(); return false;">
+                                <i class="bi bi-clipboard-check me-2"></i>Tutanaklar
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="card-body py-4">
+                    <div class="tab-content" id="belgelerTabContent">
+                        
+                        <!-- FATURALAR SEKME İÇERİĞİ -->
+                        <div class="tab-pane fade @(Model.AktifSekme == "Fatura" ? "show active" : "")" id="tab_faturalar" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table align-middle table-row-dashed fs-6 gy-5">
+                                    <thead>
+                                        <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
+                                            <th class="min-w-100px">Belge Tipi</th>
+                                            <th class="min-w-125px">Belge No</th>
+                                            <th class="min-w-125px">Tüketim Noktası</th>
+                                            <th class="min-w-125px">Tarih</th>
+                                            <th class="min-w-150px">Açıklama</th>
+                                            <th class="min-w-100px">Tutar</th>
+                                            <th class="text-end min-w-100px">İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-gray-600 fw-bold">
+                                        @foreach (var item in Model.Belgeler.Where(x => x.BelgeTipi == "Fatura"))
+                                        {
+                                            <tr>
+                                                <td><span class="badge badge-light-primary">Fatura</span></td>
+                                                <td>@item.BelgeNo</td>
+                                                <td>@item.TuketimNoktasiKodu</td>
+                                                <td>@item.Tarih.ToString("dd.MM.yyyy HH:mm")</td>
+                                                <td>@item.Aciklama</td>
+                                                <td>@(item.Tutar.HasValue ? item.Tutar.Value.ToString("C2") : "-")</td>
+                                                <td class="text-end">
+                                                    <a href="@item.Url" class="btn btn-sm btn-light btn-active-light-primary" target="_blank">Görüntüle/İndir</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                        @if(!Model.Belgeler.Any(x => x.BelgeTipi == "Fatura"))
+                                        {
+                                            <tr><td colspan="7" class="text-center text-muted py-5">Sistemde henüz oluşturulmuş bir fatura bulunmamaktadır.</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- SÖZLEŞMELER SEKME İÇERİĞİ -->
+                        <div class="tab-pane fade @(Model.AktifSekme == "Sozlesme" ? "show active" : "")" id="tab_sozlesmeler" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table align-middle table-row-dashed fs-6 gy-5">
+                                    <thead>
+                                        <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
+                                            <th class="min-w-100px">Belge Tipi</th>
+                                            <th class="min-w-125px">Belge No</th>
+                                            <th class="min-w-125px">Tüketim Noktası</th>
+                                            <th class="min-w-125px">Tarih</th>
+                                            <th class="min-w-150px">Açıklama</th>
+                                            <th class="text-end min-w-100px">İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-gray-600 fw-bold">
+                                        @foreach (var item in Model.Belgeler.Where(x => x.BelgeTipi == "Sözleşme"))
+                                        {
+                                            <tr>
+                                                <td><span class="badge badge-light-success">Sözleşme</span></td>
+                                                <td>@item.BelgeNo</td>
+                                                <td>@item.TuketimNoktasiKodu</td>
+                                                <td>@item.Tarih.ToString("dd.MM.yyyy HH:mm")</td>
+                                                <td>@item.Aciklama</td>
+                                                <td class="text-end">
+                                                    <a href="@item.Url" class="btn btn-sm btn-light btn-active-light-success" target="_blank">Görüntüle</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                        @if(!Model.Belgeler.Any(x => x.BelgeTipi == "Sözleşme"))
+                                        {
+                                            <tr><td colspan="6" class="text-center text-muted py-5">Sistemde henüz oluşturulmuş bir sözleşme bulunmamaktadır.</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- TUTANAKLAR SEKME İÇERİĞİ -->
+                        <div class="tab-pane fade @(Model.AktifSekme == "Tutanak" ? "show active" : "")" id="tab_tutanaklar" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table align-middle table-row-dashed fs-6 gy-5">
+                                    <thead>
+                                        <tr class="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
+                                            <th class="min-w-100px">Belge Tipi</th>
+                                            <th class="min-w-125px">Belge No</th>
+                                            <th class="min-w-125px">Tüketim Noktası</th>
+                                            <th class="min-w-125px">Tarih</th>
+                                            <th class="min-w-150px">Açıklama</th>
+                                            <th class="text-end min-w-100px">İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-gray-600 fw-bold">
+                                        @foreach (var item in Model.Belgeler.Where(x => x.BelgeTipi == "Tutanak"))
+                                        {
+                                            <tr>
+                                                <td><span class="badge badge-light-warning">Tutanak</span></td>
+                                                <td>@item.BelgeNo</td>
+                                                <td>@item.TuketimNoktasiKodu</td>
+                                                <td>@item.Tarih.ToString("dd.MM.yyyy HH:mm")</td>
+                                                <td>@item.Aciklama</td>
+                                                <td class="text-end">
+                                                    <a href="@item.Url" class="btn btn-sm btn-light btn-active-light-warning" target="_blank">Görüntüle/İndir</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                        @if(!Model.Belgeler.Any(x => x.BelgeTipi == "Tutanak"))
+                                        {
+                                            <tr><td colspan="6" class="text-center text-muted py-5">Sistemde henüz oluşturulmuş bir tutanak bulunmamaktadır.</td></tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    @if (Model.TotalPages > 1)
+                    {
+                        <div class="d-flex justify-content-center mt-4 mb-3">
+                            <form id="filterForm" method="get" action="/Belgeler/Index">
+                                <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
+                                <input type="hidden" name="AktifSekme" value="@Model.AktifSekme" />
+                                <input type="hidden" name="FiltreBelgeTarihi" value="@(Model.FiltreBelgeTarihi?.ToString("yyyy-MM-dd"))" />
+                                <input type="hidden" name="FiltreBelgeNo" value="@Model.FiltreBelgeNo" />
+                                <input type="hidden" name="FiltreTekilKod" value="@Model.FiltreTekilKod" />
+                            </form>
+                            <nav>
+                                <ul class="pagination pagination-sm shadow-sm">
+                                    <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                                        <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage > 1) { document.getElementById('CurrentPage').value = @(Model.CurrentPage - 1); document.getElementById('filterForm').submit(); } return false;">&laquo; Önceki</a>
+                                    </li>
+                                    <li class="page-item active">
+                                        <span class="page-link fw-bold px-4">Sayfa @Model.CurrentPage</span>
+                                    </li>
+                                    <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                                        <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage < @Model.TotalPages) { document.getElementById('CurrentPage').value = @(Model.CurrentPage + 1); document.getElementById('filterForm').submit(); } return false;">Sonraki &raquo;</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

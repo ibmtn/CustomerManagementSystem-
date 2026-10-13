@@ -1,0 +1,200 @@
+@model MusteriYonetim.ViewModels.SayacListeViewModel
+
+@{
+    ViewData["Title"] = "Sayaç Envanteri";
+    var tuketimNoktalari = ViewBag.TuketimNoktalari as List<MusteriYonetim.Models.TuketimNoktasi>;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <div>
+        <h2 class="h4 text-primary fw-bold d-inline-block me-3">Sayaç Envanteri ve Durumları</h2>
+        <span class="badge bg-secondary bg-opacity-10 text-dark border fs-6">
+            Toplam: @Model.TotalItems (Sayfa @Model.CurrentPage / @Model.TotalPages)
+        </span>
+    </div>
+    <a href="/Sayac/Yeni" class="btn btn-primary shadow-sm">
+        <i class="bi bi-plus-circle me-1"></i> Yeni Sayaç Ekle
+    </a>
+</div>
+
+@if (TempData["BasariMesaji"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        @TempData["BasariMesaji"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card shadow-sm border-0 mb-4 bg-light">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3 align-items-end">
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Seri No (Arama)</label>
+                <input name="FiltreSeriNo" value="@Model.FiltreSeriNo" type="text" class="form-control" placeholder="Örn: 2026100..." />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Mühür No</label>
+                <input name="FiltreMuhurNo" value="@Model.FiltreMuhurNo" type="text" class="form-control" placeholder="Örn: MHR-1234" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Marka</label>
+                <select data-control="select2" name="FiltreMarka" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="Makel" selected="@(Model.FiltreMarka == "Makel" ? "selected" : null)">Makel</option>
+                    <option value="Luna" selected="@(Model.FiltreMarka == "Luna" ? "selected" : null)">Luna</option>
+                    <option value="Köhler" selected="@(Model.FiltreMarka == "Köhler" ? "selected" : null)">Köhler</option>
+                    <option value="Viko" selected="@(Model.FiltreMarka == "Viko" ? "selected" : null)">Viko</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Durum</label>
+                <select data-control="select2" name="FiltreDurum" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="Depoda" selected="@(Model.FiltreDurum == "Depoda" ? "selected" : null)">Depoda</option>
+                    <option value="Bağlı" selected="@(Model.FiltreDurum == "Bağlı" ? "selected" : null)">Bağlı</option>
+                    <option value="Arızalı" selected="@(Model.FiltreDurum == "Arızalı" ? "selected" : null)">Arızalı</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Bağlı Nokta</label>
+                <input name="FiltreTuketimNoktasi" value="@Model.FiltreTuketimNoktasi" type="text" class="form-control" placeholder="Örn: TK-..." />
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Faz</label>
+                <select data-control="select2" name="FiltreFaz" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="Monofaze" selected="@(Model.FiltreFaz == "Monofaze" ? "selected" : null)">Monofaze</option>
+                    <option value="Trifaze" selected="@(Model.FiltreFaz == "Trifaze" ? "selected" : null)">Trifaze</option>
+                </select>
+            </div>
+            <div class="col-12 mt-4 text-end">
+                <a href="/Sayac/Index" class="btn btn-outline-secondary px-4 me-2" title="Temizle">
+                    <i class="bi bi-x-lg me-1"></i> Temizle
+                </a>
+                <button type="submit" class="btn btn-primary px-5">
+                    <i class="bi bi-search me-1"></i> Filtrele
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+    <form id="filterForm" method="get" action="/Sayac/Index">
+        <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
+        <input type="hidden" name="FiltreSeriNo" value="@Model.FiltreSeriNo" />
+        <input type="hidden" name="FiltreMuhurNo" value="@Model.FiltreMuhurNo" />
+        <input type="hidden" name="FiltreMarka" value="@Model.FiltreMarka" />
+        <input type="hidden" name="FiltreDurum" value="@Model.FiltreDurum" />
+        <input type="hidden" name="FiltreTuketimNoktasi" value="@Model.FiltreTuketimNoktasi" />
+        <input type="hidden" name="FiltreFaz" value="@Model.FiltreFaz" />
+    </form>
+
+<div class="card shadow-sm border-0 rounded-4 mb-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Seri No</th>
+                        <th>Marka / Model</th>
+                        <th>Faz Bilgisi</th>
+                        <th>Çarpan</th>
+                        <th>Mühür No</th>
+                        <th>Durum</th>
+                        <th>Bağlı Olduğu Nokta</th>
+                        <th class="text-end pe-4">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Sayaclar != null && Model.Sayaclar.Any())
+                    {
+                        foreach (var item in Model.Sayaclar)
+                        {
+                            var tn = tuketimNoktalari?.FirstOrDefault(t => t.tuketim_noktasi_id == item.tuketim_noktasi_id);
+
+                            <tr>
+                                <td class="ps-4 fw-bold text-dark">@item.seri_no</td>
+                                <td>@item.marka / @item.model</td>
+                                <td>
+                                    <span class="badge bg-secondary">@item.faz</span>
+                                </td>
+                                <td>@item.carpan</td>
+
+                                <td>@item.muhur_no</td>
+
+                                <td>
+                                    @{
+                                        string gorunenDurum = (item.durum == MusteriYonetim.Models.Enums.SayacDurumu.Takili || item.durum == MusteriYonetim.Models.Enums.SayacDurumu.Bagli || item.tuketim_noktasi_id > 0) ? "Bağlı" : "Depoda";
+                                        string bgClass = gorunenDurum == "Bağlı" ? "success" : "warning text-dark";
+                                    }
+                                    <span class="badge bg-@bgClass">
+                                        @gorunenDurum
+                                    </span>
+                                </td>
+
+                                <td>
+                                    @if (tn != null)
+                                    {
+                                        <span class="fw-bold text-primary">@tn.tekil_kod</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">Yok (Depoda)</span>
+                                    }
+                                </td>
+
+                                <td class="text-end pe-4">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown">
+                                            İşlem <i class="bi bi-chevron-down ms-1"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                            <li>
+                                                <a href="/Sayac/Detay/@item.sayac_id" class="dropdown-item fw-semibold">
+                                                    <i class="bi bi-info-circle text-info me-2"></i> Detay
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/Sayac/Bagla/@item.sayac_id" class="dropdown-item fw-semibold">
+                                                    <i class="bi bi-link-45deg text-primary me-2"></i> @(item.durum == MusteriYonetim.Models.Enums.SayacDurumu.Bagli ? "Sök / Değiştir" : "Bağla")
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                Kayıtlı sayaç bulunmamaktadır.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (Model.TotalPages > 1)
+{
+    <div class="d-flex justify-content-center mt-4 mb-3">
+        <nav>
+            <ul class="pagination pagination-sm shadow-sm">
+                <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                    <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage > 1) { document.getElementById('CurrentPage').value = @(Model.CurrentPage - 1); document.getElementById('filterForm').submit(); } return false;">&laquo; Önceki</a>
+                </li>
+                <li class="page-item active">
+                    <span class="page-link fw-bold px-4">Sayfa @Model.CurrentPage</span>
+                </li>
+                <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage < @Model.TotalPages) { document.getElementById('CurrentPage').value = @(Model.CurrentPage + 1); document.getElementById('filterForm').submit(); } return false;">Sonraki &raquo;</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+}

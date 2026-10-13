@@ -1,0 +1,137 @@
+﻿@model MusteriYonetim.ViewModels.EndeksOkumaViewModels
+
+@{
+    ViewData["Title"] = "Okuma Detayı";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 text-primary fw-bold">
+            <i class="bi bi-speedometer2 me-2"></i> Endeks Okuma Detayı
+        </h2>
+        <a href="/EndeksOkuma/Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Listeye Dön
+        </a>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-gradient bg-primary text-white p-4">
+            <div class="d-flex align-items-center">
+                <div class="bg-white text-primary rounded-circle d-flex justify-content-center align-items-center shadow-sm" style="width: 60px; height: 60px; font-size: 24px;">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </div>
+                <div class="ms-3">
+                    <h3 class="mb-0 fw-bold">Okuma ID: @Model.okuma_id</h3>
+                    <p class="mb-0 opacity-75">Tarih: @Model.okuma_zamani?.ToString("dd.MM.yyyy HH:mm")</p>
+                </div>
+                <div class="ms-auto">
+                    @{
+                        var tuketim = (Model.yeni_endeks ?? 0) - (Model.onceki_endeks ?? 0);
+                    }
+                    @if (Model.status == "Basarili")
+                    {
+                        <span class="badge bg-success rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Başarılı</span>
+                    }
+                    else if (Model.status == "Anormal")
+                    {
+                        <span class="badge bg-danger rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-exclamation-triangle-fill me-1"></i> Anormal</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-info-circle-fill me-1"></i> @Model.status</span>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        @if (Model.status == "Anormal")
+        {
+            <div class="alert alert-danger rounded-0 border-0 m-0 p-3 d-flex align-items-center">
+                <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
+                <div>
+                    <strong>Sistem Uyarısı:</strong> Bu okuma anormal olarak işaretlenmiştir. Gerekçe: <em>Bilinmiyor</em>
+                </div>
+            </div>
+        }
+
+        <div class="card-body p-4 bg-light">
+            <div class="row g-4 mb-2">
+                <div class="col-md-6">
+                    <h6 class="text-muted fw-bold mb-3"><i class="bi bi-geo-alt me-1"></i> Lokasyon ve Cihaz</h6>
+                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
+                        <div class="mb-3">
+                            <label class="text-muted small fw-bold mb-1 text-uppercase">Sözleşme No</label>
+                            <p class="fs-5 fw-bold text-dark mb-0">@Model.sozlesme_no</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small fw-bold mb-1 text-uppercase">İş Emri No</label>
+                            <p class="fs-6 fw-medium text-dark mb-0">@Model.IsEmriNo</p>
+                        </div>
+                        <div>
+                            <label class="text-muted small fw-bold mb-1 text-uppercase">Sayaç Seri No</label>
+                            <p class="fs-6 fw-medium text-dark mb-0">@Model.seri_no </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h6 class="text-muted fw-bold mb-3"><i class="bi bi-speedometer me-1"></i> Endeks Detayları</h6>
+                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="text-muted small fw-bold mb-1 text-uppercase">İlk Endeks</label>
+                                <p class="fs-6 fw-medium text-dark mb-0">@Model.onceki_endeks</p>
+                            </div>
+                            <div class="col-6">
+                                <label class="text-muted small fw-bold mb-1 text-uppercase">Son Endeks</label>
+                                <p class="fs-6 fw-medium text-dark mb-0">@Model.yeni_endeks</p>
+                            </div>
+                            <div class="col-12 mt-3 pt-3 border-top border-2 border-primary">
+                                <label class="text-primary small fw-bold mb-1 text-uppercase"><i class="bi bi-lightning-charge me-1"></i> Toplam Tüketim</label>
+                                <p class="fs-3 fw-bold text-primary mb-0">@tuketim <span class="fs-6 text-muted fw-normal">kWh</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mt-2">
+                <div class="col-md-12">
+                    <h6 class="text-muted fw-bold mb-3"><i class="bi bi-shield-check me-1"></i> Durum ve Doğrulama Bildirimi</h6>
+                    <div class="p-4 bg-white rounded-3 shadow-sm border border-light d-flex justify-content-around text-center">
+                        <div>
+                            <label class="text-muted small fw-bold mb-2 text-uppercase d-block">Doğrulama Durumu</label>
+                            @if (Model.dogrulama_durumu == MusteriYonetim.Models.Enums.DogrulamaDurumu.Onaylandi)
+                            {
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2 fs-6">Doğrulandı</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-3 py-2 fs-6">@(!Model.dogrulama_durumu.HasValue ? "Bekliyor" : Model.dogrulama_durumu.Value.ToString())</span>
+                            }
+                        </div>
+                        <div class="border-start border-end px-5">
+                            <label class="text-muted small fw-bold mb-2 text-uppercase d-block">Anormal mi?</label>
+                            @if (Model.anomali_mi == true)
+                            {
+                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3 py-2 fs-6">Evet (Anormal)</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2 fs-6">Hayır (Normal)</span>
+                            }
+                        </div>
+                        <div>
+                            <label class="text-muted small fw-bold mb-2 text-uppercase d-block">Tutanak Aktarıldı mı?</label>
+                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3 py-2 fs-6">Hayır (Bekliyor)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 text-end">
+                <a href="/EndeksOkuma/TutanakYazdir/@Model.okuma_id" target="_blank" class="btn btn-outline-primary shadow-sm"><i class="bi bi-printer-fill"></i> Tutanak Yazdır</a>
+            </div>
+        </div>
+    </div>
+</div>
