@@ -54,3 +54,10 @@ Bu dosyalar lisans gereği depoda yoktur; olmadan sayfalar çalışır ancak sti
 
 - `.gitignore`, tema dosyalarının, kurum logolarının, API yanıt dökümlerinin ve yerel ayarların depoya girmesini engeller.
 - Gizli değerler (API adresi vb.) yalnızca `user-secrets` veya ortam değişkenleriyle verilir.
+
+## Lisans ve kullanım
+
+Bu depo bir lisans içermez; **tüm hakları saklıdır**. Kod yalnızca portfolyo amacıyla incelenebilir;
+izin alınmadan kopyalanamaz, değiştirilemez, dağıtılamaz veya başka bir projede kullanılamaz.
+
+Proje staj kapsamında ekip olarak geliştirildiği için kod üzerindeki haklar ekip üyelerine ve staj yapılan kuruma da ait olabilir.
