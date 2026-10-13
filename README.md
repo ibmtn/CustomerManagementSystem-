@@ -1,6 +1,6 @@
 # Müşteri Yönetim Sistemi — Web Arayüzü
 
-Bir elektrik dağıtım şirketi için geliştirilen müşteri yönetim sisteminin **web arayüzü**.
+Staj kapsamında, bir elektrik dağıtım şirketinin süreçleri örnek alınarak eğitim amaçlı geliştirilen müşteri yönetim sisteminin **web arayüzü**.
 Aboneler, tüketim noktaları, sözleşmeler, sayaçlar, endeks okumaları, faturalar ve saha iş emirleri tek bir portaldan yönetilir.
 
 > **Bu depo hakkında:** Staj projesinin portfolyo amaçlı kopyasıdır. Şirkete ve projeye özel her şey
@@ -12,6 +12,7 @@ Aboneler, tüketim noktaları, sözleşmeler, sayaçlar, endeks okumaları, fatu
 - Staj döneminde (2026) **9 kişilik bir ekiple** geliştirildi.
 - **Web arayüzünü** bir ekip arkadaşımla birlikte ben geliştirdim — bu depodaki kod.
 - **Arka uç API'si** ve **mobil uygulama** ekibin diğer üyelerinin sorumluluğundaydı; bu depoda yer almaz.
+- Proje, stajyerlerin kendini geliştirmesi için verildi; şirket tarafından canlı ortamda kullanılmadı. Staj bitiminde sonraki stajyer ekibine devredildi ve geliştirme onlarla devam etti.
 
 ## Modüller
 
